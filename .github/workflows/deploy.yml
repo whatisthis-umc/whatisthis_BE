@@ -40,6 +40,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ysys1226/what-is-this-docker:latest
+          cache-from: type=none
+          cache-to: type=inline
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
