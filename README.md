@@ -5,7 +5,8 @@ Spring Boot 3.4.7 <br>
 Java 17 <br>
 
 ## Link
-http://43.203.237.88:8080
+Server : http://43.203.237.88:8080<br>
+Swagger : http://43.203.237.88:8080/swagger-ui/index.html
 
 ## Github Convention
 | Tag        | 설명                      |
@@ -23,3 +24,4 @@ http://43.203.237.88:8080
 
 
 브랜치전략 : github-flow (main, feat)
+(개발단계에서는 실 사용자가 없고 CI/CD 파이프라인 구축해둬서 github-flow 방식을 이용하는 것이 좋다고 생각
