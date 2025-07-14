@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.dto;
+package umc.demoday.whatisthis.dto.member;
 
 public class MemberReqDTO {
 
