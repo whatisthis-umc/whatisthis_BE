@@ -22,10 +22,12 @@ public class MemberReqDTO {
         @NotBlank
         private String emailAuthCode;
 
+        // 아이디 유효성 검사
         @NotBlank
         @Pattern(regexp = "^[a-zA-Z0-9가-힣]+$", message = "특수문자는 사용할 수 없습니다.")
         private String username;
 
+        // 비밀번호 유효성 검사
         @NotBlank
         @Pattern(
                 regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{10,}$",
@@ -36,6 +38,7 @@ public class MemberReqDTO {
         @NotBlank
         private String passwordCheck;
 
+        // 닉네임 유효성 검사
         @NotBlank
         @Pattern(regexp = "^[a-zA-Z0-9가-힣]+$", message = "특수문자는 사용할 수 없습니다.")
         private String nickname;
