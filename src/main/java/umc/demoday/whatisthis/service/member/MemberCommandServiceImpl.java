@@ -12,7 +12,7 @@ import umc.demoday.whatisthis.repository.member.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
-@Transactionalit
+@Transactional
 public class MemberCommandServiceImpl implements MemberCommandService {
 
     private final MemberRepository memberRepository;
