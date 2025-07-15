@@ -11,12 +11,12 @@ public class MemberConverter {
     // DTO -> Entity
     public static Member toMember(MemberReqDTO.JoinRequestDTO dto, PasswordEncoder encoder) {
         return Member.builder()
-                .email(dto.email())
-                .memberId(dto.username())
-                .password(dto.password())
-                .nickname(dto.nickname())
-                .serviceAgreed(dto.serviceAgreed())
-                .privacyAgreed(dto.privacyAgreed())
+                .email(dto.getEmail())
+                .memberId(dto.getUsername())
+                .password(encoder.encode(dto.getPassword()))
+                .nickname(dto.getNickname())
+                .serviceAgreed(dto.getServiceAgreed())
+                .privacyAgreed(dto.getPrivacyAgreed())
                 .build();
     }
 
