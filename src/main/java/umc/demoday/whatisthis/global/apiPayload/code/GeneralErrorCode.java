@@ -14,7 +14,10 @@ public enum GeneralErrorCode implements BaseErrorCode {
     FORBIDDEN_403(HttpStatus.FORBIDDEN, "COMMON4030", "접근이 금지되었습니다"),
     NOT_FOUND_404(HttpStatus.NOT_FOUND, "COMMON4040", "요청한 자원을 찾을 수 없습니다"),
     INTERNAL_SERVER_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON5000", "서버 내부 오류가 발생했습니다"),
-    ;
+
+    // 멤버 관련 에러
+    ALREADY_EXIST_MEMBER_ID(HttpStatus.BAD_REQUEST, "MEMBER4001", "이미 사용 중인 아이디입니다."),
+    ALREADY_EXIST_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용 중인 닉네임입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
