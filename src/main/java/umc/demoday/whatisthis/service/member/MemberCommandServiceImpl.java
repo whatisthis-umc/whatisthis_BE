@@ -8,6 +8,8 @@ import umc.demoday.whatisthis.converter.member.MemberConverter;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.repository.member.MemberRepository;
 
 @Service
@@ -25,12 +27,12 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         // 아이디 중복 검사
         if (memberRepository.existsByMemberId(dto.getUsername())) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+            throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_MEMBER_ID);
         }
 
         // 닉네임 중복 검사
         if (memberRepository.existsByNickname(dto.getNickname())) {
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_NICKNAME);
         }
 
         // DTO -> Entity
