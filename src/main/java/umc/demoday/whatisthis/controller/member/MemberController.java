@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.controller.member;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +15,6 @@ import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.service.member.MemberCommandService;
 
 @RestController
-@Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/v0/members")
 public class MemberController {
@@ -24,7 +24,7 @@ public class MemberController {
     @PostMapping("/signup")
     @Operation(summary = "회원가입 API -by 이정준")
     public CustomResponse<MemberResDTO.JoinResponseDTO> signup(
-        @RequestBody @Validated MemberReqDTO.JoinRequestDTO request
+            @RequestBody @Valid MemberReqDTO.JoinRequestDTO request
     ) {
         MemberResDTO.JoinResponseDTO response = memberCommandService.signUp(request);
         return CustomResponse.created(response);
