@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.service.member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.converter.member.MemberConverter;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.dto.member.MemberReqDTO;
@@ -11,6 +12,7 @@ import umc.demoday.whatisthis.repository.member.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
+@Transactionalit
 public class MemberCommandServiceImpl implements MemberCommandService {
 
     private final MemberRepository memberRepository;
