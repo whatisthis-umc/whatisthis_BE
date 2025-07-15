@@ -26,7 +26,7 @@ public class Member {
     @Column(nullable = false, length = 50)
     private String email;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 100)
     private String password;
 
     @Column(length = 20)
@@ -53,4 +53,20 @@ public class Member {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id", referencedColumnName = "id")
     private ProfileImage profileImage;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+        if (this.isDeleted == null) {
+            this.isDeleted = false;
+        }
+        if (this.deletedAt == null) {
+            this.deletedAt = LocalDateTime.of(9999, 12, 31, 23, 59, 59);
+        }
+        if (this.isBest == null) {
+            this.isBest = false;
+        }
+    }
 }
