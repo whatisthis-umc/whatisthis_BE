@@ -25,13 +25,23 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     @Override
     public MemberResDTO.JoinResponseDTO signUp(MemberReqDTO.JoinRequestDTO dto) {
 
-        // 이메일 인증 코드 검사
-        String verified = redisTemplate.opsForValue()
-                .get("EMAIL_AUTH_SUCCESS:" + dto.getEmail());
-
-        if (!"true".equals(verified)) {
-            throw new GeneralException(GeneralErrorCode.EMAIL_NOT_VERIFIED);
+        // 약관 동의 검사
+        if (!Boolean.TRUE.equals(dto.getServiceAgreed())) {
+            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
         }
+
+        if (!Boolean.TRUE.equals(dto.getPrivacyAgreed())) {
+            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
+        }
+
+        // 이메일 인증 코드 검사
+        String redisAuthCode = redisTemplate.opsForValue()
+                .get("EMAIL_AUTH:" + dto.getEmail());
+
+        if (!redisAuthCode.equals(dto.getEmailAuthCode())) {
+            throw new GeneralException(GeneralErrorCode.EMAIL_AUTH_CODE_MISMATCH);
+        }
+
 
         // 아이디 중복 검사
         if (memberRepository.existsByMemberId(dto.getUsername())) {
