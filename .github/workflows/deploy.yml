@@ -62,6 +62,7 @@ jobs:
               -e REDIS_HOST="${{ secrets.REDIS_HOST }}" \
               -e REDIS_PORT="${{ secrets.REDIS_PORT }}" \
               -e REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}" \
+              -e MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
               ysys1226/what-is-this-docker:latest
 
 
