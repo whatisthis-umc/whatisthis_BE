@@ -1,9 +1,11 @@
 package umc.demoday.whatisthis.service.email;
 
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -13,11 +15,10 @@ import java.util.concurrent.TimeUnit;
 public class EmailAuthServiceImpl implements EmailAuthService {
 
     private final StringRedisTemplate redisTemplate;
-    private final JavaMailSender mailSender; // 네 프로젝트에 맞춰 Email 발송 컴포넌트 주입
+    private final JavaMailSender mailSender;
 
     private static final long EXPIRE_MINUTES = 3;
 
-    // 이메일 전송
     @Override
     public void sendAuthCode(String email) {
         String authCode = generateAuthCode();
@@ -26,22 +27,28 @@ public class EmailAuthServiceImpl implements EmailAuthService {
         redisTemplate.opsForValue()
                 .set(buildKey(email), authCode, EXPIRE_MINUTES, TimeUnit.MINUTES);
 
-        // 메일 메시지 객체 생성
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("[이게뭐예요] 이메일 인증 코드");
-        message.setText("인증코드: " + authCode);
+        try {
+            // MimeMessage 생성
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
 
-        // 이메일 전송
-        mailSender.send(message);
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            helper.setTo(email);
+            helper.setSubject("[이게뭐예요] 이메일 인증 코드");
+            helper.setText("인증코드: " + authCode, false);
+            helper.setFrom(new InternetAddress("whatisthistest1111@gmail.com"));
+
+            mailSender.send(mimeMessage);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("이메일 발송 실패", e);
+        }
     }
 
-    // 이메일 인증 코드 검증
     @Override
     public boolean verifyAuthCode(String email, String authCode) {
         String key = buildKey(email);
         String savedCode = redisTemplate.opsForValue().get(key);
-
         return savedCode != null && savedCode.equals(authCode);
     }
 
