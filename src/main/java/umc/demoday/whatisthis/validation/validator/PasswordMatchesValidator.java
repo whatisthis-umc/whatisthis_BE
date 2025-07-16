@@ -9,9 +9,22 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
 
     @Override
     public boolean isValid(MemberReqDTO.JoinRequestDTO dto, ConstraintValidatorContext context) {
-        if (dto.getPassword() == null || dto.getPasswordCheck() == null) {
-            return false;
+        if (dto == null) {
+            return true;
         }
-        return dto.getPassword().equals(dto.getPasswordCheck());
+
+        String password = dto.getPassword();
+        String passwordCheck = dto.getPasswordCheck();
+
+        boolean valid = password != null && password.equals(passwordCheck);
+
+        if (!valid) {
+            context.disableDefaultConstraintViolation();
+            context
+                    .buildConstraintViolationWithTemplate("비밀번호가 일치하지 않습니다.")
+                    .addPropertyNode("passwordCheck")
+                    .addConstraintViolation();
+        }
+        return valid;
     }
 }
