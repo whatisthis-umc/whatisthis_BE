@@ -1,25 +1,21 @@
 package umc.demoday.whatisthis.controller.member;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.dto.email.EmailAuthReqDTO;
-import umc.demoday.whatisthis.dto.email.EmailAuthVerifyReqDTO;
 import umc.demoday.whatisthis.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.dto.member.MemberResDTO;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
-import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 import umc.demoday.whatisthis.service.email.EmailAuthService;
 import umc.demoday.whatisthis.service.member.MemberCommandService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v0/members")
+@RequestMapping("/members")
 public class MemberController {
 
     private final MemberCommandService memberCommandService;
@@ -43,22 +39,4 @@ public class MemberController {
         emailAuthService.sendAuthCode(request.getEmail());
         return CustomResponse.onSuccess(GeneralSuccessCode.EMAIL_AUTH_SENT, null);
     }
-
-    @PostMapping("/email-auth/verify")
-    @Operation(summary = "이메일 인증 코드 검증 API")
-    public CustomResponse<Void> verifyEmailAuthCode(
-            @RequestBody @Valid EmailAuthVerifyReqDTO request
-    ) {
-        boolean result = emailAuthService.verifyAuthCode(request.getEmail(), request.getAuthCode());
-        if (result) {
-            return CustomResponse.onSuccess(GeneralSuccessCode.EMAIL_AUTH_MATCHED, null);
-        } else {
-            return CustomResponse.onFailure(
-                    GeneralErrorCode.EMAIL_AUTH_CODE_MISMATCH.getCode(),
-                    GeneralErrorCode.EMAIL_AUTH_CODE_MISMATCH.getMessage(),
-                    null
-            );
-        }
-    }
-
 }
