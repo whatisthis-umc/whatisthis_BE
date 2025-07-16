@@ -21,7 +21,9 @@ public enum GeneralErrorCode implements BaseErrorCode {
 
     // 이메일 관련 에러
     EMAIL_AUTH_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "EMAIL4000", "인증 코드 번호가 일치하지 않습니다."),
-    EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "EMAIL4001", "이메일 인증이 완료되지 않았습니다.")
+
+    // 약관 관련 에러
+    TERMS_REQUIRED(HttpStatus.BAD_REQUEST, "TERMS4000", "필수 항목에 체크해주세요.");
     ;
 
     private final HttpStatus httpStatus;
