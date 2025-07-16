@@ -1,6 +1,7 @@
 package umc.demoday.whatisthis.service.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +20,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public MemberResDTO.JoinResponseDTO signUp(MemberReqDTO.JoinRequestDTO dto) {
 
         // 이메일 인증 코드 검사
+        String verified = redisTemplate.opsForValue()
+                .get("EMAIL_AUTH_SUCCESS:" + dto.getEmail());
+
+        if (!"true".equals(verified)) {
+            throw new GeneralException(GeneralErrorCode.EMAIL_NOT_VERIFIED);
+        }
 
         // 아이디 중복 검사
         if (memberRepository.existsByMemberId(dto.getUsername())) {
