@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.dto.member;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,7 +43,10 @@ public class MemberReqDTO {
         @Pattern(regexp = "^[a-zA-Z0-9가-힣]+$", message = "특수문자는 사용할 수 없습니다.")
         private String nickname;
 
+        @NotNull(message = "서비스 이용 약관 동의 여부를 선택해주세요.")
         private Boolean serviceAgreed;
+
+        @NotNull(message = "개인정보 접근 약관 동의 여부를 선택해주세요.")
         private Boolean privacyAgreed;
     }
 }
