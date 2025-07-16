@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import umc.demoday.whatisthis.validation.annotation.PasswordMatches;
 
-@PasswordMatches
 public class MemberReqDTO {
 
     @Getter
