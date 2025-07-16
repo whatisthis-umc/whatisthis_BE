@@ -44,6 +44,23 @@ public class MemberControllerValidationTest {
     }
 
     @Test
+    @DisplayName("회원가입 실패 - 이메일 형식이 올바르지 않음")
+    void signup_fail_invalidEmailFormat() throws Exception {
+        MemberReqDTO.JoinRequestDTO requestDTO = createValidRequest();
+        requestDTO.setEmail("not-an-email");  // 올바르지 않은 이메일 형식
+
+        mockMvc.perform(
+                        post("/api/v0/members/signup")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(requestDTO))
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.result.email").value("이메일이 올바르지않습니다. 다시 확인해주세요."));
+    }
+
+
+    @Test
     @DisplayName("회원가입 실패 - username 특수문자 포함")
     void signup_fail_invalidUsername() throws Exception {
         MemberReqDTO.JoinRequestDTO requestDTO = createValidRequest();
