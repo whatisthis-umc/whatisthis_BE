@@ -148,8 +148,8 @@ public class MemberControllerValidationTest {
         requestDTO.setEmail("test@email.com");
         requestDTO.setEmailAuthCode("123456");
         requestDTO.setUsername("testuser");
-        requestDTO.setPassword("password1");
-        requestDTO.setPasswordCheck("password1");
+        requestDTO.setPassword("password12");
+        requestDTO.setPasswordCheck("password12");
         requestDTO.setNickname("nickname");
         requestDTO.setServiceAgreed(true);
         requestDTO.setPrivacyAgreed(true);
