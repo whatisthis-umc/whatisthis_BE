@@ -37,11 +37,11 @@ class MemberCommandServiceImplTest {
     @Autowired
     StringRedisTemplate redisTemplate;
 
-//    @AfterEach
-//    void tearDown() {
-//        memberRepository.deleteAll();
-//        redisTemplate.getConnectionFactory().getConnection().flushDb();
-//    }
+    @AfterEach
+    void tearDown() {
+        memberRepository.deleteAll();
+        redisTemplate.getConnectionFactory().getConnection().flushDb();
+    }
 
     @Test
     @DisplayName("이메일 인증 안됐으면 회원가입 실패")
