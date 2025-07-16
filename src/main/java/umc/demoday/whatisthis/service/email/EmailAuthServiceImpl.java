@@ -45,13 +45,6 @@ public class EmailAuthServiceImpl implements EmailAuthService {
         }
     }
 
-    @Override
-    public boolean verifyAuthCode(String email, String authCode) {
-        String key = buildKey(email);
-        String savedCode = redisTemplate.opsForValue().get(key);
-        return savedCode != null && savedCode.equals(authCode);
-    }
-
     private String buildKey(String email) {
         return "EMAIL_AUTH:" + email;
     }
