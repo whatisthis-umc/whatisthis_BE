@@ -17,7 +17,12 @@ public enum GeneralErrorCode implements BaseErrorCode {
 
     // 멤버 관련 에러
     ALREADY_EXIST_MEMBER_ID(HttpStatus.BAD_REQUEST, "MEMBER4001", "이미 사용 중인 아이디입니다."),
-    ALREADY_EXIST_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용 중인 닉네임입니다.");
+    ALREADY_EXIST_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용 중인 닉네임입니다."),
+
+    // 이메일 관련 에러
+    EMAIL_AUTH_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "EMAIL4000", "인증 코드 번호가 일치하지 않습니다."),
+    EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "EMAIL4001", "이메일 인증이 완료되지 않았습니다.")
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;
