@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.controller.member;
+package umc.demoday.whatisthis.domain.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

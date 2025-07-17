@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.service.member;
+package umc.demoday.whatisthis.domain.member.service.member;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

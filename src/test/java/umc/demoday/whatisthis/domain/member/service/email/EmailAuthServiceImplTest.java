@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.service.email;
+package umc.demoday.whatisthis.domain.member.service.email;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
