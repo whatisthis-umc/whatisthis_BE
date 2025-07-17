@@ -39,4 +39,35 @@ public class MemberAuthServiceImpl implements MemberAuthService {
 
         return new LoginResDTO(accessToken, refreshToken);
     }
+
+    @Override
+    public LoginResDTO reissue(String refreshToken) {
+
+        // 1. 토큰 유효성 검사
+        if (!jwtProvider.validateToken(refreshToken)) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401); // 만료 등
+        }
+
+        // 2. 사용자 ID 추출
+        Integer memberId = jwtProvider.getUserIdFromToken(refreshToken);
+
+        // 3. DB에 저장된 refreshToken과 비교
+        RefreshToken saved = refreshTokenRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.UNAUTHORIZED_401));
+
+        if (!saved.getToken().equals(refreshToken)) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401); // 위조된 토큰
+        }
+
+        // 4. 새 AccessToken 생성
+        String newAccessToken = jwtProvider.createAccessToken(memberId, "ROLE_USER");
+
+        // (선택) RefreshToken도 새로 발급하여 갱신
+        String newRefreshToken = jwtProvider.createRefreshToken(memberId);
+        saved.updateToken(newRefreshToken);
+        refreshTokenRepository.save(saved);
+
+        return new LoginResDTO(newAccessToken, newRefreshToken);
+    }
+
 }
