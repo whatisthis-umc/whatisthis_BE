@@ -22,9 +22,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                "/api/v0/members/signup",
-                                "/api/v0/members/email-auth",
-                                "/api/v0/members/email-auth/verify",
+                                "/members/signup",
+                                "/members/email-auth",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
