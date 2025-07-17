@@ -5,7 +5,7 @@ import umc.demoday.whatisthis.domain.member.Member;
 
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     boolean existsByNickname(String nickname);
 
