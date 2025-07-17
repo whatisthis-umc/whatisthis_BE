@@ -1,5 +1,7 @@
 package umc.demoday.whatisthis.domain.refresh_token.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,7 +19,8 @@ public class AuthTokenController {
     private final MemberAuthService memberAuthService;
 
     @PostMapping("/reissue")
-    public CustomResponse<LoginResDTO> reissue(@RequestHeader("Authorization") String refreshToken) {
+    @Operation(summary = "accessToken 재발급 API -by 이정준", security = {@SecurityRequirement(name = "")})
+    public CustomResponse<LoginResDTO> reissue(@RequestHeader("Refresh-Token") String refreshToken) {
         LoginResDTO response = memberAuthService.reissue(refreshToken);
         return CustomResponse.ok(response);
     }
