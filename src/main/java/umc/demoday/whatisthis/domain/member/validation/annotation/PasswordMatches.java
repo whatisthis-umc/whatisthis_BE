@@ -1,8 +1,8 @@
-package umc.demoday.whatisthis.validation.annotation;
+package umc.demoday.whatisthis.domain.member.validation.annotation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import umc.demoday.whatisthis.validation.validator.PasswordMatchesValidator;
+import umc.demoday.whatisthis.domain.member.validation.validator.PasswordMatchesValidator;
 
 import java.lang.annotation.*;
 

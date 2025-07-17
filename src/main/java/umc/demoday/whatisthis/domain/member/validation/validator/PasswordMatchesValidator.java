@@ -1,9 +1,9 @@
-package umc.demoday.whatisthis.validation.validator;
+package umc.demoday.whatisthis.domain.member.validation.validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import umc.demoday.whatisthis.dto.member.MemberReqDTO;
-import umc.demoday.whatisthis.validation.annotation.PasswordMatches;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
+import umc.demoday.whatisthis.domain.member.validation.annotation.PasswordMatches;
 
 public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, MemberReqDTO.JoinRequestDTO> {
 

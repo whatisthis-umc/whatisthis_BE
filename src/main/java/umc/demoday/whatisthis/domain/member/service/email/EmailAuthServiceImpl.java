@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.service.email;
+package umc.demoday.whatisthis.domain.member.service.email;
 
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;

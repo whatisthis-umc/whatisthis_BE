@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import umc.demoday.whatisthis.domain.member.service.email.EmailAuthService;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

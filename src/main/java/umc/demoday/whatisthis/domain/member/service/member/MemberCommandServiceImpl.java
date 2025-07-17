@@ -1,17 +1,17 @@
-package umc.demoday.whatisthis.service.member;
+package umc.demoday.whatisthis.domain.member.service.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.demoday.whatisthis.converter.member.MemberConverter;
+import umc.demoday.whatisthis.domain.member.converter.MemberConverter;
 import umc.demoday.whatisthis.domain.member.Member;
-import umc.demoday.whatisthis.dto.member.MemberReqDTO;
-import umc.demoday.whatisthis.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
-import umc.demoday.whatisthis.repository.member.MemberRepository;
+import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 
 @Service
 @RequiredArgsConstructor

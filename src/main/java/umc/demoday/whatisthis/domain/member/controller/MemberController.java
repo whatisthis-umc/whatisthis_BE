@@ -1,17 +1,17 @@
-package umc.demoday.whatisthis.controller.member;
+package umc.demoday.whatisthis.domain.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import umc.demoday.whatisthis.dto.email.EmailAuthReqDTO;
-import umc.demoday.whatisthis.dto.member.MemberReqDTO;
-import umc.demoday.whatisthis.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.email.EmailAuthReqDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
-import umc.demoday.whatisthis.service.email.EmailAuthService;
-import umc.demoday.whatisthis.service.member.MemberCommandService;
+import umc.demoday.whatisthis.domain.member.service.email.EmailAuthService;
+import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 
 @RestController
 @RequiredArgsConstructor

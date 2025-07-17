@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.repository.member;
+package umc.demoday.whatisthis.domain.member.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import umc.demoday.whatisthis.domain.member.Member;

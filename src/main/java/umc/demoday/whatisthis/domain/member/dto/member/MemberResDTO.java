@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.dto.member;
+package umc.demoday.whatisthis.domain.member.dto.member;
 
 public class MemberResDTO {
 

@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.dto.email;
+package umc.demoday.whatisthis.domain.member.dto.email;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,10 +1,9 @@
-package umc.demoday.whatisthis.converter.member;
+package umc.demoday.whatisthis.domain.member.converter;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 import umc.demoday.whatisthis.domain.member.Member;
-import umc.demoday.whatisthis.dto.member.MemberReqDTO;
-import umc.demoday.whatisthis.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
 
 public class MemberConverter {
 

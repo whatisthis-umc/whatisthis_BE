@@ -10,13 +10,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.member.Member;
-import umc.demoday.whatisthis.dto.member.MemberReqDTO;
-import umc.demoday.whatisthis.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
-import umc.demoday.whatisthis.repository.member.MemberRepository;
+import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
+import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
