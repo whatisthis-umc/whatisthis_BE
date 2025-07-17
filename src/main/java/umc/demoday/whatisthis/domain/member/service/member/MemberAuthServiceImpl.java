@@ -33,11 +33,22 @@ public class MemberAuthServiceImpl implements MemberAuthService {
         }
 
         String accessToken = jwtProvider.createAccessToken(member.getId(), "ROLE_USER");
-        String refreshToken = jwtProvider.createRefreshToken(member.getId());
+        String refreshToken;
 
-        refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken));
+        // DB에 기존 refreshToken이 있는지 확인
+        RefreshToken savedToken = refreshTokenRepository.findById(member.getId()).orElse(null);
+
+        if (savedToken != null && jwtProvider.validateToken(savedToken.getToken())) {
+            // 유효하면 기존 refreshToken 재사용
+            refreshToken = savedToken.getToken();
+        } else {
+            // 없거나 만료됐으면 새로 발급 & 저장
+            refreshToken = jwtProvider.createRefreshToken(member.getId());
+            refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken));
+        }
 
         return new LoginResDTO(accessToken, refreshToken);
+
     }
 
     @Override
