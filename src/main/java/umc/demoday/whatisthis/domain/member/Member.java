@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.member;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import umc.demoday.whatisthis.domain.profile_image.ProfileImage;
 
 import java.time.LocalDateTime;
@@ -48,6 +49,7 @@ public class Member {
     private Boolean privacyAgreed;
 
     @Column(name = "is_best", nullable = false)
+    @ColumnDefault("false")
     private Boolean isBest;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,4 +71,10 @@ public class Member {
             this.isBest = false;
         }
     }
+
+    public void evaluateIsBest() {
+        ;
+    }
+
+
 }
