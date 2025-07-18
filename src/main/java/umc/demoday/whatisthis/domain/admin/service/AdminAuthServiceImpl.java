@@ -37,4 +37,20 @@ public class AdminAuthServiceImpl implements AdminAuthService {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+    @Override
+    public AdminLoginResDTO reissue(String refreshToken) {
+        if (!jwtProvider.validateToken(refreshToken)) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401);
+        }
+
+        Integer adminId = jwtProvider.getUserIdFromToken(refreshToken);
+        String newAccessToken = jwtProvider.createAccessToken(adminId, "ADMIN");
+
+        return AdminLoginResDTO.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(refreshToken) // 보통 refreshToken은 그대로 유지
+                .build();
+    }
+
 }
