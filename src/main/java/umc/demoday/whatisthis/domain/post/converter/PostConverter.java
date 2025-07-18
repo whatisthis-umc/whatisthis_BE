@@ -8,13 +8,12 @@ import java.util.List;
 
 public class PostConverter {
 
-}
     // Entity -> DTO
-    public static PostResponseDTO.GgulPostResponseDTO toGgulPostResponseDTO(Post post) {
+    public static PostResponseDTO.GgulPostResponseDTO toGgulPostResponseDTO(Post post, String category) {
         return new PostResponseDTO.GgulPostResponseDTO(
                 post.getId(),
-                post.getCategory(),
-                post.getSubCategory(),
+                category,
+                post.getCategory(),// 청소/이런것
                 post.getTitle(),
                 post.getContent(),
                 post.getHashtags(),
