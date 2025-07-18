@@ -19,6 +19,11 @@ public enum GeneralErrorCode implements BaseErrorCode {
     ALREADY_EXIST_MEMBER_ID(HttpStatus.BAD_REQUEST, "MEMBER4001", "이미 사용 중인 아이디입니다."),
     ALREADY_EXIST_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용 중인 닉네임입니다."),
 
+    // 관리자 관련 에러
+    ADMIN_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "ADMIN4040", "존재하지 않는 관리자 ID입니다."),
+    ADMIN_PASSWORD_MISMATCH(HttpStatus.UNAUTHORIZED, "ADMIN4010", "비밀번호가 일치하지 않습니다."),
+
+
     // 이메일 관련 에러
     EMAIL_AUTH_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "EMAIL4000", "인증 코드 번호가 일치하지 않습니다."),
 
