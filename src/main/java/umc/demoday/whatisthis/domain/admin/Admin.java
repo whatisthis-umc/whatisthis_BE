@@ -16,10 +16,10 @@ public class Admin {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 20)
-    private String nickname;
+    @Column(nullable = false, length = 100)
+    private String password;
 
     @Column(nullable = false, length = 20)
-    private String role;
+    private String nickname;
 }
 
