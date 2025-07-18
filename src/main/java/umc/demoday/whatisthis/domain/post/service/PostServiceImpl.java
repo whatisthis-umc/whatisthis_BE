@@ -3,10 +3,13 @@ package umc.demoday.whatisthis.domain.post.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
+import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
+import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
@@ -20,6 +23,9 @@ import java.util.stream.Collectors;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
+    private final PostScrapRepository postScrapRepository;
+    private final HashtagRepository hashtagRepository;
 
     public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId) {
         // 1. 게시글 정보 조회
@@ -42,7 +48,6 @@ public class PostServiceImpl implements PostService {
 
         // 2-3. 스크랩 수 조회
         int postScrapCount = postScrapRepository.countByPost(post);
-
 
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
         return PostConverter.toGgulPostResponseDTO(post,category);
