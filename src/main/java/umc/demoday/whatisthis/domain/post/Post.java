@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.time.LocalDateTime;
 
@@ -38,7 +39,8 @@ public class Post {
     private LocalDateTime updatedAt;
 
     @Column(nullable = false, length = 50)
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
