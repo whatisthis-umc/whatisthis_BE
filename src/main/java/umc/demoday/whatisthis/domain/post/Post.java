@@ -1,8 +1,11 @@
 package umc.demoday.whatisthis.domain.post;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.time.LocalDateTime;
 
@@ -32,13 +35,16 @@ public class Post {
     private Integer likeCount;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @Column(nullable = false, length = 50)
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
