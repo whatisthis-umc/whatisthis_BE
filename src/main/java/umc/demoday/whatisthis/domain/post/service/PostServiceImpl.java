@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.comment.repository.CommentRepository;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
@@ -58,4 +59,9 @@ public class PostServiceImpl implements PostService {
         return postRepository.findAllByCategory(category, pageable);
     }
 
+    @Override
+    public Post insertNewPost(Post post) {
+
+        return postRepository.save(post);
+    }
 }

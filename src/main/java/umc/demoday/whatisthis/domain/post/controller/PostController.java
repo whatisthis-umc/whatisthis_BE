@@ -4,10 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
@@ -148,7 +150,12 @@ public class PostController {
 
     @PostMapping
     @Operation(summary = "커뮤니티 글 작성 API -by 남성현")
-    public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost() {
-        return null;
+    public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost
+            (@RequestBody PostRequestDTO.NewPostRequestDTO request,
+             @AuthenticationPrincipal Member loginUser) {
+
+        Post newPost = postService.insertNewPost(toNewPost(request, loginUser));
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.CREATED,toNewPostDTO(newPost));
     }
 }

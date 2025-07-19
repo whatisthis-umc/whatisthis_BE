@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.post.converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
@@ -53,27 +54,34 @@ public class PostConverter {
                 .build();
     }
 
-    public static Post toNewPost (PostRequestDTO.NewPostRequestDTO request) {
+    public static Post toNewPost (PostRequestDTO.NewPostRequestDTO request, Member loginMember) {
 
-        /*
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
+                .viewCount(0)
+                .likeCount(0)
                 .category(request.getCategory())
+                .member(loginMember)
                 .build();
 
         List<PostImage> postImages = request.getImageUrls().stream()
                 .map(url -> PostImage.builder()
                         .imageUrl(url)
-                        .post(post) // 연관관계 주입
+                        .post(post)
                         .build())
                 .collect(Collectors.toList());
-        */
 
-        return null;
+        post.setPostImageList(postImages);
+
+        return post;
     }
 
     public static PostResponseDTO.NewPostResponseDTO toNewPostDTO(Post post) {
-        return null;
+        return PostResponseDTO.NewPostResponseDTO.builder()
+                .id(post.getId())
+                .createdAt(post.getCreatedAt())
+                .authorId(post.getMember().getId())
+                .build();
     }
 }
