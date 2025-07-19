@@ -16,10 +16,10 @@ public class Admin {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 20)
-    private String nickname;
+    @Column(name = "admin_id", nullable = false, length = 20)
+    private String adminId; // 관리자가 입력한 아이디
 
-    @Column(nullable = false, length = 20)
-    private String role;
+    @Column(nullable = false, length = 100)
+    private String password;
 }
 
