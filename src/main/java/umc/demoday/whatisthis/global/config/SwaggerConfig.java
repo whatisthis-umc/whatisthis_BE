@@ -17,7 +17,6 @@ public class SwaggerConfig {
         Info info = new Info().title("이게뭐예요").description("Umc 8기 Demoday 이게뭐예요 Swagger").version("0.0.1");
 
         String securityScheme = "JWT TOKEN";
-        SecurityRequirement securityRequirement = new SecurityRequirement().addList(securityScheme);
 
         Components components = new Components()
                 .addSecuritySchemes(securityScheme, new SecurityScheme()
@@ -29,7 +28,6 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(info)
                 .addServersItem(new Server().url("/"))
-                .addSecurityItem(securityRequirement)
                 .components(components);
     }
 }
