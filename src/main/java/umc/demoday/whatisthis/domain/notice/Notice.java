@@ -1,6 +1,7 @@
 package umc.demoday.whatisthis.domain.notice;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import umc.demoday.whatisthis.domain.admin.Admin;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class Notice {
     private String content;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

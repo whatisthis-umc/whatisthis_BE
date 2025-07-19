@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.domain.terms;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -28,5 +29,6 @@ public class Terms {
     private String version;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 }

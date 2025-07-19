@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.domain.profile_image;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.LastModifiedDate;
 import umc.demoday.whatisthis.domain.member.Member;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public class ProfileImage {
     private Integer id;
 
     @Column(name = "updated_at")
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @Column(name = "image_url", nullable = false, length = 500)
