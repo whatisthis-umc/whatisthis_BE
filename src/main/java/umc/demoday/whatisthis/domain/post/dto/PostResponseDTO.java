@@ -27,7 +27,7 @@ public class PostResponseDTO {
         Integer viewCount;
         Integer likeCount;
         Integer commentCount;
-        String imageUrl;
+        List <String> imageUrl;
     }
 
     @Builder
@@ -41,7 +41,15 @@ public class PostResponseDTO {
         Long totalElements;
         Boolean isFirst;
         Boolean isLast;
-
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CommunityPostImageURLDTO {
+        String url;
+    }
+
 
 }

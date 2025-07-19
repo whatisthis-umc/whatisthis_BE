@@ -5,13 +5,21 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
+import umc.demoday.whatisthis.domain.post.service.PostService;
+import umc.demoday.whatisthis.domain.post_image.PostImage;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PostConverter {
 
+    PostService postService;
+
     public static PostResponseDTO.CommunityPostPreviewDTO toCommunityPostPreviewDTO(Post post) {
+
+        List<String> imageUrls = post.getPostImageList().stream()
+                .map(PostImage::getImageUrl)
+                .collect(Collectors.toList());
 
         return PostResponseDTO.CommunityPostPreviewDTO.builder()
                 .id(post.getId())
@@ -23,9 +31,9 @@ public class PostConverter {
                 .isBestUser(post.getMember().getIsBest())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
-                .isBestUser(null)
-                .commentCount(null)
-                .imageUrl(null)
+                .isBestUser(post.getMember().getIsBest())
+                .commentCount(post.getCommentList().size())
+                .imageUrl(imageUrls)
                 .build();
     }
 

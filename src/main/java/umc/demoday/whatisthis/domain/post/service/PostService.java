@@ -13,5 +13,4 @@ public interface PostService {
     Page<Post> getBestPosts(Integer page, Integer size);
     Page<Post> getAllPostsByCategory(Integer page, Integer size, SortBy sort, Category category);
 
-
 }

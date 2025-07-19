@@ -72,9 +72,4 @@ public class Member {
         }
     }
 
-    public void evaluateIsBest() {
-        ;
-    }
-
-
 }

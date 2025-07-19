@@ -5,13 +5,20 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.demoday.whatisthis.domain.comment.repository.CommentRepository;
+import umc.demoday.whatisthis.domain.comment_like.repository.CommentLikeRepository;
 import umc.demoday.whatisthis.domain.member.converter.MemberConverter;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.post.repository.PostRepository;
+import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
+import umc.demoday.whatisthis.domain.report.repository.ReportRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +28,11 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redisTemplate;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final ReportRepository reportRepository;
 
     @Override
     public MemberResDTO.JoinResponseDTO signUp(MemberReqDTO.JoinRequestDTO dto) {
@@ -61,5 +73,34 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         // Entity -> ResponseDTO
         return MemberConverter.toJoinResponseDTO(newMember);
+    }
+
+    @Override
+    public void evaluateIsBest(Member member) {
+        Integer memberId = member.getId();
+        LocalDateTime createdAt = member.getCreatedAt();
+        LocalDateTime now = LocalDateTime.now();
+
+
+        LocalDateTime sixtyDaysAgo = now.minusDays(60);
+        Integer recentPosts = postRepository.countByMemberIdAndCreatedAtAfter(memberId, sixtyDaysAgo);
+        Integer recentComments = commentRepository.countByMemberIdAndCreatedAtAfter(memberId, sixtyDaysAgo);
+        Integer totalLikes = commentLikeRepository.countByMember(member)
+                + postLikeRepository.countByMember(member);
+
+        member.setIsBest(false);
+
+        if (createdAt.isAfter(now.minusDays(30))) {
+            if ((recentPosts >= 5) && (recentComments >= 10) && (totalLikes >= 30)) {
+                member.setIsBest(true);
+            }
+        }
+
+        else {
+            if ((recentPosts >= 10) && (recentComments >= 20) && (totalLikes >= 50)
+                && (reportRepository.countReportsByReportedMemberId(memberId) ==0)) {
+                member.setIsBest(true);
+            }
+        }
     }
 }

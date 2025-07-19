@@ -12,5 +12,5 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findAllByCategory(Category category, Pageable pageable);
     Page<Post> findByCreatedAtAfter(LocalDateTime createdAtAfter, Pageable pageable);
 
-
+    Integer countByMemberIdAndCreatedAtAfter(Integer memberId, LocalDateTime createdAtAfter);
 }
