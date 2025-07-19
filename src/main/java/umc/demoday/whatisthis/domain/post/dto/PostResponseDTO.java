@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.post.enums.SortBy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +41,6 @@ public class PostResponseDTO {
         Long totalElements;
         Boolean isFirst;
         Boolean isLast;
-        Integer sort;
 
     }
 

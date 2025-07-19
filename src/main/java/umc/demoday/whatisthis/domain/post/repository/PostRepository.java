@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findAllByCategory(Category category, Pageable pageable);
-
     Page<Post> findByCreatedAtAfter(LocalDateTime createdAtAfter, Pageable pageable);
+
+
 }
