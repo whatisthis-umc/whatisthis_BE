@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +19,7 @@ public class PostResponseDTO {
         Integer id;
         String title;
         String content;
-        String category;
+        Category category;
         String nickname;
         LocalDateTime createdAt;
         Boolean isBestUser;

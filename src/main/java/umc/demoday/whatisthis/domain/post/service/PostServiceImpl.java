@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 
@@ -43,7 +44,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<Post> getAllPostsByCategory(Integer page, Integer size, String category, SortBy sort) {
+    public Page<Post> getAllPostsByCategory(Integer page, Integer size, SortBy sort, Category category) {
         Pageable pageable;
 
         if (sort == SortBy.BEST) {
