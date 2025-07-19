@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.global.apiPayload.exception.handler;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +56,20 @@ public class ExceptionAdvice {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<CustomResponse<String>> handleEntityNotFoundException(EntityNotFoundException e) {
+        log.warn("EntityNotFoundException: {}", e.getMessage());
+
+        BaseErrorCode errorCode = GeneralErrorCode.NOT_FOUND_404; // 404 코드 사용
+
+        CustomResponse<String> response = CustomResponse.onFailure(
+                errorCode.getCode(),
+                errorCode.getMessage(),
+                e.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 }

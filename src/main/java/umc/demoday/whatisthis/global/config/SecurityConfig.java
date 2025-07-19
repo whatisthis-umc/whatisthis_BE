@@ -30,6 +30,9 @@ public class SecurityConfig {
                                 "/admin/reissue",
                                 "/members/login",
                                 "/auth/reissue",
+
+                                "/support/notices",
+                                "/support/notices/*",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
