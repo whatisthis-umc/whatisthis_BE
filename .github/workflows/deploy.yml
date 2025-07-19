@@ -64,7 +64,6 @@ jobs:
               -e REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}" \
               -e MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
               -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-              
               ysys1226/what-is-this-docker:latest
 
 
