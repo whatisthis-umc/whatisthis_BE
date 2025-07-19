@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.service.PostService;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
@@ -52,4 +53,27 @@ public class PostConverter {
                 .build();
     }
 
+    public static Post toNewPost (PostRequestDTO.NewPostRequestDTO request) {
+
+        /*
+        Post post = Post.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .category(request.getCategory())
+                .build();
+
+        List<PostImage> postImages = request.getImageUrls().stream()
+                .map(url -> PostImage.builder()
+                        .imageUrl(url)
+                        .post(post) // 연관관계 주입
+                        .build())
+                .collect(Collectors.toList());
+        */
+
+        return null;
+    }
+
+    public static PostResponseDTO.NewPostResponseDTO toNewPostDTO(Post post) {
+        return null;
+    }
 }

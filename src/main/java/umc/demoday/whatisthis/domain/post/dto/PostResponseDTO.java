@@ -51,5 +51,14 @@ public class PostResponseDTO {
         String url;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NewPostResponseDTO {
+        Integer id;
+        LocalDateTime createdAt;
+        Integer authorId;
+    }
 
 }

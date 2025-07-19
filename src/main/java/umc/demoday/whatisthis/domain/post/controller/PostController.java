@@ -4,10 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -149,7 +146,9 @@ public class PostController {
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,toCommunityPostPreviewListDTO(postList));
     }
 
-
-
-
+    @PostMapping
+    @Operation(summary = "커뮤니티 글 작성 API -by 남성현")
+    public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost() {
+        return null;
+    }
 }
