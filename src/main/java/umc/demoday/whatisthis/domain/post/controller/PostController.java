@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.comment.Comment;
+import umc.demoday.whatisthis.domain.comment.dto.CommentResponseDTO;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -201,6 +202,51 @@ public class PostController {
         postService.unLikePost(post, loginUser);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toPostLikeCountDTO(post));
+    }
+
+    @PostMapping("/{post-id}/comments/{comment-id}")
+    @Operation(summary = "커뮤니티 댓글 작성 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<CommentResponseDTO.NewCommentResponseDTO> newCommment
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @AuthenticationPrincipal Member loginUser) {
+        return null;
+    }
+
+    @PatchMapping("/{post-id}/comments/{comment-id}")
+    @Operation(summary = "커뮤니티 댓글 수정 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<CommentResponseDTO.ModifiedCommentResponseDTO> modifyComment
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @AuthenticationPrincipal Member loginUser) {
+        return null;
+    }
+
+    @DeleteMapping("/{post-id}/comments/{comment-id}")
+    @Operation(summary = "커뮤니티 댓글 삭제 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<CommentResponseDTO.DeletedCommentResponseDTO> deleteComment
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @AuthenticationPrincipal Member loginUser) {
+        return null;
+    }
+
+    @PostMapping("/{post-id}/comments/{comment-id}/likes")
+    @Operation(summary = "커뮤니티 댓글 좋아요 등록 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<CommentResponseDTO.CommentLikeCountDTO> commmentLike
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @AuthenticationPrincipal Member loginUser) {
+        return null;
+    }
+
+    @DeleteMapping("/{post-id}/comments/{comment-id}/likes")
+    @Operation(summary = "커뮤니티 댓글 좋아요 해제 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<CommentResponseDTO.CommentLikeCountDTO> commmentUnLike
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @AuthenticationPrincipal Member loginUser) {
+        return null;
     }
 
 
