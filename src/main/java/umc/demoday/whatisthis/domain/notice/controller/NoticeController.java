@@ -16,12 +16,12 @@ import static umc.demoday.whatisthis.domain.notice.code.NoticeSuccessCode.NOTICE
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/support")
+@RequestMapping("/support/notices")
 public class NoticeController {
 
     private final NoticeQueryService noticeQueryService;
 
-    @GetMapping("/notices")
+    @GetMapping
     @Operation(summary = "공지사항 목록 기본: 5개씩 -by 윤영석")
     public CustomResponse<NoticePageResDTO> getNoticeList(
             @RequestParam(defaultValue = "1") int page,
@@ -33,7 +33,7 @@ public class NoticeController {
         return CustomResponse.onSuccess(NOTICE_OK, result);
     }
 
-    @GetMapping("/notices/{noticeId}")
+    @GetMapping("/{noticeId}")
     @Operation(summary = "공지사항 상세조회 -by 윤영석")
     public CustomResponse<NoticeResDTO> getNotice(@PathVariable("noticeId") Integer noticeId) {
         NoticeResDTO result = noticeQueryService.getNotice(noticeId);
