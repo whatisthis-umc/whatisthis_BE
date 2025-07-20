@@ -1,6 +1,7 @@
 package umc.demoday.whatisthis.domain.post.service;
 
 import org.springframework.data.domain.Page;
+import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
@@ -15,4 +16,7 @@ public interface PostService {
     Page<Post> getAllPostsByCategory(Integer page, Integer size, SortBy sort, Category category);
 
     Post insertNewPost (Post post);
+
+    Post getPost(Integer id);
+    Page<Comment> getCommentListByPost(Integer page, Integer size, SortBy sort, Post post);
 }

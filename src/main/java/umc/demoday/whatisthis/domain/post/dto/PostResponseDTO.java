@@ -70,12 +70,12 @@ public class PostResponseDTO {
         String title;
         String content;
         String nickname;
+        Boolean isBestUser;
         String profileimageUrl;
         Integer viewCount;
         Integer likeCount;
         Integer commentCount;
         LocalDateTime createdAt;
-        Boolean isBestUser;
         CommentViewListDTO commentListDto;
     }
 

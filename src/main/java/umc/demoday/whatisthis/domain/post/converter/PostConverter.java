@@ -3,14 +3,17 @@ package umc.demoday.whatisthis.domain.post.converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.service.PostService;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
+import umc.demoday.whatisthis.domain.profile_image.ProfileImage;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PostConverter {
@@ -85,9 +88,54 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDTO.CommunityPostViewDTO toCommunityPostViewDTO(Post post) {
-        return null;
+    public static PostResponseDTO.CommunityPostViewDTO toCommunityPostViewDTO(Post post, Page<Comment> commentList) {
+
+
+        List<PostResponseDTO.CommentViewDTO> commentDtoList = commentList.stream()
+                .map(comment -> PostResponseDTO.CommentViewDTO.builder()
+                        .id(comment.getId())
+                        .content(comment.getContent())
+                        .likeCount(comment.getLikeCount())
+                        .nickname(comment.getMember().getNickname())
+                        .profileimageUrl(
+                                comment.getMember().getProfileImage() != null
+                                        ? comment.getMember().getProfileImage().getImageUrl()
+                                        : null
+                        )
+                        .createdAt(comment.getCreatedAt())
+                        .build())
+                .toList();
+
+        PostResponseDTO.CommentViewListDTO commentViewListDTO =
+                PostResponseDTO.CommentViewListDTO.builder()
+                        .commentList(commentDtoList)
+                        .listSize(commentDtoList.size())
+                        .totalPage(commentList.getTotalPages())
+                        .totalElements(commentList.getTotalElements())
+                        .isFirst(commentList.isFirst())
+                        .isLast(commentList.isLast())
+                        .build();
+
+        String profileImageUrl = post.getMember().getProfileImage() != null
+                ? post.getMember().getProfileImage().getImageUrl()
+                : null;
+
+        return PostResponseDTO.CommunityPostViewDTO.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .nickname(post.getMember().getNickname())
+                .isBestUser(post.getMember().getIsBest())
+                .profileimageUrl(profileImageUrl)
+                .viewCount(post.getViewCount())
+                .likeCount(post.getLikeCount())
+                .commentCount(post.getCommentList().size())
+                .createdAt(post.getCreatedAt())
+                .commentListDto(commentViewListDTO)
+                .build();
     }
+
+
 
     public static PostResponseDTO.PostLikeCountDTO toPostLikeCountDTO(Post post) {
         return null;

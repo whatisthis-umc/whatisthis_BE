@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.comment.repository.CommentRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
@@ -64,4 +65,22 @@ public class PostServiceImpl implements PostService {
 
         return postRepository.save(post);
     }
+
+    @Override
+    public Post getPost(Integer id) {
+        return postRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Page<Comment> getCommentListByPost(Integer page, Integer size, SortBy sort, Post post) {
+        Pageable pageable;
+
+        if (sort == SortBy.BEST) {
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+        return commentRepository.findAllByPost(post,pageable);
+    }
+
 }

@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -157,7 +158,6 @@ public class PostController {
             (@RequestBody PostRequestDTO.NewPostRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
-        System.out.println("loginUser = " + loginUser);
         Post newPost = postService.insertNewPost(toNewPost(request, loginUser));
 
         return CustomResponse.onSuccess(GeneralSuccessCode.CREATED,toNewPostDTO(newPost));
@@ -167,8 +167,13 @@ public class PostController {
     @Operation(summary = "커뮤니티 게시물 본문 조회 API -by 남성현")
     public CustomResponse<PostResponseDTO.CommunityPostViewDTO> getCommunityPost
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
-             @Parameter(description = "페이지 번호") @RequestParam Integer page) {
-        return null;
+             @Parameter(description = "페이지 번호") @RequestParam Integer page,
+             @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
+             @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
+        Post post = postService.getPost(postId);
+        Page<Comment> commentList = postService.getCommentListByPost(page, size, sort, post);
+
+        return CustomResponse.ok(toCommunityPostViewDTO(post, commentList));
     }
 
     @PostMapping("/{post-id}/likes")
