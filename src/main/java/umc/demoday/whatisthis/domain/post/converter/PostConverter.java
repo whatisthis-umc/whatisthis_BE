@@ -84,4 +84,12 @@ public class PostConverter {
                 .authorId(post.getMember().getId())
                 .build();
     }
+
+    public static PostResponseDTO.CommunityPostViewDTO toCommunityPostViewDTO(Post post) {
+        return null;
+    }
+
+    public static PostResponseDTO.PostLikeCountDTO toPostLikeCountDTO(Post post) {
+        return null;
+    }
 }

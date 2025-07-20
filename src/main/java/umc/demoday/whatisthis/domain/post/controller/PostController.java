@@ -162,4 +162,28 @@ public class PostController {
 
         return CustomResponse.onSuccess(GeneralSuccessCode.CREATED,toNewPostDTO(newPost));
     }
+
+    @GetMapping("/{post-id}")
+    @Operation(summary = "커뮤니티 게시물 본문 조회 API -by 남성현")
+    public CustomResponse<PostResponseDTO.CommunityPostViewDTO> getCommunityPost
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @Parameter(description = "페이지 번호") @RequestParam Integer page) {
+        return null;
+    }
+
+    @PostMapping("/{post-id}/likes")
+    @Operation(summary = "커뮤니티 게시물 좋아요 등록 API -by 남성현")
+    public CustomResponse<PostResponseDTO.PostLikeCountDTO> postLike
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId) {
+        return null;
+    }
+
+    @DeleteMapping("/{post-id}/likes")
+    @Operation(summary = "커뮤니티 게시물 좋아요 해제 API -by 남성현")
+    public CustomResponse<PostResponseDTO.PostLikeCountDTO> postUnLike
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId) {
+        return null;
+    }
+
+
 }

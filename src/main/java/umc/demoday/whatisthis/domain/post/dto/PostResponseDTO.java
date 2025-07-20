@@ -61,4 +61,56 @@ public class PostResponseDTO {
         Integer authorId;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CommunityPostViewDTO {
+        Integer id;
+        String title;
+        String content;
+        String nickname;
+        String profileimageUrl;
+        Integer viewCount;
+        Integer likeCount;
+        Integer commentCount;
+        LocalDateTime createdAt;
+        Boolean isBestUser;
+        CommentViewListDTO commentListDto;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CommentViewListDTO {
+        List<CommentViewDTO> commentList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CommentViewDTO {
+        Integer id;
+        String content;
+        Integer likeCount;
+        String nickname;
+        String profileimageUrl;
+        LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PostLikeCountDTO {
+        Integer likeCount;
+    }
+
 }
