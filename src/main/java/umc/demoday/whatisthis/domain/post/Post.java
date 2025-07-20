@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Getter
 @Setter
