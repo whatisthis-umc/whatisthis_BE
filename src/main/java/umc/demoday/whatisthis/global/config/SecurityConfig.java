@@ -31,6 +31,7 @@ public class SecurityConfig {
                                 "/members/login",
                                 "/auth/reissue",
 
+                                "/admin/**", //추후 삭제해야함
                                 "/support/notices",
                                 "/support/notices/*",
                                 "/swagger-ui/**",

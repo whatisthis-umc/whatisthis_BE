@@ -34,6 +34,7 @@ public class NoticeController {
     }
 
     @GetMapping("/notices/{noticeId}")
+    @Operation(summary = "공지사항 상세조회 -by 윤영석")
     public CustomResponse<NoticeResDTO> getNotice(@PathVariable("noticeId") Integer noticeId) {
         NoticeResDTO result = noticeQueryService.getNotice(noticeId);
         return CustomResponse.onSuccess(NOTICE_OK, result);
