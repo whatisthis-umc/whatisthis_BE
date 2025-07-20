@@ -1,10 +1,8 @@
 package umc.demoday.whatisthis.domain.notice.service;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import umc.demoday.whatisthis.domain.notice.Notice;
-import umc.demoday.whatisthis.domain.notice.dto.NoticePageResDTO;
-import umc.demoday.whatisthis.domain.notice.dto.NoticeResDTO;
+import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticePageResDTO;
+import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticeResDTO;
 
 
 public interface NoticeQueryService {

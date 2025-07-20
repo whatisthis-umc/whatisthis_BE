@@ -7,12 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import umc.demoday.whatisthis.domain.notice.Notice;
 import umc.demoday.whatisthis.domain.notice.converter.NoticeConverter;
-import umc.demoday.whatisthis.domain.notice.dto.NoticePageResDTO;
-import umc.demoday.whatisthis.domain.notice.dto.NoticeResDTO;
+import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticePageResDTO;
+import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticeResDTO;
 import umc.demoday.whatisthis.domain.notice.repository.NoticeRepository;
-import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
-
-import java.util.Optional;
 
 
 @Service

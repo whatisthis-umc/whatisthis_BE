@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.domain.notice.dto;
+package umc.demoday.whatisthis.domain.notice.dto.resDTO;
 
 import lombok.Getter;
 

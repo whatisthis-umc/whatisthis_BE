@@ -3,8 +3,9 @@ package umc.demoday.whatisthis.domain.notice.converter;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import umc.demoday.whatisthis.domain.notice.Notice;
-import umc.demoday.whatisthis.domain.notice.dto.NoticePageResDTO;
-import umc.demoday.whatisthis.domain.notice.dto.NoticeResDTO;
+import umc.demoday.whatisthis.domain.notice.dto.reqDTO.NoticeCreateReqDTO;
+import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticePageResDTO;
+import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticeResDTO;
 
 import java.util.List;
 
@@ -33,5 +34,12 @@ public class NoticeConverter {
                 page.isFirst(),
                 page.isLast()
         );
+    }
+
+    public static Notice toEntity(NoticeCreateReqDTO dto) {
+        return Notice.builder()
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .build();
     }
 }

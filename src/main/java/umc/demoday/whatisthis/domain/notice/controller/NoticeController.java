@@ -2,19 +2,17 @@ package umc.demoday.whatisthis.domain.notice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-import umc.demoday.whatisthis.domain.notice.Notice;
-import umc.demoday.whatisthis.domain.notice.dto.NoticePageResDTO;
-import umc.demoday.whatisthis.domain.notice.dto.NoticeResDTO;
+import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticePageResDTO;
+import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticeResDTO;
 import umc.demoday.whatisthis.domain.notice.service.NoticeQueryService;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 
-import static umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode.NOTICE_OK;
+import static umc.demoday.whatisthis.domain.notice.code.NoticeSuccessCode.NOTICE_OK;
+
 
 @RestController
 @RequiredArgsConstructor
