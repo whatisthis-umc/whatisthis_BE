@@ -172,22 +172,35 @@ public class PostController {
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
         Post post = postService.getPost(postId);
         Page<Comment> commentList = postService.getCommentListByPost(page, size, sort, post);
+        postService.plusOneViewCount(post);
 
         return CustomResponse.ok(toCommunityPostViewDTO(post, commentList));
     }
 
     @PostMapping("/{post-id}/likes")
-    @Operation(summary = "커뮤니티 게시물 좋아요 등록 API -by 남성현")
+    @Operation(summary = "커뮤니티 게시물 좋아요 등록 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<PostResponseDTO.PostLikeCountDTO> postLike
-            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId) {
-        return null;
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @AuthenticationPrincipal Member loginUser) {
+
+        Post post = postService.getPost(postId);
+        postService.likePost(post, loginUser);
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toPostLikeCountDTO(post));
     }
 
     @DeleteMapping("/{post-id}/likes")
-    @Operation(summary = "커뮤니티 게시물 좋아요 해제 API -by 남성현")
+    @Operation(summary = "커뮤니티 게시물 좋아요 해제 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<PostResponseDTO.PostLikeCountDTO> postUnLike
-            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId) {
-        return null;
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @AuthenticationPrincipal Member loginUser) {
+
+        System.out.println("loginUser = " + loginUser);
+
+        Post post = postService.getPost(postId);
+        postService.unLikePost(post, loginUser);
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toPostLikeCountDTO(post));
     }
 
 

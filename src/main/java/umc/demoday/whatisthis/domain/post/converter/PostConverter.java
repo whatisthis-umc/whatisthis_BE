@@ -138,6 +138,8 @@ public class PostConverter {
 
 
     public static PostResponseDTO.PostLikeCountDTO toPostLikeCountDTO(Post post) {
-        return null;
+        return PostResponseDTO.PostLikeCountDTO.builder()
+                .likeCount(post.getLikeCount())
+                .build();
     }
 }
