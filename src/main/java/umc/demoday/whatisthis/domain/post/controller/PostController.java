@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.domain.post.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -151,11 +152,12 @@ public class PostController {
     }
 
     @PostMapping
-    @Operation(summary = "커뮤니티 글 작성 API -by 남성현")
+    @Operation(summary = "커뮤니티 글 작성 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost
             (@RequestBody PostRequestDTO.NewPostRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
+        System.out.println("loginUser = " + loginUser);
         Post newPost = postService.insertNewPost(toNewPost(request, loginUser));
 
         return CustomResponse.onSuccess(GeneralSuccessCode.CREATED,toNewPostDTO(newPost));
