@@ -13,6 +13,8 @@ import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.global.security.JwtProvider;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class MemberAuthServiceImpl implements MemberAuthService {
@@ -31,6 +33,10 @@ public class MemberAuthServiceImpl implements MemberAuthService {
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new GeneralException(GeneralErrorCode.INVALID_PASSWORD);
         }
+
+        // 로그인 시점 기록
+        member.setLastLoginAt(LocalDateTime.now());
+        memberRepository.save(member);
 
         String accessToken = jwtProvider.createAccessToken(member.getId(), "ROLE_USER");
         String refreshToken;
