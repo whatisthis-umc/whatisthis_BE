@@ -29,7 +29,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
             throw new GeneralException(GeneralErrorCode.ADMIN_PASSWORD_MISMATCH);
         }
 
-        String accessToken = jwtProvider.createAccessToken(admin.getId(), "ADMIN");
+        String accessToken = jwtProvider.createAccessToken(admin.getId(), "ROLE_ADMIN");
         String refreshToken = jwtProvider.createRefreshToken(admin.getId());
 
         return AdminLoginResDTO.builder()
