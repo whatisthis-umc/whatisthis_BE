@@ -3,10 +3,14 @@ package umc.demoday.whatisthis.domain.post.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
+import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.service.PostService;
 import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
@@ -29,9 +33,12 @@ public class PostController {
 
     @GetMapping("/life-tips")
     @Operation(summary = "생활 꿀팁 카테고리 별 게시글 목록 조회 API - by 천성호" )
-    public CustomResponse<PostResponseDTO.GgulPostResponseDTO> getGgulTipPostsByCategory(){
+    public CustomResponse<PostResponseDTO.GgulPostsByCategoryResponseDTO> getGgulTipPostsByCategory(@RequestParam("category") Category category,
+                                                                               @RequestParam("sort") SortBy sort,
+                                                                               @RequestParam("page") Integer page,
+                                                                               @RequestParam("size") Integer size ){
 
-        PostResponseDTO.
+        PostResponseDTO.GgulPostsByCategoryResponseDTO result = postService.getGgulPostsByCategory(category,sort,page,size);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
 }

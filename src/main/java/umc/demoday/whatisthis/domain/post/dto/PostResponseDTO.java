@@ -50,7 +50,7 @@ public class PostResponseDTO {
         Integer size;
         Integer totalElements;
         Integer totalPages;
-        PostResponseDTO.GgulPostSummaryDTO posts;
+        List<PostResponseDTO.GgulPostSummaryDTO> posts;
     }
 
 
@@ -63,7 +63,7 @@ public class PostResponseDTO {
         String thumnailUrl;
         String title;
         String summary;
-        Hashtag hashtags;
+        List<Hashtag> hashtags;
         Integer viewCount;
         Integer likeCount;
         Integer scrapCount;
