@@ -22,7 +22,11 @@ import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.service.PostService;
+import umc.demoday.whatisthis.domain.report.Report;
+import umc.demoday.whatisthis.domain.report.converter.ReportConverter;
+import umc.demoday.whatisthis.domain.report.dto.ReportRequestDTO;
 import umc.demoday.whatisthis.domain.report.dto.ReportResponseDTO;
+import umc.demoday.whatisthis.domain.report.service.ReportService;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 
@@ -31,6 +35,8 @@ import java.util.stream.Collectors;
 
 import static umc.demoday.whatisthis.domain.comment.converter.CommentConverter.toCommentLikeCountDTO;
 import static umc.demoday.whatisthis.domain.post.converter.PostConverter.*;
+import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportCommentResponseDTO;
+import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportPostResponseDTO;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,6 +46,7 @@ public class PostController {
     private final PostService postService;
     private final MemberCommandService memberCommandService;
     private final CommentService commentService;
+    private final ReportService reportService;
 
     @GetMapping("/communities")
     @Operation(summary = "커뮤니티 페이지 조회 API (전체) -by 남성현")
@@ -283,8 +290,13 @@ public class PostController {
     @Operation(summary = "게시글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<ReportResponseDTO.ReportPostResponseDTO> postReport
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @RequestBody ReportRequestDTO.NewReportRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
-        return null;
+
+        Post post = postService.getPost(postId);
+        Report report = reportService.insertNewReport(ReportConverter.toReport(request,loginUser,post,null));
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toReportPostResponseDTO(report));
     }
 
 
@@ -293,8 +305,14 @@ public class PostController {
     public CustomResponse<ReportResponseDTO.ReportCommentResponseDTO> commentReport
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @RequestBody ReportRequestDTO.NewReportRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
-        return null;
+
+        Post post = postService.getPost(postId);
+        Comment comment = commentService.getComment(commentId);
+        Report report = reportService.insertNewReport(ReportConverter.toReport(request,loginUser,null,comment));
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toReportCommentResponseDTO(report));
     }
 
 }
