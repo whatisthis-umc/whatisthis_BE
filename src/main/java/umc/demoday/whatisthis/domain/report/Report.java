@@ -1,9 +1,11 @@
 package umc.demoday.whatisthis.domain.report;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.report.enums.Content;
 
 import java.time.LocalDateTime;
 
@@ -24,9 +26,14 @@ public class Report {
     private String status;
 
     @Column(length = 20, nullable = false)
-    private String content;
+    @Enumerated(EnumType.STRING)
+    private Content content;
+
+    @Column(length = 50, nullable = true)
+    private String description;
 
     @Column(name = "reported_at")
+    @CreatedDate
     private LocalDateTime reportedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

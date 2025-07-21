@@ -28,4 +28,15 @@ public class PostRequestDTO {
 
         List<String> imageUrls;
     }
+
+    @Getter @Setter
+    public static class ReportRequestDTO {
+
+        @NotBlank
+        String content;
+
+        String description;
+
+    }
+
 }

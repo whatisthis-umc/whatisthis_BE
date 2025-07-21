@@ -278,5 +278,12 @@ public class PostController {
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,CommentConverter.toCommentLikeCountDTO(comment));
     }
 
+    @PostMapping("/{post-id}/reports")
+    @Operation(summary = "게시글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+
+
+
+    @PostMapping("/{post-id}/comments/{comment-id}/reports")
+    @Operation(summary = "댓글 좋아요 등록 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
 
 }
