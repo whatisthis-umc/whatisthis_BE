@@ -26,4 +26,12 @@ public class PostController {
         PostResponseDTO.GgulPostResponseDTO result = postService.getGgulPost(postId);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
+
+    @GetMapping("/life-tips")
+    @Operation(summary = "생활 꿀팁 카테고리 별 게시글 목록 조회 API - by 천성호" )
+    public CustomResponse<PostResponseDTO.GgulPostResponseDTO> getGgulTipPostsByCategory(){
+
+        PostResponseDTO.
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
+    }
 }

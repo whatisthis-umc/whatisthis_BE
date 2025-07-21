@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.post.enums.SortBy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,5 +37,37 @@ public class PostResponseDTO {
         LocalDateTime updatedAt;
 
         //timestamp는 공통 응답 구조에 추가 예정
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GgulPostsByCategoryResponseDTO {
+        Category category;
+        SortBy  sortBy;
+        Integer page;
+        Integer size;
+        Integer totalElements;
+        Integer totalPages;
+        PostResponseDTO.GgulPostSummaryDTO posts;
+    }
+
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GgulPostSummaryDTO {
+        Integer postId;
+        String thumnailUrl;
+        String title;
+        String summary;
+        Hashtag hashtags;
+        Integer viewCount;
+        Integer likeCount;
+        Integer scrapCount;
+        LocalDateTime createdAt;
+        // timestamp는 공통 응답 구조에 추가
     }
 }
