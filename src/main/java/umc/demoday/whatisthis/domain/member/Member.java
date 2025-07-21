@@ -4,10 +4,12 @@ package umc.demoday.whatisthis.domain.member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import umc.demoday.whatisthis.domain.profile_image.ProfileImage;
 
 import java.time.LocalDateTime;
 
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Getter
 @Setter
@@ -51,6 +53,9 @@ public class Member {
 
     @Column(name = "is_best", nullable = false)
     private Boolean isBest;
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id", referencedColumnName = "id")
