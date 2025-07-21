@@ -22,6 +22,7 @@ import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.service.PostService;
+import umc.demoday.whatisthis.domain.report.dto.ReportResponseDTO;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 
@@ -280,10 +281,20 @@ public class PostController {
 
     @PostMapping("/{post-id}/reports")
     @Operation(summary = "게시글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
-
+    public CustomResponse<ReportResponseDTO.ReportPostResponseDTO> postReport
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @AuthenticationPrincipal Member loginUser) {
+        return null;
+    }
 
 
     @PostMapping("/{post-id}/comments/{comment-id}/reports")
-    @Operation(summary = "댓글 좋아요 등록 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    @Operation(summary = "댓글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<ReportResponseDTO.ReportCommentResponseDTO> commentReport
+            (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
+             @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @AuthenticationPrincipal Member loginUser) {
+        return null;
+    }
 
 }

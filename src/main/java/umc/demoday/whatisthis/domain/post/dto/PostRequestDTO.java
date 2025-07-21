@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.report.enums.Content;
 
 import java.util.List;
 
@@ -28,15 +29,4 @@ public class PostRequestDTO {
 
         List<String> imageUrls;
     }
-
-    @Getter @Setter
-    public static class ReportRequestDTO {
-
-        @NotBlank
-        String content;
-
-        String description;
-
-    }
-
 }
