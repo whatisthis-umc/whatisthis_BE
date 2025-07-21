@@ -35,7 +35,7 @@ public class PostServiceImpl implements PostService {
     private final PostImageRepository postImageRepository;
     private final PostScrapRepository postScrapRepository;
     private final HashtagRepository hashtagRepository;
-
+    private final PageConverter pageConverter;
     @Override
     public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId) {
         // 1. 게시글 정보 조회
@@ -83,6 +83,6 @@ public class PostServiceImpl implements PostService {
         Page<Post> postPage = postRepository.findByCategory(category, pageable);
 
         // 4. 조회된 Post 엔티티를 GgulPostsByCategoryResponseDTO 로 변환
-        return PageConverter.ggulPostsByCategoryResponseDTO(postPage, imageUrl, hashtags, summary, scrapCount);
+        return pageConverter.toGgulPostsByCategoryResponseDTO(postPage,category,sort,page);
     }
 }

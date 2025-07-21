@@ -48,7 +48,7 @@ public class PostResponseDTO {
         SortBy  sortBy;
         Integer page;
         Integer size;
-        Integer totalElements;
+        Long totalElements;
         Integer totalPages;
         List<PostResponseDTO.GgulPostSummaryDTO> posts;
     }
