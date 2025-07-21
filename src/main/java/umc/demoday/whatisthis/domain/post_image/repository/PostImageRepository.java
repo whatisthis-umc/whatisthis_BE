@@ -5,7 +5,8 @@ import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface PostImageRepository extends JpaRepository<PostImage, Integer> {
-    Collection<Object> findAllByPost(Post post);
+    List<PostImage> findAllByPostId(Integer postId);
 }

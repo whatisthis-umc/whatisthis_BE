@@ -9,20 +9,20 @@ import java.util.List;
 public class PostConverter {
 
     // Entity -> DTO
-    public static PostResponseDTO.GgulPostResponseDTO toGgulPostResponseDTO(Post post, String category) {
+    public static PostResponseDTO.GgulPostResponseDTO toGgulPostResponseDTO(Post post, String category,List<String> imageUrls, List<String> hashtags, Integer postScrapCount) {
         return new PostResponseDTO.GgulPostResponseDTO(
                 post.getId(),
                 category,
                 post.getCategory(),// 청소/이런것
                 post.getTitle(),
                 post.getContent(),
-                post.getHashtags(),
-                post.getImages(),
+                hashtags,
+                imageUrls,
                 post.getLikeCount(),
-                post.getScrapCount(),
+                postScrapCount,
                 post.getViewCount(),
                 post.getCreatedAt(),
-                post.getUpdatedAt(),
-                post.getTimpstamp()
+                post.getUpdatedAt()
         );
+    }
 }

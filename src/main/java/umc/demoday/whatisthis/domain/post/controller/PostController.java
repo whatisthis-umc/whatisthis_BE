@@ -10,19 +10,20 @@ import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.service.PostService;
 import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
+import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
 public class PostController {
-    private final PostService postServiceImpl;
+
+    private final PostService postService;
 
     @GetMapping("/{post-id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "생활꿀팁 or 생활꿀팁 페이지 조회 API -by 천성호")
-    public CustomResponse<PostResponseDTO.GgulPostResponseDTO> getGgulPost(@PathVariable Integer postId){
+    public CustomResponse<PostResponseDTO.GgulPostResponseDTO> getGgulPost(@PathVariable("post-id") Integer postId){
 
-        PostResponseDTO.GgulPostResponseDTO response = PostServiceImpl.getGgulPost(postId);
-        return CustomResponse.onSuccess(response);
+        PostResponseDTO.GgulPostResponseDTO result = postService.getGgulPost(postId);
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
 }

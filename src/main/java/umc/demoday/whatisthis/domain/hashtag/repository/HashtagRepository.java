@@ -5,7 +5,8 @@ import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.post.Post;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface HashtagRepository extends JpaRepository<Hashtag, Integer> {
-    Collection<Object> findAllByPost(Post post);
+    List<Hashtag> findAllByPostId(Integer postId);
 }

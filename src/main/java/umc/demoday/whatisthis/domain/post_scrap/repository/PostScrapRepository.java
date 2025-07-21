@@ -5,6 +5,5 @@ import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post_scrap.PostScrap;
 
 public interface PostScrapRepository extends JpaRepository<PostScrap, Integer> {
-
-    int countByPost(Post post);
+    int countByPostId(Integer postId);
 }

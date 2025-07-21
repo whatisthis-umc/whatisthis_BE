@@ -16,9 +16,9 @@ public class PostResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class GgulPostResponseDTO {
-        Long postId;
+        Integer postId;
         String category;
-        List<String> subCategories;
+        String subCategories; //Post에 서브 카테고리 List<String> 타입 추가하면 List<String>으로 타입 변
         String title;
         String content;
         List<String> hashtags;
@@ -33,8 +33,6 @@ public class PostResponseDTO {
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
         LocalDateTime updatedAt;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-        LocalDateTime timestamp;
-
+        //timestamp는 공통 응답 구조에 추가
     }
 }
