@@ -11,11 +11,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.service.PostService;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -56,7 +58,7 @@ class PostControllerTest {
         PostResponseDTO.GgulPostResponseDTO fakeResult = new PostResponseDTO.GgulPostResponseDTO(
                 1,
                 "생활꿀팁",
-                "청소/분리수거",
+                Category.CLEAN_TIP,
                 "전자레인지 청소 꿀팁",
                 "내용...",
                 List.of("#청소", "#정보"),

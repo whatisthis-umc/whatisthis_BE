@@ -10,6 +10,7 @@ import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
@@ -53,7 +54,7 @@ class PostServiceImplTest {
                 .id(postId)
                 .title("전자레인지 청소 꿀팁")
                 .content("내용...")
-                .category("청소/분리수거") // '생활꿀팁'으로 변환될 카테고리
+                .category(Category.LIFE_TIP) // '생활꿀팁'으로 변환될 카테고리
                 .viewCount(23)
                 .likeCount(324)
                 .build();
