@@ -10,7 +10,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.comment.Comment;
+import umc.demoday.whatisthis.domain.comment.converter.CommentConverter;
+import umc.demoday.whatisthis.domain.comment.dto.CommentRequestDTO;
 import umc.demoday.whatisthis.domain.comment.dto.CommentResponseDTO;
+import umc.demoday.whatisthis.domain.comment.service.CommentService;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -25,6 +28,7 @@ import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static umc.demoday.whatisthis.domain.comment.converter.CommentConverter.toCommentLikeCountDTO;
 import static umc.demoday.whatisthis.domain.post.converter.PostConverter.*;
 
 @RestController
@@ -34,6 +38,7 @@ public class PostController {
 
     private final PostService postService;
     private final MemberCommandService memberCommandService;
+    private final CommentService commentService;
 
     @GetMapping("/communities")
     @Operation(summary = "커뮤니티 페이지 조회 API (전체) -by 남성현")
@@ -208,9 +213,18 @@ public class PostController {
     @Operation(summary = "커뮤니티 댓글 작성 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<CommentResponseDTO.NewCommentResponseDTO> newCommment
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
-             @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @RequestBody CommentRequestDTO.NewCommentRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
-        return null;
+
+        Post post = postService.getPost(postId);
+        Comment parent;
+
+        if(request.getParentCommentId() == null) {parent = null;}
+        else {parent = commentService.getComment(request.getParentCommentId());}
+
+        Comment newComment = commentService.insertNewComment(CommentConverter.toNewComment(request, post, loginUser, parent));
+
+        return CustomResponse.created(CommentConverter.toNewCommentResponseDTO(newComment));
     }
 
     @PatchMapping("/{post-id}/comments/{comment-id}")
@@ -218,8 +232,12 @@ public class PostController {
     public CustomResponse<CommentResponseDTO.ModifiedCommentResponseDTO> modifyComment
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
+             @RequestBody CommentRequestDTO.ModifyCommentRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
-        return null;
+
+        Comment comment = commentService.updateComment(commentId,request.getContent());
+
+        return CustomResponse.ok(CommentConverter.toModifiedCommentResponseDTO(comment));
     }
 
     @DeleteMapping("/{post-id}/comments/{comment-id}")
@@ -228,7 +246,10 @@ public class PostController {
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
              @AuthenticationPrincipal Member loginUser) {
-        return null;
+
+        Comment comment = commentService.deleteComment(commentId);
+
+        return CustomResponse.ok(CommentConverter.toDeletedCommentResponseDTO(comment));
     }
 
     @PostMapping("/{post-id}/comments/{comment-id}/likes")
@@ -237,7 +258,11 @@ public class PostController {
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
              @AuthenticationPrincipal Member loginUser) {
-        return null;
+
+        Comment comment = commentService.getComment(commentId);
+        commentService.likeComment(comment, loginUser);
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,CommentConverter.toCommentLikeCountDTO(comment));
     }
 
     @DeleteMapping("/{post-id}/comments/{comment-id}/likes")
@@ -246,7 +271,11 @@ public class PostController {
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
              @AuthenticationPrincipal Member loginUser) {
-        return null;
+
+        Comment comment = commentService.getComment(commentId);
+        commentService.unLikeComment(comment, loginUser);
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,CommentConverter.toCommentLikeCountDTO(comment));
     }
 
 
