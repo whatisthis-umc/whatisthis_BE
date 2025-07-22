@@ -218,4 +218,45 @@ class PostServiceImplTest {
             // 로직상 아무 일도 일어나지 않으므로, save 메서드가 호출되지 않았음을 검증
             verify(postScrapRepository, never()).save(any(PostScrap.class));
         }
+
+
+    @Test
+    @DisplayName("스크랩 삭제 성공")
+    void 스크랩_삭제_성공() {
+        // given
+        Integer scrapId = 100;
+        Integer memberId = 1;
+
+        // SecurityContext 설정
+        CustomUserDetails userDetails = new CustomUserDetails(memberId, "tester", "pw", new ArrayList<>());
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        SecurityContextHolder.setContext(securityContext);
+
+        // 소유자 정보가 일치하는 스크랩 객체 모킹
+        Member owner = Member.builder()
+                .id(memberId)
+                .memberId("user123")
+                .email("user@example.com")
+                .password("encoded_password")
+                .nickname("강력한닉네임")
+                .serviceAgreed(true)
+                .privacyAgreed(true)
+                .build();
+
+        Post post = Post.builder()
+                .id(2)
+                .build();
+
+        PostScrap mockScrap = new PostScrap(owner, post);
+
+        when(postScrapRepository.findById(scrapId)).thenReturn(Optional.of(mockScrap));
+
+        // when
+        postService.deleteScrap(scrapId);
+
+        // then
+        verify(postScrapRepository, times(1)).delete(mockScrap);
+    }
+
 }
