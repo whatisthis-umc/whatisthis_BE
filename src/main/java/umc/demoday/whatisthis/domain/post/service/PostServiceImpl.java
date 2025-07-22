@@ -64,6 +64,7 @@ public class PostServiceImpl implements PostService {
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
     }
 
+
     @Override
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
         // 1. 정렬 기준(Sort) 객체 생성
