@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
@@ -54,7 +55,16 @@ public class PostController {
 
     @GetMapping("/life-tips/all")
     @Operation(summary = "생활 꿀팁 전체 페이지 API - by 천성호")
-    public CustomResponse<> getAllGgulTipPosts(){
+    public CustomResponse<MainPageResponseDTO> getAllGgulTipPosts(@RequestParam("page") Integer page){
+        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_TIP, page, 6);
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
+    }
 
+    @GetMapping("/life-items/all")
+    @Operation(summary = "생활 꿀템 전체 페이지 API - by 천성호")
+    public CustomResponse<MainPageResponseDTO> getAllGgulItemPosts(@RequestParam("page") Integer page){
+
+        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_ITEM, page, 6);
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
 }

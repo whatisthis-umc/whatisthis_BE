@@ -12,6 +12,7 @@ import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.converter.PageConverter;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
+import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
@@ -23,6 +24,7 @@ import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,4 +88,32 @@ public class PostServiceImpl implements PostService {
         // 4. 조회된 Post 엔티티를 GgulPostsByCategoryResponseDTO 로 변환
         return pageConverter.toGgulPostsByCategoryResponseDTO(postPage,category,sort);
     }
+
+    @Override
+    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size){
+        // 1. category Enum List 생성
+        List<Category> categoryList = List.of();
+        if(category == Category.LIFE_TIP)
+            categoryList = Arrays.stream(Category.values())
+                .filter(ct -> ct.name().endsWith("_TIP"))
+                .toList();
+        else if(category == Category.LIFE_ITEM)
+            categoryList = Arrays.stream(Category.values())
+                    .filter(ct -> ct.name().endsWith("_ITEM"))
+                    .toList();
+
+        // 2. Best 정렬 페이지 요청(Pageable) 객체 생성
+        Pageable pageableBest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+
+        // 3. Latest 정렬 페이지 요청(Pageable) 객체 생성
+        Pageable pageableLatest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // 3. Repository를 통해 데이터베이스에서 데이터 조회
+        Page<Post> bestPostPage = postRepository.findByCategoryIn(categoryList, pageableBest);
+        Page<Post> latestPostPage = postRepository.findByCategoryIn(categoryList, pageableLatest);
+
+        //  4. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
+        return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, categoryList);
+    }
 }
+
