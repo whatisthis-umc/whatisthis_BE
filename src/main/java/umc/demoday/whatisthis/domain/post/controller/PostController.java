@@ -34,4 +34,11 @@ public class PostController {
         postService.scrapPost(postId);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, null);
     }
+
+    @DeleteMapping("/{post-id}/scraps/{scrap-id}")
+    @Operation(summary = "스크랩 삭제 API - by 천성호")
+    public CustomResponse<Void> deleteScrap (@PathVariable("post-id") Integer postId, @PathVariable("scrap-id") Integer scrapId){
+        postService.deleteScrap(postId,scrapId);
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK, null);
+    }
 }

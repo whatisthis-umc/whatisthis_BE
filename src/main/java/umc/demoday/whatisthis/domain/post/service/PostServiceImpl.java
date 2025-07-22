@@ -82,4 +82,11 @@ public class PostServiceImpl implements PostService {
             postScrapRepository.save(postScrap);
         }
     }
+
+    public void deleteScrap(Integer postId, Integer scrapId) {
+        PostScrap postScrap = postScrapRepository.findById(postId).orElseThrow();
+        if(postScrap.getPost().getId().equals(postId)){
+            postScrapRepository.delete(postScrap);
+        }
+    }
 }
