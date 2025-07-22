@@ -41,7 +41,7 @@ public class PostController {
         PostResponseDTO.GgulPostsByCategoryResponseDTO result = postService.getGgulPostsByCategory(category,sort,page,size);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
-    @GetMapping("/life-tems")
+    @GetMapping("/life-items")
     @Operation(summary = "생활 꿀템 카테고리 별 게시글 목록 조회 API - by 천성호" )
     public CustomResponse<PostResponseDTO.GgulPostsByCategoryResponseDTO> getGgulItemPostsByCategory(@RequestParam("category") Category category,
                                                                                                     @RequestParam("sort") SortBy sort,
