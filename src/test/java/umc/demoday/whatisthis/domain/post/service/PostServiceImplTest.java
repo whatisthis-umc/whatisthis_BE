@@ -13,6 +13,7 @@ import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.converter.PageConverter;
+import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
@@ -24,6 +25,7 @@ import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -234,5 +236,93 @@ class PostServiceImplTest {
 
         // Converter가 정확한 인자들로 호출되었는지 검증
         verify(pageConverter).toGgulPostsByCategoryResponseDTO(mockPostPage, category, sortBy);
+    }
+
+    @Test
+    @DisplayName("메인 페이지 조회 - 생활꿀팁(_TIP) 카테고리 그룹 테스트")
+    void 생활꿀팁_메인페이지_조회_테스트() {
+        // given (테스트 준비)
+        Category parentCategory = Category.LIFE_TIP;
+        int page = 0;
+        int size = 6;
+
+        // 1. 서비스 로직 내에서 생성될 것으로 예상되는 카테고리 리스트
+        List<Category> expectedTipCategories = Arrays.stream(Category.values())
+                .filter(c -> c.name().endsWith("_TIP"))
+                .toList();
+
+        // 2. Repository가 반환할 Mock Page 객체들 (BEST, LATEST)
+        Page<Post> mockBestPage = new PageImpl<>(List.of(new Post()));
+        Page<Post> mockLatestPage = new PageImpl<>(List.of(new Post()));
+
+        // 3. Repository Mocking 설정
+        // 인기순(likeCount) 정렬로 호출될 때
+        when(postRepository.findByCategoryIn(
+                eq(expectedTipCategories),
+                argThat(p -> p.getSort().equals(Sort.by(Sort.Direction.DESC, "likeCount")))
+        )).thenReturn(mockBestPage);
+
+        // 최신순(createdAt) 정렬로 호출될 때
+        when(postRepository.findByCategoryIn(
+                eq(expectedTipCategories),
+                argThat(p -> p.getSort().equals(Sort.by(Sort.Direction.DESC, "createdAt")))
+        )).thenReturn(mockLatestPage);
+
+        // 4. Converter Mocking 설정
+        MainPageResponseDTO expectedResponse = new MainPageResponseDTO(); // Mock DTO
+        when(pageConverter.toMainPageResponseDTO(mockBestPage, mockLatestPage, expectedTipCategories))
+                .thenReturn(expectedResponse);
+
+        // when (테스트 실행)
+        MainPageResponseDTO actualResponse = postService.getAllGgulPosts(parentCategory, page, size);
+
+        // then (결과 검증)
+        Assertions.assertThat(actualResponse).isEqualTo(expectedResponse);
+
+        // postRepository.findByCategoryIn이 총 2번 호출되었는지 확인
+        verify(postRepository, times(2)).findByCategoryIn(any(), any(Pageable.class));
+
+        // converter가 정확한 인자들로 호출되었는지 확인
+        verify(pageConverter).toMainPageResponseDTO(mockBestPage, mockLatestPage, expectedTipCategories);
+    }
+
+    @Test
+    @DisplayName("메인 페이지 조회 - 생활꿀템(_ITEM) 카테고리 그룹 테스트")
+    void 생활꿀템_메인페이지_조회_테스트() {
+        // given
+        Category parentCategory = Category.LIFE_ITEM;
+        int page = 0;
+        int size = 6;
+
+        // 서비스 로직 내에서 생성될 것으로 예상되는 카테고리 리스트
+        List<Category> expectedItemCategories = Arrays.stream(Category.values())
+                .filter(c -> c.name().endsWith("_ITEM"))
+                .toList();
+
+        // Repository가 반환할 Mock Page 객체들
+        Page<Post> mockBestPage = new PageImpl<>(List.of(new Post()));
+        Page<Post> mockLatestPage = new PageImpl<>(List.of(new Post()));
+
+        // Repository Mocking 설정
+        when(postRepository.findByCategoryIn(eq(expectedItemCategories), any(Pageable.class)))
+                .thenReturn(mockBestPage) // 첫 번째 호출은 Best
+                .thenReturn(mockLatestPage); // 두 번째 호출은 Latest
+
+        // Converter Mocking 설정
+        when(pageConverter.toMainPageResponseDTO(any(), any(), any())).thenReturn(new MainPageResponseDTO());
+
+
+        // when
+        postService.getAllGgulPosts(parentCategory, page, size);
+
+
+        // then
+        // ArgumentCaptor로 repository에 전달된 카테고리 리스트를 캡처하여 검증
+        ArgumentCaptor<List<Category>> categoryListCaptor = ArgumentCaptor.forClass(List.class);
+        verify(postRepository, times(2)).findByCategoryIn(categoryListCaptor.capture(), any(Pageable.class));
+
+        // 캡처된 두 개의 리스트 모두 _ITEM 카테고리 리스트와 일치하는지 확인
+        Assertions.assertThat(categoryListCaptor.getAllValues().get(0)).isEqualTo(expectedItemCategories);
+        Assertions.assertThat(categoryListCaptor.getAllValues().get(1)).isEqualTo(expectedItemCategories);
     }
 }
