@@ -1,12 +1,10 @@
 package umc.demoday.whatisthis.domain.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.member.dto.login.LoginReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.login.LoginResDTO;
 import umc.demoday.whatisthis.domain.member.service.member.MemberAuthService;
@@ -25,6 +23,13 @@ public class MemberAuthController {
             @RequestBody @Valid LoginReqDTO request
     ) {
         LoginResDTO response = memberAuthService.login(request);
+        return CustomResponse.ok(response);
+    }
+
+    @PostMapping("/reissue")
+    @Operation(summary = "accessToken 재발급 API -by 이정준", security = {@SecurityRequirement(name = "")})
+    public CustomResponse<LoginResDTO> reissue(@RequestHeader("Refresh-Token") String refreshToken) {
+        LoginResDTO response = memberAuthService.reissue(refreshToken);
         return CustomResponse.ok(response);
     }
 }

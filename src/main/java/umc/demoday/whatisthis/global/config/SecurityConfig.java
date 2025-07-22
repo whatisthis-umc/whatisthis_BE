@@ -29,7 +29,7 @@ public class SecurityConfig {
                                 "/admin/login",
                                 "/admin/reissue",
                                 "/members/login",
-                                "/auth/reissue",
+                                "/members/reissue",
 
                                 "/admin/**", //추후 삭제해야함
                                 "/support/notices",
@@ -39,6 +39,8 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/members/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

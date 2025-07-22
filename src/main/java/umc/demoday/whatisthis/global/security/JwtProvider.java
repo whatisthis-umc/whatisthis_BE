@@ -31,6 +31,7 @@ public class JwtProvider {
     // AccessToken 생성
     public String createAccessToken(Integer memberId, String role) {
         Claims claims = Jwts.claims().setSubject(String.valueOf(memberId));
+        claims.put("memberId", memberId);
         claims.put("role", role);
 
         return Jwts.builder()
