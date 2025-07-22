@@ -26,4 +26,12 @@ public class PostController {
         PostResponseDTO.GgulPostResponseDTO result = postService.getGgulPost(postId);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
+
+
+    @PostMapping("/{post-id}/scraps")
+    @Operation(summary = "게시물 스크랩 API - by 천성호")
+    public CustomResponse<Void> scrapPost (@PathVariable("post-id") Integer postId){
+        postService.scrapPost(postId);
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK, null);
+    }
 }

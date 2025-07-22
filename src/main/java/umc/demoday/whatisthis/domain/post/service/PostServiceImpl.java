@@ -1,10 +1,15 @@
 package umc.demoday.whatisthis.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
+import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
@@ -12,7 +17,9 @@ import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
+import umc.demoday.whatisthis.domain.post_scrap.PostScrap;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
@@ -29,6 +36,7 @@ public class PostServiceImpl implements PostService {
     private final PostImageRepository postImageRepository;
     private final PostScrapRepository postScrapRepository;
     private final HashtagRepository hashtagRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId) {
@@ -56,5 +64,22 @@ public class PostServiceImpl implements PostService {
 
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
+    }
+
+    public void scrapPost(Integer postId) {
+
+        // Post 불러오기
+        Post post = postRepository.findById(postId).orElse(null);
+        if(post == null) throw new GeneralException(GeneralErrorCode.NOT_FOUND_404);
+
+        // 멤버 ID 불러오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            Integer memberId = userDetails.getId();
+            // 멤버 엔티티 불러오기
+            Member member = memberRepository.findById(memberId).orElseThrow();
+            PostScrap postScrap = new PostScrap(member, post);
+            postScrapRepository.save(postScrap);
+        }
     }
 }

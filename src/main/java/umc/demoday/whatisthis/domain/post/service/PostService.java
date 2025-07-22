@@ -4,4 +4,6 @@ import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 
 public interface PostService {
     public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId);
+
+    public void scrapPost (Integer postId);
 }
