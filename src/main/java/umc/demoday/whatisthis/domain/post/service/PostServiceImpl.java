@@ -83,6 +83,6 @@ public class PostServiceImpl implements PostService {
         Page<Post> postPage = postRepository.findByCategory(category, pageable);
 
         // 4. 조회된 Post 엔티티를 GgulPostsByCategoryResponseDTO 로 변환
-        return pageConverter.toGgulPostsByCategoryResponseDTO(postPage,category,sort,page);
+        return pageConverter.toGgulPostsByCategoryResponseDTO(postPage,category,sort);
     }
 }
