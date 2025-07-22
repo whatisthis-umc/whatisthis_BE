@@ -29,7 +29,7 @@ public class SecurityConfig {
                                 "/admin/login",
                                 "/admin/reissue",
                                 "/members/login",
-                                "/auth/reissue",
+                                "/members/reissue",
 
                                 "/admin/**", //추후 삭제해야함
                                 "/support/notices",
