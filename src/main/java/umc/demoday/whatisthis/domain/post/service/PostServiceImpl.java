@@ -90,6 +90,7 @@ public class PostServiceImpl implements PostService {
             PostScrap postScrap = new PostScrap(member, post);
             postScrapRepository.save(postScrap);
         }
+    }
 
     @Override
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
