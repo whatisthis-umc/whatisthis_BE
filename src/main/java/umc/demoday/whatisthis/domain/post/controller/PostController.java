@@ -32,6 +32,14 @@ public class PostController {
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
 
+
+    @PostMapping("/{post-id}/scraps")
+    @Operation(summary = "게시물 스크랩 API - by 천성호")
+    public CustomResponse<Void> scrapPost (@PathVariable("post-id") Integer postId){
+        postService.scrapPost(postId);
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK, null);
+    }
+  
     @GetMapping("/life-tips")
     @Operation(summary = "생활 꿀팁 카테고리 별 게시글 목록 조회 API - by 천성호" )
     public CustomResponse<PostResponseDTO.GgulPostsByCategoryResponseDTO> getGgulTipPostsByCategory(@RequestParam("category") Category category,

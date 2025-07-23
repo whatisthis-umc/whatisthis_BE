@@ -1,6 +1,9 @@
 package umc.demoday.whatisthis.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
+import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.converter.PageConverter;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
@@ -19,7 +24,9 @@ import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
+import umc.demoday.whatisthis.domain.post_scrap.PostScrap;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
@@ -37,7 +44,9 @@ public class PostServiceImpl implements PostService {
     private final PostImageRepository postImageRepository;
     private final PostScrapRepository postScrapRepository;
     private final HashtagRepository hashtagRepository;
+    private final MemberRepository memberRepository;
     private final PageConverter pageConverter;
+  
     @Override
     public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId) {
         // 1. 게시글 정보 조회
@@ -66,6 +75,21 @@ public class PostServiceImpl implements PostService {
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
     }
 
+    public void scrapPost(Integer postId) {
+
+        // Post 불러오기
+        Post post = postRepository.findById(postId).orElse(null);
+        if(post == null) throw new GeneralException(GeneralErrorCode.NOT_FOUND_404);
+
+        // 멤버 ID 불러오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            Integer memberId = userDetails.getId();
+            // 멤버 엔티티 불러오기
+            Member member = memberRepository.findById(memberId).orElseThrow();
+            PostScrap postScrap = new PostScrap(member, post);
+            postScrapRepository.save(postScrap);
+        }
 
     @Override
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
