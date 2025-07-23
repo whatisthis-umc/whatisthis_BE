@@ -9,4 +9,7 @@ import java.util.List;
 
 public interface PostImageRepository extends JpaRepository<PostImage, Integer> {
     List<PostImage> findAllByPostId(Integer postId);
+    PostImage findOneByPostId(Integer postId);
+
+    List<PostImage> findAllByPost_IdIn(List<Integer> postIds);
 }

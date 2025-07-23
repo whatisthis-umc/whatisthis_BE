@@ -1,14 +1,20 @@
 package umc.demoday.whatisthis.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.converter.PageConverter;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
@@ -29,7 +35,7 @@ public class PostServiceImpl implements PostService {
     private final PostImageRepository postImageRepository;
     private final PostScrapRepository postScrapRepository;
     private final HashtagRepository hashtagRepository;
-
+    private final PageConverter pageConverter;
     @Override
     public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId) {
         // 1. 게시글 정보 조회
@@ -56,5 +62,28 @@ public class PostServiceImpl implements PostService {
 
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
+    }
+
+
+    @Override
+    public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
+        // 1. 정렬 기준(Sort) 객체 생성
+        Sort sortKey;
+        if ("BEST".equalsIgnoreCase(sort.toString())) {
+            // BEST(인기순) -> likeCount(좋아요 수)가 높은 순서대로 정렬
+            sortKey = Sort.by(Sort.Direction.DESC, "likeCount");
+        } else {
+            // LATEST(최신순) -> createdAt(생성일)이 최신인 순서대로 정렬
+            sortKey = Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+
+        // 2. 페이지 요청(Pageable) 객체 생성
+        Pageable pageable = PageRequest.of(page, size, sortKey);
+
+        // 3. Repository를 통해 데이터베이스에서 데이터 조회
+        Page<Post> postPage = postRepository.findByCategory(category, pageable);
+
+        // 4. 조회된 Post 엔티티를 GgulPostsByCategoryResponseDTO 로 변환
+        return pageConverter.toGgulPostsByCategoryResponseDTO(postPage,category,sort);
     }
 }
