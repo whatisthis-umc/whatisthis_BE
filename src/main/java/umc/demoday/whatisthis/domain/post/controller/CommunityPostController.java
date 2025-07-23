@@ -175,7 +175,7 @@ public class CommunityPostController {
         return CustomResponse.onSuccess(GeneralSuccessCode.CREATED,toNewPostDTO(newPost));
     }
 
-    @GetMapping("/{post-id}")
+    @GetMapping("/communities/{post-id}")
     @Operation(summary = "커뮤니티 게시물 본문 조회 API -by 남성현")
     public CustomResponse<PostResponseDTO.CommunityPostViewDTO> getCommunityPost
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
