@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
@@ -73,6 +74,72 @@ public class PageConverter {
         );
     }
 
+
+    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Category> categories) {
+        List<Post> bestPosts = bestPostPage.getContent();
+        List<Post> latestPosts = latestPostPage.getContent();
+        // 게시글이 없는 경우 빈 응답을 즉시 반환
+        if (bestPosts.isEmpty() && latestPosts.isEmpty()) {
+            return new MainPageResponseDTO();
+        }
+        // 1. 페이지 내 모든 게시글 ID 추출
+        List<Integer> bestPostIds = bestPosts.stream()
+                .map(Post::getId)
+                .toList();
+
+        List<Integer> latestPostIds = latestPosts.stream()
+                .map(Post::getId)
+                .toList();
+        // 2. 연관 데이터 일괄 조회 (Batch Fetching)
+        Map<Integer, String> bestPostThumbnailsMap = findThumbnails(bestPostIds);
+        Map<Integer, List<Hashtag>> bestPostHashtagsMap = findHashtags(bestPostIds);
+        Map<Integer, Integer> bestPostScrapCountsMap = getScrapCountMap(bestPostIds);
+
+        Map<Integer, String> latestPostThumbnailsMap = findThumbnails(latestPostIds);
+        Map<Integer, List<Hashtag>> latestPostHashtagsMap = findHashtags(latestPostIds);
+        Map<Integer, Integer> latestPostScrapCountsMap = getScrapCountMap(latestPostIds);
+
+        // summaryDTO 생성
+        List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList = bestPostPage.stream()
+                .map(post -> toGgulPostSummaryDTO(
+                        post,
+                        bestPostThumbnailsMap.get(post.getId()),
+                        bestPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        bestPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                )).toList();
+        List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList = bestPostPage.stream()
+                .map(post -> toGgulPostSummaryDTO(
+                        post,
+                        latestPostThumbnailsMap.get(post.getId()),
+                        latestPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        latestPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                )).toList();
+
+        // section dto 생성
+        List<MainPageResponseDTO.SectionDTO> sections = getSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList);
+        return new MainPageResponseDTO(
+                categories,
+                sections
+        );
+    }
+
+    private List<MainPageResponseDTO.SectionDTO> getSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList) {
+        MainPageResponseDTO.SectionDTO bestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
+                "인기 게시물",
+                bestPostSummaryDTOList,
+                "/life-tips/posts?sort=BEST&page=1&size=6"
+        );
+        MainPageResponseDTO.SectionDTO latestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
+                "최신 게시물",
+                latestPostSummaryDTOList,
+                "/life-tips/posts?sort=LATEST&page=1&size=6"
+        );
+        List<MainPageResponseDTO.SectionDTO> sections = new java.util.ArrayList<>(List.of());
+        sections.add(bestPostSectionDTO);
+        sections.add(latestPostSectionDTO);
+        return sections;
+    }
+
     // Post 엔티티를 GgulPostSummaryDTO로 변환
     private PostResponseDTO.GgulPostSummaryDTO toGgulPostSummaryDTO(Post post, String thumbnailUrl, List<Hashtag> hashtags, Integer scrapCount) {
         String summary = post.getContent();
@@ -94,9 +161,8 @@ public class PageConverter {
         );
     }
 
-    /**
-     * 주어진 Post ID 리스트에 해당하는 썸네일들을 한 번의 쿼리로 조회합니다.
-     */
+    // 주어진 Post ID 리스트에 해당하는 썸네일들을 한 번의 쿼리로 조회
+
     private Map<Integer, String> findThumbnails(List<Integer> postIds) {
         // 각 post의 첫 번째 이미지를 썸네일로 간주
         return postImageRepository.findAllByPost_IdIn(postIds).stream()
@@ -122,6 +188,5 @@ public class PageConverter {
                         result -> (Integer) result[1]) // count
                 );
     }
-
 
 }
