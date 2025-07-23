@@ -7,8 +7,8 @@ public interface CommentService {
 
     Comment getComment(Integer id);
     Comment insertNewComment(Comment comment);
-    Comment updateComment(Integer commentId, String content);
-    Comment deleteComment(Integer commentId);
+    Comment updateComment(Integer commentId, Integer postId, String content, Member member);
+    Comment deleteComment(Integer commentId, Integer postId, Member member);
 
     void likeComment(Comment comment, Member member);
     void unLikeComment(Comment comment, Member member);

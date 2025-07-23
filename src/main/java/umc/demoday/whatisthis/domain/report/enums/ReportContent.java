@@ -1,6 +1,6 @@
 package umc.demoday.whatisthis.domain.report.enums;
 
-public enum Content {
+public enum ReportContent {
 
     ABUSIVE_LANGUAGE, // 욕설 및 비하 표현
     SEXUAL_CONTENT, // 음란성/선정적 내용

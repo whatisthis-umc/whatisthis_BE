@@ -11,4 +11,6 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Intege
     boolean existsByCommentAndMember(Comment comment, Member member);
 
     void deleteCommentLikeByCommentAndMember(Comment comment, Member member);
+
+    boolean existsByMemberAndComment(Member member, Comment comment);
 }

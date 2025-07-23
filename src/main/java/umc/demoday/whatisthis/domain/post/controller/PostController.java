@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.post.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -55,7 +56,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPosts(page, size, sort);
+        Page<Post> postList = postService.getAllPosts(page-1, size, sort);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -74,7 +75,7 @@ public class PostController {
             (@Parameter(description = "페이지 번호") @RequestParam Integer page,
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size) {
 
-        Page<Post> postList = postService.getBestPosts(page, size);
+        Page<Post> postList = postService.getBestPosts(page-1, size);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -93,7 +94,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPostsByCategory(page, size, sort, Category.TIP);
+        Page<Post> postList = postService.getAllPostsByCategory(page-1, size, sort, Category.TIP);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -113,7 +114,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPostsByCategory(page, size, sort, Category.ITEM);
+        Page<Post> postList = postService.getAllPostsByCategory(page-1, size, sort, Category.ITEM);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -133,7 +134,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPostsByCategory(page, size, sort, Category.SHOULD_I_BUY);
+        Page<Post> postList = postService.getAllPostsByCategory(page-1, size, sort, Category.SHOULD_I_BUY);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -153,7 +154,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPostsByCategory(page, size, sort, Category.CURIOUS);
+        Page<Post> postList = postService.getAllPostsByCategory(page-1, size, sort, Category.CURIOUS);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -169,7 +170,7 @@ public class PostController {
     @PostMapping
     @Operation(summary = "커뮤니티 글 작성 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost
-            (@RequestBody PostRequestDTO.NewPostRequestDTO request,
+            (@Valid @RequestBody PostRequestDTO.NewPostRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
         Post newPost = postService.insertNewPost(toNewPost(request, loginUser));
@@ -181,11 +182,11 @@ public class PostController {
     @Operation(summary = "커뮤니티 게시물 본문 조회 API -by 남성현")
     public CustomResponse<PostResponseDTO.CommunityPostViewDTO> getCommunityPost
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
-             @Parameter(description = "페이지 번호") @RequestParam Integer page,
-             @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
+             @Parameter(description = "댓글 페이지 번호") @RequestParam Integer page,
+             @Parameter(description = "한 페이지 당 댓글 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
         Post post = postService.getPost(postId);
-        Page<Comment> commentList = postService.getCommentListByPost(page, size, sort, post);
+        Page<Comment> commentList = postService.getCommentListByPost(page-1, size, sort, post);
         postService.plusOneViewCount(post);
 
         return CustomResponse.ok(toCommunityPostViewDTO(post, commentList));
@@ -209,8 +210,6 @@ public class PostController {
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @AuthenticationPrincipal Member loginUser) {
 
-        System.out.println("loginUser = " + loginUser);
-
         Post post = postService.getPost(postId);
         postService.unLikePost(post, loginUser);
 
@@ -221,7 +220,7 @@ public class PostController {
     @Operation(summary = "커뮤니티 댓글 작성 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<CommentResponseDTO.NewCommentResponseDTO> newCommment
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
-             @RequestBody CommentRequestDTO.NewCommentRequestDTO request,
+             @Valid @RequestBody CommentRequestDTO.NewCommentRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
         Post post = postService.getPost(postId);
@@ -240,10 +239,10 @@ public class PostController {
     public CustomResponse<CommentResponseDTO.ModifiedCommentResponseDTO> modifyComment
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
-             @RequestBody CommentRequestDTO.ModifyCommentRequestDTO request,
+             @Valid @RequestBody CommentRequestDTO.ModifyCommentRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
-        Comment comment = commentService.updateComment(commentId,request.getContent());
+        Comment comment = commentService.updateComment(commentId,postId,request.getContent(),loginUser);
 
         return CustomResponse.ok(CommentConverter.toModifiedCommentResponseDTO(comment));
     }
@@ -255,7 +254,7 @@ public class PostController {
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
              @AuthenticationPrincipal Member loginUser) {
 
-        Comment comment = commentService.deleteComment(commentId);
+        Comment comment = commentService.deleteComment(commentId, postId, loginUser);
 
         return CustomResponse.ok(CommentConverter.toDeletedCommentResponseDTO(comment));
     }
@@ -290,7 +289,7 @@ public class PostController {
     @Operation(summary = "게시글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<ReportResponseDTO.ReportPostResponseDTO> postReport
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
-             @RequestBody ReportRequestDTO.NewReportRequestDTO request,
+             @Valid @RequestBody ReportRequestDTO.NewReportRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
         Post post = postService.getPost(postId);
@@ -305,7 +304,7 @@ public class PostController {
     public CustomResponse<ReportResponseDTO.ReportCommentResponseDTO> commentReport
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
-             @RequestBody ReportRequestDTO.NewReportRequestDTO request,
+             @Valid @RequestBody ReportRequestDTO.NewReportRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
         Post post = postService.getPost(postId);

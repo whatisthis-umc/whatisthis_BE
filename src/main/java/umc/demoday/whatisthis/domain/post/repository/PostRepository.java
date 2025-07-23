@@ -10,6 +10,7 @@ import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findAllByCategory(Category category, Pageable pageable);
@@ -28,4 +29,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount - 1 WHERE p.id = :postId")
     void decreaseLikeCount(@Param("postId") Integer postId);
+
+    Page<Post> findByCategoryIn(Collection<Category> categories, Pageable pageable);
+
+    Page<Post> findByCreatedAtAfterAndCategoryIn(LocalDateTime createdAtAfter, Collection<Category> categories, Pageable pageable);
 }

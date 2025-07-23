@@ -6,7 +6,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
-import umc.demoday.whatisthis.domain.report.enums.Content;
+import umc.demoday.whatisthis.domain.report.enums.ReportContent;
 import umc.demoday.whatisthis.domain.report.enums.ReportStatus;
 
 import java.time.LocalDateTime;
@@ -31,7 +31,7 @@ public class Report {
 
     @Column(length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
-    private Content content;
+    private ReportContent content;
 
     @Column(length = 50, nullable = true)
     private String description;

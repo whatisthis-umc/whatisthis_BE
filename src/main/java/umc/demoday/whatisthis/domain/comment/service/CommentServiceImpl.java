@@ -10,6 +10,9 @@ import umc.demoday.whatisthis.domain.comment_like.repository.CommentLikeReposito
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post_like.PostLike;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
+
+import static umc.demoday.whatisthis.domain.comment.code.CommentErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,27 +24,58 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Comment getComment(Integer id) {
-        return commentRepository.findById(id).orElse(null);
+        return commentRepository.findById(id).orElseThrow(() -> new GeneralException(COMMENT_NOT_FOUND));
     }
 
     @Override
     public Comment insertNewComment(Comment comment) {
+
+        if(comment.getParent() != null) {
+            if (!comment.getPost().equals(comment.getParent().getPost())) {
+                throw new GeneralException(PARENT_POST_CONFLICT);
+            }
+        }
+
         return commentRepository.save(comment);
     }
 
     @Override
-    public Comment updateComment(Integer commentId, String content) {
+    public Comment updateComment(Integer commentId, Integer postId, String content, Member member) {
 
-        Comment comment = commentRepository.findById(commentId).orElse(null);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new GeneralException(COMMENT_NOT_FOUND));
+
+        if (comment.getIsDeleted()) {
+            throw new GeneralException(ALREADY_DELETED_COMMENT);
+        }
+        if(!comment.getPost().getId().equals(postId)) {
+            throw new GeneralException(COMMENT_POST_CONFLICT);
+        }
+        if(!comment.getMember().getId().equals(member.getId())) {
+            throw new GeneralException(COMMENT_EDIT_FORBIDDEN);
+        }
+
         comment.setContent(content);
 
         return comment;
     }
 
     @Override
-    public Comment deleteComment(Integer commentId) {
+    public Comment deleteComment(Integer commentId, Integer postId, Member member) {
 
-        Comment comment = commentRepository.findById(commentId).orElse(null);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new GeneralException(COMMENT_NOT_FOUND));
+
+        if (comment.getIsDeleted()) {
+            throw new GeneralException(ALREADY_DELETED_COMMENT);
+        }
+        if(!comment.getPost().getId().equals(postId)) {
+            throw new GeneralException(COMMENT_POST_CONFLICT);
+        }
+        if(!comment.getMember().getId().equals(member.getId())) {
+            throw new GeneralException(COMMENT_EDIT_FORBIDDEN);
+        }
+
         comment.setIsDeleted(true);
 
         return comment;
@@ -49,9 +83,17 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void likeComment(Comment comment, Member member) {
-        if (commentLikeRepository.existsByCommentAndMember(comment, member)
-        || comment.getIsDeleted()) {
-            System.out.println("예외 처리 예정");
+
+        if (comment.getIsDeleted()) {
+            throw new GeneralException(ALREADY_DELETED_COMMENT);
+        }
+
+        if (commentLikeRepository.existsByMemberAndComment(member, comment)){
+            throw new GeneralException(ALREADY_LIKED_COMMENT);
+        }
+
+        if (comment.getMember().getId().equals(member.getId())) {
+            throw new GeneralException(CANNOT_LIKE_OWN_COMMENT);
         }
 
         commentRepository.increaseLikeCount(comment.getId());
@@ -63,9 +105,13 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void unLikeComment(Comment comment, Member member) {
-        if (commentLikeRepository.existsByCommentAndMember(comment, member)
-                || comment.getIsDeleted() || comment.getLikeCount() ==0 ) {
-            System.out.println("예외 처리 예정");
+
+        if (comment.getIsDeleted()) {
+            throw new GeneralException(ALREADY_DELETED_COMMENT);
+        }
+
+        if (!commentLikeRepository.existsByMemberAndComment(member, comment)){
+            throw new GeneralException(ALREADY_UNLIKED_COMMENT);
         }
 
         commentRepository.decreaseLikeCount(comment.getId());
