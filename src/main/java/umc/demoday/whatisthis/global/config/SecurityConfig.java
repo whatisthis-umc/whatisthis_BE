@@ -29,13 +29,18 @@ public class SecurityConfig {
                                 "/admin/login",
                                 "/admin/reissue",
                                 "/members/login",
-                                "/auth/reissue",
+                                "/members/reissue",
+
+                                "/support/notices",
+                                "/support/notices/*",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/posts/**"
                         ).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/members/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -24,4 +24,10 @@ public class PostScrap {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+
+    public PostScrap(Member member, Post post) {
+        this.member = member;
+        this.post = post;
+    }
 }

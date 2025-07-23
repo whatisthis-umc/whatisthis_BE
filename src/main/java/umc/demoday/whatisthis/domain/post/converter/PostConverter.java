@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.post.converter;
 import org.springframework.data.domain.Page;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
+
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
@@ -135,4 +136,23 @@ public class PostConverter {
                 .likeCount(post.getLikeCount())
                 .build();
     }
+
+    // Entity -> DTO
+    public static PostResponseDTO.GgulPostResponseDTO toGgulPostResponseDTO(Post post, String category,List<String> imageUrls, List<String> hashtags, Integer postScrapCount) {
+        return new PostResponseDTO.GgulPostResponseDTO(
+                post.getId(),
+                category,
+                post.getCategory(),// 청소/이런것
+                post.getTitle(),
+                post.getContent(),
+                hashtags,
+                imageUrls,
+                post.getLikeCount(),
+                postScrapCount,
+                post.getViewCount(),
+                post.getCreatedAt(),
+                post.getUpdatedAt()
+        );
+    }
+
 }

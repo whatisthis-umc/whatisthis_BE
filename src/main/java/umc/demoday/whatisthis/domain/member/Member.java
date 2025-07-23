@@ -56,6 +56,9 @@ public class Member {
     @ColumnDefault("false")
     private Boolean isBest;
 
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id", referencedColumnName = "id")
     private ProfileImage profileImage;
