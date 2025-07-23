@@ -4,14 +4,10 @@ import org.springframework.data.domain.Page;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
-import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
-import umc.demoday.whatisthis.domain.post_like.PostLike;
 
-import java.util.List;
-
-public interface PostService {
+public interface CommunityPostService {
 
     Page<Post> getAllPosts(Integer page, Integer size, SortBy sort);
     Page<Post> getBestPosts(Integer page, Integer size);

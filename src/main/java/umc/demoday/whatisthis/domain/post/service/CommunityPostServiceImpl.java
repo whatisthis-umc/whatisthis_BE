@@ -12,7 +12,6 @@ import umc.demoday.whatisthis.domain.comment.repository.CommentRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.code.PostErrorCode;
-import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
@@ -26,7 +25,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class PostServiceImpl implements PostService {
+public class CommunityPostServiceImpl implements CommunityPostService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;

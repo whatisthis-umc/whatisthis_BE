@@ -1,24 +1,17 @@
 package umc.demoday.whatisthis.domain.post.converter;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
-import umc.demoday.whatisthis.domain.post.service.PostService;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
-import umc.demoday.whatisthis.domain.profile_image.ProfileImage;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PostConverter {
-
-    PostService postService;
 
     public static PostResponseDTO.CommunityPostPreviewDTO toCommunityPostPreviewDTO(Post post) {
 

@@ -6,9 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.comment.converter.CommentConverter;
@@ -22,7 +20,7 @@ import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
-import umc.demoday.whatisthis.domain.post.service.PostService;
+import umc.demoday.whatisthis.domain.post.service.CommunityPostService;
 import umc.demoday.whatisthis.domain.report.Report;
 import umc.demoday.whatisthis.domain.report.converter.ReportConverter;
 import umc.demoday.whatisthis.domain.report.dto.ReportRequestDTO;
@@ -34,7 +32,6 @@ import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static umc.demoday.whatisthis.domain.comment.converter.CommentConverter.toCommentLikeCountDTO;
 import static umc.demoday.whatisthis.domain.post.converter.PostConverter.*;
 import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportCommentResponseDTO;
 import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportPostResponseDTO;
@@ -42,9 +39,9 @@ import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toR
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
-public class PostController {
+public class CommunityPostController {
 
-    private final PostService postService;
+    private final CommunityPostService communityPostService;
     private final MemberCommandService memberCommandService;
     private final CommentService commentService;
     private final ReportService reportService;
@@ -56,7 +53,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPosts(page-1, size, sort);
+        Page<Post> postList = communityPostService.getAllPosts(page-1, size, sort);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -75,7 +72,7 @@ public class PostController {
             (@Parameter(description = "페이지 번호") @RequestParam Integer page,
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size) {
 
-        Page<Post> postList = postService.getBestPosts(page-1, size);
+        Page<Post> postList = communityPostService.getBestPosts(page-1, size);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -94,7 +91,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPostsByCategory(page-1, size, sort, Category.TIP);
+        Page<Post> postList = communityPostService.getAllPostsByCategory(page-1, size, sort, Category.TIP);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -114,7 +111,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPostsByCategory(page-1, size, sort, Category.ITEM);
+        Page<Post> postList = communityPostService.getAllPostsByCategory(page-1, size, sort, Category.ITEM);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -134,7 +131,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPostsByCategory(page-1, size, sort, Category.SHOULD_I_BUY);
+        Page<Post> postList = communityPostService.getAllPostsByCategory(page-1, size, sort, Category.SHOULD_I_BUY);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -154,7 +151,7 @@ public class PostController {
              @Parameter(description = "한 페이지 당 게시물 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
 
-        Page<Post> postList = postService.getAllPostsByCategory(page-1, size, sort, Category.CURIOUS);
+        Page<Post> postList = communityPostService.getAllPostsByCategory(page-1, size, sort, Category.CURIOUS);
 
         Set<Member> members = postList.stream()
                 .map(Post::getMember)
@@ -173,7 +170,7 @@ public class PostController {
             (@Valid @RequestBody PostRequestDTO.NewPostRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
-        Post newPost = postService.insertNewPost(toNewPost(request, loginUser));
+        Post newPost = communityPostService.insertNewPost(toNewPost(request, loginUser));
 
         return CustomResponse.onSuccess(GeneralSuccessCode.CREATED,toNewPostDTO(newPost));
     }
@@ -185,9 +182,9 @@ public class PostController {
              @Parameter(description = "댓글 페이지 번호") @RequestParam Integer page,
              @Parameter(description = "한 페이지 당 댓글 수")@RequestParam Integer size,
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
-        Post post = postService.getPost(postId);
-        Page<Comment> commentList = postService.getCommentListByPost(page-1, size, sort, post);
-        postService.plusOneViewCount(post);
+        Post post = communityPostService.getPost(postId);
+        Page<Comment> commentList = communityPostService.getCommentListByPost(page-1, size, sort, post);
+        communityPostService.plusOneViewCount(post);
 
         return CustomResponse.ok(toCommunityPostViewDTO(post, commentList));
     }
@@ -198,8 +195,8 @@ public class PostController {
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @AuthenticationPrincipal Member loginUser) {
 
-        Post post = postService.getPost(postId);
-        postService.likePost(post, loginUser);
+        Post post = communityPostService.getPost(postId);
+        communityPostService.likePost(post, loginUser);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toPostLikeCountDTO(post));
     }
@@ -210,8 +207,8 @@ public class PostController {
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @AuthenticationPrincipal Member loginUser) {
 
-        Post post = postService.getPost(postId);
-        postService.unLikePost(post, loginUser);
+        Post post = communityPostService.getPost(postId);
+        communityPostService.unLikePost(post, loginUser);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toPostLikeCountDTO(post));
     }
@@ -223,7 +220,7 @@ public class PostController {
              @Valid @RequestBody CommentRequestDTO.NewCommentRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
-        Post post = postService.getPost(postId);
+        Post post = communityPostService.getPost(postId);
         Comment parent;
 
         if(request.getParentCommentId() == null) {parent = null;}
@@ -292,7 +289,7 @@ public class PostController {
              @Valid @RequestBody ReportRequestDTO.NewReportRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
-        Post post = postService.getPost(postId);
+        Post post = communityPostService.getPost(postId);
         Report report = reportService.insertNewReport(ReportConverter.toReport(request,loginUser,post,null));
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toReportPostResponseDTO(report));
@@ -307,7 +304,7 @@ public class PostController {
              @Valid @RequestBody ReportRequestDTO.NewReportRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
-        Post post = postService.getPost(postId);
+        Post post = communityPostService.getPost(postId);
         Comment comment = commentService.getComment(commentId);
         Report report = reportService.insertNewReport(ReportConverter.toReport(request,loginUser,null,comment));
 
