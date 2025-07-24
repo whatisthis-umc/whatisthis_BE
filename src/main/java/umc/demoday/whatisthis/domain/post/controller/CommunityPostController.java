@@ -239,6 +239,7 @@ public class CommunityPostController {
              @Valid @RequestBody CommentRequestDTO.ModifyCommentRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
+        commentService.validateCommentByPostId(commentService.getComment(commentId),postId);
         Comment comment = commentService.updateComment(commentId,postId,request.getContent(),loginUser);
 
         return CustomResponse.ok(CommentConverter.toModifiedCommentResponseDTO(comment));
@@ -251,6 +252,7 @@ public class CommunityPostController {
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
              @AuthenticationPrincipal Member loginUser) {
 
+        commentService.validateCommentByPostId(commentService.getComment(commentId),postId);
         Comment comment = commentService.deleteComment(commentId, postId, loginUser);
 
         return CustomResponse.ok(CommentConverter.toDeletedCommentResponseDTO(comment));
@@ -264,6 +266,7 @@ public class CommunityPostController {
              @AuthenticationPrincipal Member loginUser) {
 
         Comment comment = commentService.getComment(commentId);
+        commentService.validateCommentByPostId(comment, postId);
         commentService.likeComment(comment, loginUser);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,CommentConverter.toCommentLikeCountDTO(comment));
@@ -277,6 +280,7 @@ public class CommunityPostController {
              @AuthenticationPrincipal Member loginUser) {
 
         Comment comment = commentService.getComment(commentId);
+        commentService.validateCommentByPostId(comment, postId);
         commentService.unLikeComment(comment, loginUser);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,CommentConverter.toCommentLikeCountDTO(comment));
@@ -306,6 +310,7 @@ public class CommunityPostController {
 
         Post post = communityPostService.getPost(postId);
         Comment comment = commentService.getComment(commentId);
+        commentService.validateCommentByPostId(comment, postId);
         Report report = reportService.insertNewReport(ReportConverter.toReport(request,loginUser,null,comment));
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toReportCommentResponseDTO(report));

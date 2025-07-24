@@ -48,9 +48,7 @@ public class CommentServiceImpl implements CommentService {
         if (comment.getIsDeleted()) {
             throw new GeneralException(ALREADY_DELETED_COMMENT);
         }
-        if(!comment.getPost().getId().equals(postId)) {
-            throw new GeneralException(COMMENT_POST_CONFLICT);
-        }
+
         if(!comment.getMember().getId().equals(member.getId())) {
             throw new GeneralException(COMMENT_EDIT_FORBIDDEN);
         }
@@ -69,9 +67,7 @@ public class CommentServiceImpl implements CommentService {
         if (comment.getIsDeleted()) {
             throw new GeneralException(ALREADY_DELETED_COMMENT);
         }
-        if(!comment.getPost().getId().equals(postId)) {
-            throw new GeneralException(COMMENT_POST_CONFLICT);
-        }
+
         if(!comment.getMember().getId().equals(member.getId())) {
             throw new GeneralException(COMMENT_EDIT_FORBIDDEN);
         }
@@ -116,5 +112,13 @@ public class CommentServiceImpl implements CommentService {
 
         commentRepository.decreaseLikeCount(comment.getId());
         commentLikeRepository.deleteCommentLikeByCommentAndMember(comment, member);
+    }
+
+    @Override
+    public void validateCommentByPostId(Comment comment,Integer postId){
+
+        if(!comment.getPost().getId().equals(postId)) {
+            throw new GeneralException(COMMENT_POST_CONFLICT);
+        }
     }
 }
