@@ -12,4 +12,6 @@ public interface CommentService {
 
     void likeComment(Comment comment, Member member);
     void unLikeComment(Comment comment, Member member);
+
+    void validateCommentByPostId(Comment comment,Integer postId);
 }
