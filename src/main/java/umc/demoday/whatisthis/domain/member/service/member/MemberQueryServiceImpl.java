@@ -27,16 +27,24 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     private static String maskMemberId(String id) {
-        if (id.length() <= 2) return "*".repeat(id.length());
+        int length = id.length();
+        int visibleCount;
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(id.charAt(0)); // 첫 글자는 그대로 노출
-
-        for (int i = 1; i < id.length() - 2; i++) {
-            sb.append("*"); // 중간 글자들을 *로 가림
+        if (length <= 2) {
+            return "*".repeat(length);
+        } else if (length <= 4) {
+            visibleCount = 1;
+        } else if (length <= 6) {
+            visibleCount = 2;
+        } else if (length <= 8) {
+            visibleCount = 3;
+        } else {
+            visibleCount = 4;
         }
 
-        sb.append(id.substring(id.length() - 2)); // 마지막 2글자는 그대로 노출
+        StringBuilder sb = new StringBuilder();
+        sb.append(id, 0, visibleCount);
+        sb.append("*".repeat(length - visibleCount));
 
         return sb.toString();
     }
