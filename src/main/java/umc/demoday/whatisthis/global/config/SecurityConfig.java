@@ -30,6 +30,7 @@ public class SecurityConfig {
                                 "/admin/reissue",
                                 "/members/login",
                                 "/members/reissue",
+                                "/members/find-id",
 
                                 "/support/notices",
                                 "/support/notices/*",
