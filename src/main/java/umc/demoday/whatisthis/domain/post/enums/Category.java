@@ -19,5 +19,4 @@ public enum Category {
     ITEM,   // 커뮤니티-꿀템추천
     SHOULD_I_BUY,   // 커뮤니티-살까말까?
     CURIOUS;    // 커뮤니티-궁금해요!
-
 }

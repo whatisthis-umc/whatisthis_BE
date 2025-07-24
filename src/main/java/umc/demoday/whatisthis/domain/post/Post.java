@@ -5,10 +5,14 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import umc.demoday.whatisthis.domain.admin.Admin;
+import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.post_image.PostImage;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
@@ -55,4 +59,10 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     private Admin admin;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Comment> CommentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostImage> PostImageList = new ArrayList<>();
 }

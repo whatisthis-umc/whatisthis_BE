@@ -79,7 +79,7 @@ public class PostServiceImpl implements PostService {
 
         // Post 불러오기
         Post post = postRepository.findById(postId).orElse(null);
-        if(post == null) throw new GeneralException(GeneralErrorCode.NOT_FOUND_404);
+        if (post == null) throw new GeneralException(GeneralErrorCode.NOT_FOUND_404);
 
         // 멤버 ID 불러오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
