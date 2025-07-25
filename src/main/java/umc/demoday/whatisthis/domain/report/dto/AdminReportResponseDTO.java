@@ -19,9 +19,9 @@ public class AdminReportResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class reportListResponseDTO {
+    public static class ReportListResponseDTO {
 
-        List<reportPageResponseDTO> reportList;
+        List<ReportPageResponseDTO> reportList;
         Integer listSize;
         Integer totalPage;
         Long totalElements;
@@ -34,10 +34,12 @@ public class AdminReportResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class reportPageResponseDTO {
+    public static class ReportPageResponseDTO {
 
+        Integer reportId;
         String type;
-        ReportContent content;
+        String content;
+        ReportContent reportContent;
         LocalDateTime reportedAt;
         ReportStatus status;
 
@@ -47,7 +49,7 @@ public class AdminReportResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class reportDetailResponseDTO {
+    public static class ReportDetailResponseDTO {
 
         Integer reportId;
         String type;

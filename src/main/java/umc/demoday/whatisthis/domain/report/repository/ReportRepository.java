@@ -1,9 +1,12 @@
 package umc.demoday.whatisthis.domain.report.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import umc.demoday.whatisthis.domain.report.Report;
+import umc.demoday.whatisthis.domain.report.enums.ReportStatus;
 
 public interface ReportRepository extends JpaRepository<Report, Integer> {
 
@@ -17,4 +20,23 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
 """)
     Integer countReportsByReportedMemberId(@Param("memberId") Integer memberId);
 
+    @Query("SELECT r FROM Report r " +
+            "LEFT JOIN r.post p " +
+            "LEFT JOIN r.comment c " +
+            "WHERE r.status = :status " +
+            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "     OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Report> findByStatusAndKeyword(@Param("status") ReportStatus status,
+                                        @Param("keyword") String keyword,
+                                        Pageable pageable);
+
+
+    @Query("SELECT r FROM Report r " +
+            "LEFT JOIN r.post p " +
+            "LEFT JOIN r.comment c " +
+            "WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "   OR LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Report> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    Page<Report> findByStatus(ReportStatus status, Pageable pageable);
 }
