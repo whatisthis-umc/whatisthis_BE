@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.domain.post.converter;
 
 import org.springframework.data.domain.Page;
 import umc.demoday.whatisthis.domain.comment.Comment;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.member.Member;
 
 import umc.demoday.whatisthis.domain.post.Post;
@@ -9,6 +10,7 @@ import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,7 +71,15 @@ public class PostConverter {
                         .build())
                 .collect(Collectors.toList());
 
+        List<Hashtag> hashtags = request.getHashtags().stream()
+                        .map(hashtag -> Hashtag.builder()
+                                .content(hashtag)
+                                .post(post)
+                                .build())
+                .collect(Collectors.toList());
+
         post.setPostImageList(postImages);
+        post.setHashtagList(hashtags);
 
         return post;
     }
@@ -82,7 +92,7 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDTO.CommunityPostViewDTO toCommunityPostViewDTO(Post post, Page<Comment> commentList) {
+    public static PostResponseDTO.CommunityPostViewDTO toCommunityPostViewDTO(Post post, Page<Comment> commentList, List<PostImage> imageList, List<Hashtag> hashtagList) {
 
 
         List<PostResponseDTO.CommentViewDTO> commentDtoList = commentList.stream()
@@ -110,6 +120,33 @@ public class PostConverter {
                         .isLast(commentList.isLast())
                         .build();
 
+        List<PostResponseDTO.CommunityPostImageURLDTO> imageDtoList =
+                (imageList == null ? Collections.<PostImage>emptyList() : imageList)
+                        .stream()
+                        .map(img -> PostResponseDTO.CommunityPostImageURLDTO.builder()
+                                .url(img.getImageUrl())
+                                .build())
+                        .toList();
+
+        PostResponseDTO.CommunityPostImageListDTO imageListDto =
+                PostResponseDTO.CommunityPostImageListDTO.builder()
+                        .imageList(imageDtoList)
+                        .build();
+
+        List<PostResponseDTO.CommunityHashtagDTO> hashtagDtoList =
+                (hashtagList == null ? Collections.<Hashtag>emptyList() : hashtagList)
+                        .stream()
+                        .map(ht -> PostResponseDTO.CommunityHashtagDTO.builder()
+                                .content(ht.getContent())
+                                .build())
+                        .toList();
+
+        PostResponseDTO.CommunityPostHashtagListDTO hashtagListDto =
+                PostResponseDTO.CommunityPostHashtagListDTO.builder()
+                        .hashtagList(hashtagDtoList)
+                        .build();
+
+
         String profileImageUrl = post.getMember().getProfileImage() != null
                 ? post.getMember().getProfileImage().getImageUrl()
                 : null;
@@ -118,6 +155,9 @@ public class PostConverter {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .category(post.getCategory())
+                .hashtagListDto(hashtagListDto)
+                .imageListDto(imageListDto)
                 .nickname(post.getMember().getNickname())
                 .isBestUser(post.getMember().getIsBest())
                 .profileimageUrl(profileImageUrl)

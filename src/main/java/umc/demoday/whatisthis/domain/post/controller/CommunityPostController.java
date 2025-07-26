@@ -13,6 +13,7 @@ import umc.demoday.whatisthis.domain.comment.converter.CommentConverter;
 import umc.demoday.whatisthis.domain.comment.dto.CommentRequestDTO;
 import umc.demoday.whatisthis.domain.comment.dto.CommentResponseDTO;
 import umc.demoday.whatisthis.domain.comment.service.CommentService;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -21,6 +22,7 @@ import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.service.CommunityPostService;
+import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.report.Report;
 import umc.demoday.whatisthis.domain.report.converter.ReportConverter;
 import umc.demoday.whatisthis.domain.report.dto.ReportRequestDTO;
@@ -29,6 +31,7 @@ import umc.demoday.whatisthis.domain.report.service.ReportService;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -184,9 +187,11 @@ public class CommunityPostController {
              @Parameter(description = "인기순 = BEST ,최신순 = LATEST ") @RequestParam SortBy sort) {
         Post post = communityPostService.getPost(postId);
         Page<Comment> commentList = communityPostService.getCommentListByPost(page-1, size, sort, post);
+        List<Hashtag> hashtagList = communityPostService.getHashtagListByPost(post);
+        List<PostImage> postImageList = communityPostService.getPostImageListByPost(post);
         communityPostService.plusOneViewCount(post);
 
-        return CustomResponse.ok(toCommunityPostViewDTO(post, commentList));
+        return CustomResponse.ok(toCommunityPostViewDTO(post, commentList,postImageList,hashtagList));
     }
 
     @PostMapping("/{post-id}/likes")

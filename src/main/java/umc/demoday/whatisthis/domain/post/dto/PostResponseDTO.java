@@ -54,6 +54,14 @@ public class PostResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class CommunityHashtagDTO {
+        String content;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class NewPostResponseDTO {
         Integer id;
         LocalDateTime createdAt;
@@ -68,6 +76,9 @@ public class PostResponseDTO {
         Integer id;
         String title;
         String content;
+        Category category;
+        CommunityPostHashtagListDTO hashtagListDto;
+        CommunityPostImageListDTO imageListDto;
         String nickname;
         Boolean isBestUser;
         String profileimageUrl;
@@ -77,6 +88,23 @@ public class PostResponseDTO {
         LocalDateTime createdAt;
         CommentViewListDTO commentListDto;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CommunityPostImageListDTO {
+        List<CommunityPostImageURLDTO> imageList;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CommunityPostHashtagListDTO {
+        List<CommunityHashtagDTO> hashtagList;
+    }
+
 
     @Builder
     @Getter

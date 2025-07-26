@@ -29,5 +29,7 @@ public class PostRequestDTO {
         String content;
 
         List<String> imageUrls;
+
+        List<String> hashtags;
     }
 }
