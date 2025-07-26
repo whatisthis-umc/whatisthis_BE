@@ -31,4 +31,10 @@ public class AdminPostController {
         AdminPostResDTO.updatePostResDTO response = adminPostService.updatePost(postId, request);
         return CustomResponse.ok(response);
     }
+
+    @PostMapping("/")
+    public CustomResponse<AdminPostResDTO.createPostResDTO> createPost(@RequestBody AdminPostReqDTO.createPostReqDTO request){
+        AdminPostResDTO.createPostResDTO response = adminPostService.createPost(request);
+        return CustomResponse.ok(response);
+    }
 }

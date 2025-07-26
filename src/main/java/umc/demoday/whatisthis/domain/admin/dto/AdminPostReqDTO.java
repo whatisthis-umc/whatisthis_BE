@@ -21,4 +21,15 @@ public class AdminPostReqDTO {
         Category category;
         List<String> imageUrls;
     }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class createPostReqDTO{
+        String title;
+        String content;
+        Category category;
+        List<String> imageUrls;
+    }
 }
