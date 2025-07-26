@@ -2,16 +2,21 @@ package umc.demoday.whatisthis.domain.report.converter;
 
 import org.springframework.data.domain.Page;
 import umc.demoday.whatisthis.domain.comment.Comment;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.report.Report;
 import umc.demoday.whatisthis.domain.report.dto.AdminReportResponseDTO;
 import umc.demoday.whatisthis.domain.report.dto.ReportRequestDTO;
 import umc.demoday.whatisthis.domain.report.dto.ReportResponseDTO;
+import umc.demoday.whatisthis.domain.report.dto.post_preview.PostPreviewDTO;
 import umc.demoday.whatisthis.domain.report.dto.post_preview.ReportedCommentPreviewDTO;
+import umc.demoday.whatisthis.domain.report.dto.post_preview.ReportedPostPreviewDTO;
 import umc.demoday.whatisthis.domain.report.enums.ReportStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,6 +97,7 @@ public class ReportConverter {
         Category category = null;
         Post post = null;
         String commentContent = null;
+        PostPreviewDTO postPreview = null;
 
         if (report.getPost() == null && report.getComment() != null) {
 
@@ -99,6 +105,7 @@ public class ReportConverter {
             post = report.getComment().getPost();
             category = post.getCategory();
             commentContent = report.getComment().getContent();
+            postPreview = toReportedCommentPreviewDTO(report);
 
         }
 
@@ -107,6 +114,7 @@ public class ReportConverter {
             type = "POST";
             post = report.getPost();
             category = post.getCategory();
+            postPreview = toReportedPostPreviewDTO(report);
 
         }
 
@@ -120,19 +128,65 @@ public class ReportConverter {
                 .reportedAt(report.getReportedAt())
                 .content(report.getContent())
                 .description(report.getDescription())
-                .postPreview(null)
+                .postPreview(postPreview)
                 .build();
     }
 
-    public ReportedCommentPreviewDTO toReportedCommentPreviewDTO(Report report) {
+    public static ReportedPostPreviewDTO toReportedPostPreviewDTO(Report report) {
+
+        List<Hashtag> hashtags = report.getPost().getHashtagList();
+        List<PostImage> postImages = report.getPost().getPostImageList();
+
+        List<String> hashtagContents = null;
+        if (hashtags != null && !hashtags.isEmpty()) {
+            hashtagContents = hashtags.stream()
+                    .map(Hashtag::getContent)
+                    .toList();
+        }
+
+        List<String> imageUrls = null;
+        if (postImages != null && !postImages.isEmpty()) {
+            imageUrls = postImages.stream()
+                    .map(PostImage::getImageUrl)
+                    .toList();
+        }
+
+        return ReportedPostPreviewDTO.builder()
+                    .postId(report.getPost().getId())
+                    .category(report.getPost().getCategory())
+                    .title(report.getPost().getTitle())
+                    .content(report.getPost().getContent())
+                    .hashtags(hashtagContents)
+                    .images(imageUrls)
+                    .build();
+    }
+
+    public static ReportedCommentPreviewDTO toReportedCommentPreviewDTO(Report report) {
+
+        List<Hashtag> hashtags = report.getComment().getPost().getHashtagList();
+        List<PostImage> postImages = report.getComment().getPost().getPostImageList();
+
+        List<String> hashtagContents = null;
+        if (hashtags != null && !hashtags.isEmpty()) {
+            hashtagContents = hashtags.stream()
+                    .map(Hashtag::getContent)
+                    .toList();
+        }
+
+        List<String> imageUrls = null;
+        if (postImages != null && !postImages.isEmpty()) {
+            imageUrls = postImages.stream()
+                    .map(PostImage::getImageUrl)
+                    .toList();
+        }
 
         return ReportedCommentPreviewDTO.builder()
-                .postId(report.getPost().getId())
-                .category(report.getPost().getCategory())
-                .title(report.getPost().getTitle())
-                .content(report.getPost().getContent())
-                .hashtags(report.get)
+                .postId(report.getComment().getPost().getId())
+                .title(report.getComment().getPost().getTitle())
+                .content(report.getComment().getPost().getContent())
+                .hashtags(hashtagContents)
+                .images(imageUrls)
+                .commentContent(report.getComment().getContent())
                 .build();
     }
-
 }

@@ -15,6 +15,7 @@ import umc.demoday.whatisthis.domain.report.service.AdminReportService;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 
+import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportDetailResponseDTO;
 import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportListResponseDTO;
 
 @RestController
@@ -43,7 +44,7 @@ public class AdminReportController {
 
         Report report = adminReportService.getReport(reportId);
 
-        return null;
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK,toReportDetailResponseDTO(report));
     }
 
     @PostMapping("/{report-id}")

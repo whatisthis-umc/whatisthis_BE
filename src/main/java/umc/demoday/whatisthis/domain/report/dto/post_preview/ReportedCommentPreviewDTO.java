@@ -20,6 +20,5 @@ public class ReportedCommentPreviewDTO implements PostPreviewDTO {
     String content;
     List<String> hashtags;
     List<String> images;
-
-
+    String commentContent;
 }

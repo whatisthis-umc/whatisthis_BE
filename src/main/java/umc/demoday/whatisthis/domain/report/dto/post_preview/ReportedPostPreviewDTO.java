@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.util.List;
 
@@ -15,10 +16,9 @@ public class ReportedPostPreviewDTO implements PostPreviewDTO {
 
     Integer postId;
     String title;
-    String category;
+    Category category;
     String content;
     List<String> hashtags;
     List<String> images;
-    String commentContent;
 
 }
