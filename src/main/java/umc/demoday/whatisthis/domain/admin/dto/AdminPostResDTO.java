@@ -1,6 +1,7 @@
 package umc.demoday.whatisthis.domain.admin.dto;
 
 import lombok.*;
+import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.time.LocalDateTime;
@@ -20,4 +21,13 @@ public class AdminPostResDTO {
     Integer viewCount;
     Integer scrapCount;
     List<String> imageUrls;
+
+    @Setter
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class updatePostResDTO{
+        Integer postId;
+        LocalDateTime updatedAt;
+    }
 }
