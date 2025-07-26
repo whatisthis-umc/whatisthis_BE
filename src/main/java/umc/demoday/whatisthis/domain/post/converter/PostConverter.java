@@ -155,6 +155,7 @@ public class PostConverter {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .category(post.getCategory())
                 .hashtagListDto(hashtagListDto)
                 .imageListDto(imageListDto)
                 .nickname(post.getMember().getNickname())

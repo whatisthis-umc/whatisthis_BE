@@ -76,6 +76,7 @@ public class PostResponseDTO {
         Integer id;
         String title;
         String content;
+        Category category;
         CommunityPostHashtagListDTO hashtagListDto;
         CommunityPostImageListDTO imageListDto;
         String nickname;
