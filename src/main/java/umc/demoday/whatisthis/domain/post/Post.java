@@ -6,6 +6,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.comment.Comment;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
@@ -65,4 +66,7 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<PostImage> PostImageList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Hashtag> HashtagList = new ArrayList<>();
 }
