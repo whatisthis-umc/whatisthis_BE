@@ -1,10 +1,7 @@
 package umc.demoday.whatisthis.domain.admin.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
 import umc.demoday.whatisthis.domain.admin.service.AdminPostService;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
@@ -20,5 +17,11 @@ public class AdminPostController {
     public CustomResponse<AdminPostResDTO> getPost(@PathVariable("post-id") Integer postId){
         AdminPostResDTO response = adminPostService.getPost(postId);
         return CustomResponse.ok(response);
+    }
+
+    @DeleteMapping("/{post-id}")
+    public CustomResponse<Integer> deletePost(@PathVariable("post-id") Integer postId){
+        adminPostService.deletePost(postId);
+        return CustomResponse.ok(postId);
     }
 }
