@@ -1,7 +1,16 @@
 package umc.demoday.whatisthis.domain.report.dto.post_preview;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
+@Builder
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReportedPostPreviewDTO implements PostPreviewDTO {
 
     Integer postId;

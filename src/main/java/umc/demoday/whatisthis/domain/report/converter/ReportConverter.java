@@ -4,10 +4,12 @@ import org.springframework.data.domain.Page;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.report.Report;
 import umc.demoday.whatisthis.domain.report.dto.AdminReportResponseDTO;
 import umc.demoday.whatisthis.domain.report.dto.ReportRequestDTO;
 import umc.demoday.whatisthis.domain.report.dto.ReportResponseDTO;
+import umc.demoday.whatisthis.domain.report.dto.post_preview.ReportedCommentPreviewDTO;
 import umc.demoday.whatisthis.domain.report.enums.ReportStatus;
 
 import java.util.List;
@@ -81,6 +83,55 @@ public class ReportConverter {
                 .isLast(reportList.isLast())
                 .totalPage(reportList.getTotalPages())
                 .totalElements(reportList.getTotalElements())
+                .build();
+    }
+
+    public static AdminReportResponseDTO.ReportDetailResponseDTO toReportDetailResponseDTO(Report report) {
+
+        String type = "";
+        Category category = null;
+        Post post = null;
+        String commentContent = null;
+
+        if (report.getPost() == null && report.getComment() != null) {
+
+            type = "COMMENT";
+            post = report.getComment().getPost();
+            category = post.getCategory();
+            commentContent = report.getComment().getContent();
+
+        }
+
+        else if (report.getPost() != null && report.getComment() == null) {
+
+            type = "POST";
+            post = report.getPost();
+            category = post.getCategory();
+
+        }
+
+        return AdminReportResponseDTO.ReportDetailResponseDTO.builder()
+                .reportId(report.getId())
+                .type(type)
+                .category(category)
+                .postTitle(post.getTitle())
+                .commentContent(commentContent)
+                .nickname(report.getMember().getNickname())
+                .reportedAt(report.getReportedAt())
+                .content(report.getContent())
+                .description(report.getDescription())
+                .postPreview(null)
+                .build();
+    }
+
+    public ReportedCommentPreviewDTO toReportedCommentPreviewDTO(Report report) {
+
+        return ReportedCommentPreviewDTO.builder()
+                .postId(report.getPost().getId())
+                .category(report.getPost().getCategory())
+                .title(report.getPost().getTitle())
+                .content(report.getPost().getContent())
+                .hashtags(report.get)
                 .build();
     }
 

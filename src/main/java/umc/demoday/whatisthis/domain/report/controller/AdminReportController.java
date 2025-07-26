@@ -41,6 +41,8 @@ public class AdminReportController {
     public CustomResponse<AdminReportResponseDTO.ReportDetailResponseDTO> getReportDetail(
             @Parameter(description = "신고 id") @PathVariable(name = "report-id") Integer reportId) {
 
+        Report report = adminReportService.getReport(reportId);
+
         return null;
     }
 

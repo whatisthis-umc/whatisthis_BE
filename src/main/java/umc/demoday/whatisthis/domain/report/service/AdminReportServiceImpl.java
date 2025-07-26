@@ -8,9 +8,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.report.Report;
+import umc.demoday.whatisthis.domain.report.code.ReportErrorCode;
 import umc.demoday.whatisthis.domain.report.enums.ReportStatus;
 import umc.demoday.whatisthis.domain.report.enums.RequestReportStatus;
 import umc.demoday.whatisthis.domain.report.repository.ReportRepository;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +45,7 @@ public class AdminReportServiceImpl implements AdminReportService {
 
     @Override
     public Report getReport(Integer reportId) {
-        return null;
+        return reportRepository.findById(reportId).orElseThrow(()-> new GeneralException(ReportErrorCode.REPORT_NOT_FOUND));
     }
 
     @Override

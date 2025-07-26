@@ -55,9 +55,9 @@ public class AdminReportResponseDTO {
         String type;
 
         Category category;
-        String title;
-        String nickname;
+        String postTitle;
         String commentContent;
+        String nickname;
         LocalDateTime reportedAt;
         ReportContent content;
         String description;
