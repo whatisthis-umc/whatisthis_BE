@@ -4,18 +4,14 @@ import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.util.List;
 
-public class GgulPostPreviewDTO implements PostPreviewDTO {
+public class ReportedCommentPreviewDTO implements PostPreviewDTO {
 
     Integer postId;
-    String category;
-    Category subCategories; //post 엔티티의 category
+    Category category;
     String title;
     String content;
     List<String> hashtags;
     List<String> images;
-    int likeCount;
-    int scrapCount;
-    int viewCount;
 
 
 }

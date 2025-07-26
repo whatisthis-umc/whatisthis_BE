@@ -31,7 +31,7 @@ public class AdminReportController {
             @Parameter(description = "상태 (전체, 미처리, 처리완료)") @RequestParam RequestReportStatus status,
             @Parameter(description = "검색 키워드 null 가능") @RequestParam(required = false) String keyword) {
 
-        Page<Report> reports = adminReportService.reportList(page, status, keyword);
+        Page<Report> reports = adminReportService.reportList(page-1, status, keyword);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,toReportListResponseDTO(reports));
     }
@@ -40,6 +40,7 @@ public class AdminReportController {
     @Operation(summary = "신고 내역 상세조회 API -by 남성현")
     public CustomResponse<AdminReportResponseDTO.ReportDetailResponseDTO> getReportDetail(
             @Parameter(description = "신고 id") @PathVariable(name = "report-id") Integer reportId) {
+
         return null;
     }
 
