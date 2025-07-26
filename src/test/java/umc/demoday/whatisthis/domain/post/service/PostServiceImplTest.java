@@ -258,5 +258,5 @@ class PostServiceImplTest {
         // then
         verify(postScrapRepository, times(1)).delete(mockScrap);
     }
-
+    
 }
