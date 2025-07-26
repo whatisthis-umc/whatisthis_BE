@@ -9,12 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.comment.repository.CommentRepository;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
+import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.code.PostErrorCode;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
+import umc.demoday.whatisthis.domain.post_image.PostImage;
+import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_like.PostLike;
 import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
@@ -30,6 +34,8 @@ public class CommunityPostServiceImpl implements CommunityPostService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
+    private final HashtagRepository hashtagRepository;
+    private final PostImageRepository postImageRepository;
 
     private void checkPageAndSize(Integer page, Integer size) {
         if (page < 0 || size <= 0) {
@@ -120,13 +126,22 @@ public class CommunityPostServiceImpl implements CommunityPostService {
         return commentRepository.findAllByPost(post,pageable);
     }
 
-    @Transactional
+    @Override
+    public List<Hashtag> getHashtagListByPost(Post post) {
+        return hashtagRepository.findAllByPostId(post.getId());
+    }
+
+    @Override
+    public List<PostImage> getPostImageListByPost(Post post) {
+        return postImageRepository.findAllByPostId(post.getId());
+    }
+
     @Override
     public void plusOneViewCount(Post post) {
         postRepository.increaseViewCount(post.getId());
     }
 
-    @Transactional
+
     @Override
     public void likePost(Post post, Member member) {
 
