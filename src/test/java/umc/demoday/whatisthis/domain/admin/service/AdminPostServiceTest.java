@@ -6,17 +6,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
+import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -171,5 +174,120 @@ class AdminPostServiceTest {
         verify(postRepository).findById(nonExistentPostId);
         // postRepository의 delete 메서드는 절대 호출되지 않았는지 확인
         verify(postRepository, never()).delete(any(Post.class));
+    }
+
+
+    @Mock
+    private PostImageRepository postImageRepository;
+
+
+    @Test
+    @DisplayName("게시글 수정 성공 - 모든 필드 업데이트")
+    void 게시글_수정_성공_전체() {
+        // given (테스트 데이터 준비)
+        Integer postId = 1;
+
+        // 1. 기존 Post 데이터 생성
+        Post existingPost = Post.builder()
+                .id(postId)
+                .title("오래된 제목")
+                .content("오래된 내용")
+                .category(Category.LIFE_ITEM)
+                .build();
+
+        // 연관관계 편의를 위해 기존 이미지 리스트 설정
+        existingPost.setPostImageList(new ArrayList<>(List.of(PostImage.builder().imageUrl("http://old.image/1").post(existingPost).build())));
+        existingPost.setUpdatedAt(LocalDateTime.now().minusDays(1));
+
+
+        // 2. 업데이트 요청 DTO 생성
+        List<String> newImageUrls = List.of("http://new.image/1", "http://new.image/2");
+
+        AdminPostReqDTO.updatePostReqDTO request = new AdminPostReqDTO.updatePostReqDTO(
+                "새로운 제목",
+                "새로운 내용",
+                Category.LIFE_TIP,
+                newImageUrls
+        );
+
+        // 3. Mock 객체 동작 정의
+        given(postRepository.findById(postId)).willReturn(Optional.of(existingPost));
+
+        // when (테스트할 메서드 호출)
+        AdminPostResDTO.updatePostResDTO result = adminPostService.updatePost(postId, request);
+
+        // then (결과 검증)
+        assertThat(result).isNotNull();
+        assertThat(result.getPostId()).isEqualTo(postId);
+        assertThat(result.getTitle()).isEqualTo("새로운 제목");
+        assertThat(result.getContent()).isEqualTo("새로운 내용");
+        assertThat(result.getCategory()).isEqualTo(Category.LIFE_TIP);
+        assertThat(result.getImageUrls()).hasSize(2);
+        assertThat(result.getImageUrls()).containsExactly("http://new.image/1", "http://new.image/2");
+
+
+        // Mock 객체 호출 검증
+        verify(postRepository).findById(postId);
+        verify(postImageRepository).deleteAllByPost(existingPost); // 기존 이미지 삭제 메서드 호출 확인
+        verify(postImageRepository).saveAll(any()); // 새 이미지 저장 메서드 호출 확인
+    }
+
+    @Test
+    @DisplayName("게시글 수정 성공 - 일부 필드(제목, 내용)만 업데이트")
+    void 게시글_수정_성공_부분() {
+        // given
+        Integer postId = 2;
+        Post existingPost = Post.builder()
+                .id(postId)
+                .title("원본 제목")
+                .content("원본 내용")
+                .category(Category.LIFE_ITEM) // 카테고리는 그대로 유지되어야 함
+                .build();
+        existingPost.setPostImageList(new ArrayList<>(List.of(PostImage.builder().imageUrl("http://keep.this/1").post(existingPost).build())));
+
+        // 제목과 내용만 업데이트하고, 이미지와 카테고리는 null로 보냄
+        AdminPostReqDTO.updatePostReqDTO request = new AdminPostReqDTO.updatePostReqDTO(
+                "수정된 제목",
+                "수정된 내용",
+                null, // 카테고리는 업데이트하지 않음
+                null  // 이미지도 업데이트하지 않음
+        );
+
+        given(postRepository.findById(postId)).willReturn(Optional.of(existingPost));
+
+        // when
+        AdminPostResDTO.updatePostResDTO result = adminPostService.updatePost(postId, request);
+
+        // then (결과 검증)
+        assertThat(result).isNotNull();
+        assertThat(result.getPostId()).isEqualTo(postId);
+        assertThat(result.getTitle()).isEqualTo("수정된 제목");
+        assertThat(result.getContent()).isEqualTo("수정된 내용");
+
+        verify(postRepository).findById(postId);
+        // request의 imageUrls가 null이므로 이미지 관련 repository 메서드는 호출되지 않아야 함
+        verify(postImageRepository, never()).deleteAllByPost(any(Post.class));
+        verify(postImageRepository, never()).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글 수정 시 예외 발생")
+    void 존재하지_않는_게시글_수정_실패() {
+        // given
+        Integer nonExistentPostId = 999;
+        AdminPostReqDTO.updatePostReqDTO request = new AdminPostReqDTO.updatePostReqDTO("아무거나", null, null, null);
+
+        given(postRepository.findById(nonExistentPostId)).willReturn(Optional.empty());
+
+        // when & then
+        GeneralException exception = assertThrows(GeneralException.class, () -> {
+            adminPostService.updatePost(nonExistentPostId, request);
+        });
+
+        assertThat(exception.getCode()).isEqualTo(GeneralErrorCode.NOT_FOUND_404);
+
+        // 게시글이 없으므로 이미지 관련 로직은 절대 실행되면 안 됨
+        verify(postImageRepository, never()).deleteAllByPost(any());
+        verify(postImageRepository, never()).saveAll(any());
     }
 }

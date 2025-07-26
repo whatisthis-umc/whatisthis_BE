@@ -28,6 +28,10 @@ public class AdminPostResDTO {
     @AllArgsConstructor
     public static class updatePostResDTO{
         Integer postId;
+        String title;
+        String content;
+        Category category;
+        List<String> imageUrls;
         LocalDateTime updatedAt;
     }
 }

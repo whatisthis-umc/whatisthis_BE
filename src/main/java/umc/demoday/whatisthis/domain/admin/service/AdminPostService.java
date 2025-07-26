@@ -34,7 +34,7 @@ public class AdminPostService {
 
         //Post.category 기준으로 DTO category(e. g. 생활 꿀팁) 설정
         Category category = Category.LIFE_ITEM;
-        if(post.getCategory().name().endsWith("_TIP"))
+        if (post.getCategory().name().endsWith("_TIP"))
             category = Category.LIFE_TIP;
 
         // 이미지 링크들
@@ -77,13 +77,13 @@ public class AdminPostService {
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
         // 존재하면 업데이트
-        if(request.getTitle() != null)
+        if (request.getTitle() != null)
             post.setTitle(request.getTitle());
 
-        if(request.getContent() != null)
+        if (request.getContent() != null)
             post.setContent(request.getContent());
 
-        if(request.getCategory() != null)
+        if (request.getCategory() != null)
             post.setCategory(request.getCategory());
 
         // 이미지 정보 업데이트
@@ -100,9 +100,18 @@ public class AdminPostService {
             // Post 엔티티에도 새로운 이미지 목록을 설정하여 상태를 동기화합니다.
             post.setPostImageList(newImages);
         }
+        // 업데이트된 이미지 URL 목록을 가져오기
+        List<String> updatedImageUrls = post.getPostImageList().stream()
+                .map(PostImage::getImageUrl)
+                .collect(Collectors.toList());
 
+        // 모든 필드를 채워서 반환
         return AdminPostResDTO.updatePostResDTO.builder()
                 .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .category(post.getCategory())
+                .imageUrls(updatedImageUrls)
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
