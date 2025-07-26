@@ -7,8 +7,12 @@ import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
+import umc.demoday.whatisthis.domain.post.service.PostService;
+import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
@@ -26,6 +30,7 @@ public class AdminPostService {
     private final PostRepository postRepository;
     private final PostScrapRepository postScrapRepository;
     private final PostImageRepository postImageRepository;
+    private final PostService postService;
 
 
     public AdminPostResDTO getPost(Integer postId) {
@@ -149,5 +154,28 @@ public class AdminPostService {
                 .category(newPost.getCategory())
                 .imageUrls(savedImageUrls)
                 .build();
+    }
+
+    public AdminPostResDTO.allPostResDTO getAllPosts(Category category, Integer page, Integer size) {
+        PostResponseDTO.GgulPostsByCategoryResponseDTO ggulPostsByCategoryResponseDTO = postService.getGgulPostsByCategory(category, SortBy.LATEST, page, size);  //나중에는 requestParam에 따라서 category에 해당하는 게시글만 찾는 것으로 수정
+
+        List<AdminPostResDTO.getAllPostResDTO> allPosts = ggulPostsByCategoryResponseDTO.getPosts().stream()
+                .map(post -> AdminPostResDTO.getAllPostResDTO.builder()
+                .postId(post.getPostId())
+                .title(post.getTitle())
+                .content(post.getSummary())
+                .category(category)
+                .createdAt(post.getCreatedAt())
+                .build())
+                .toList();
+
+        return AdminPostResDTO.allPostResDTO.builder()
+                .posts(allPosts)
+                .page(ggulPostsByCategoryResponseDTO.getPage())
+                .size(ggulPostsByCategoryResponseDTO.getSize())
+                .totalPages(ggulPostsByCategoryResponseDTO.getTotalPages())
+                .totalElements(ggulPostsByCategoryResponseDTO.getTotalElements())
+                .build();
+
     }
 }
