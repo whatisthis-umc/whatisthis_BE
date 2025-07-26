@@ -12,4 +12,6 @@ public interface PostImageRepository extends JpaRepository<PostImage, Integer> {
     PostImage findOneByPostId(Integer postId);
 
     List<PostImage> findAllByPost_IdIn(List<Integer> postIds);
+
+    void deleteAllByPost(Post post);
 }
