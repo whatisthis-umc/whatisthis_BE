@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.domain.admin.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -21,6 +22,7 @@ public class AdminPostService {
 
     private final PostRepository postRepository;
     private final PostScrapRepository postScrapRepository;
+
 
 
     public AdminPostResDTO getPost(Integer postId) {
@@ -51,5 +53,17 @@ public class AdminPostService {
                 .scrapCount(postScrapCount)
                 .imageUrls(imageUrls)
                 .build();
+    }
+
+    @Transactional
+    public Integer deletePost(Integer postId) {
+        // 삭제하려는 게시글이 존재하는지 먼저 확인
+        Post postToDelete = postRepository.findById(postId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+
+        //존재하면 삭제
+        postRepository.delete(postToDelete);
+
+        return postId;
     }
 }

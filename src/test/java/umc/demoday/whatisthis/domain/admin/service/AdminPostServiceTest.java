@@ -21,9 +21,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class) // Mockito 확장 기능을 사용합니다.
@@ -119,5 +122,54 @@ class AdminPostServiceTest {
 
         // postScrapRepository.countByPostId는 호출되지 않았는지 검증
         // verify(postScrapRepository, never()).countByPostId(anyInt());
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 성공")
+    void 게시글_삭제_성공() {
+        // given (테스트 데이터 준비)
+        Integer postId = 1;
+        Post existingPost = Post.builder().id(postId).build();
+
+        // postRepository.findById(1)가 호출되면 existingPost 객체를 Optional로 감싸서 반환
+        given(postRepository.findById(postId)).willReturn(Optional.of(existingPost));
+
+        // when (테스트할 메서드 호출 및 결과 검증)
+        // 예외가 발생하지 않아야 함
+        Integer deletedPostId = assertDoesNotThrow(() -> adminPostService.deletePost(postId));
+
+        // then (결과 검증)
+        assertThat(deletedPostId).isEqualTo(postId);
+
+        // Mock 객체가 예상대로 호출되었는지 검증
+        // postRepository의 findById가 1번 호출되었는지 확인
+        verify(postRepository).findById(postId);
+        // postRepository의 delete가 1번 호출되었는지 확인
+        verify(postRepository).delete(existingPost);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글 삭제 시 예외 발생")
+    void 존재하지_않는_게시글_삭제_실패() {
+        // given (테스트 데이터 준비)
+        Integer nonExistentPostId = 999;
+
+        // postRepository.findById(999)가 호출되면 빈 Optional을 반환하도록 설정
+        given(postRepository.findById(nonExistentPostId)).willReturn(Optional.empty());
+
+        // when & then (예외 발생 검증)
+        // adminPostService.deletePost(999)를 호출했을 때 GeneralException이 발생하는지 확인
+        GeneralException exception = assertThrows(GeneralException.class, () -> {
+            adminPostService.deletePost(nonExistentPostId);
+        });
+
+        // 발생한 예외의 에러 코드가 NOT_FOUND_404인지 확인
+        assertThat(exception.getCode()).isEqualTo(GeneralErrorCode.NOT_FOUND_404);
+
+        // Mock 객체가 예상대로 호출되었는지 검증
+        // postRepository의 findById가 1번 호출되었는지 확인
+        verify(postRepository).findById(nonExistentPostId);
+        // postRepository의 delete 메서드는 절대 호출되지 않았는지 확인
+        verify(postRepository, never()).delete(any(Post.class));
     }
 }
