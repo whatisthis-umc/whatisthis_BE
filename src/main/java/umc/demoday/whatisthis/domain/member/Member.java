@@ -4,6 +4,7 @@ package umc.demoday.whatisthis.domain.member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import umc.demoday.whatisthis.domain.profile_image.ProfileImage;
 
@@ -52,6 +53,7 @@ public class Member {
     private Boolean privacyAgreed;
 
     @Column(name = "is_best", nullable = false)
+    @ColumnDefault("false")
     private Boolean isBest;
 
     @Column(name = "last_login_at")
