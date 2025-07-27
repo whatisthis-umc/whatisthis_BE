@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import umc.demoday.whatisthis.domain.member.dto.member.FindIdReqDTO;
-import umc.demoday.whatisthis.domain.member.dto.member.FindIdResDTO;
-import umc.demoday.whatisthis.domain.member.dto.member.PasswordResetReqDTO;
-import umc.demoday.whatisthis.domain.member.dto.member.VerifyResetCodeReqDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.*;
 import umc.demoday.whatisthis.domain.member.service.email.PasswordResetService;
 import umc.demoday.whatisthis.domain.member.service.member.MemberQueryService;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
@@ -49,5 +46,14 @@ public class MemberFindController {
 
         passwordResetService.verifyResetCode(request.getFullEmail(), request.getCode());
         return CustomResponse.onSuccess(GeneralSuccessCode.EMAIL_AUTH_MATCHED, null);
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "비밀번호 재설정 API -by 이정준")
+    public CustomResponse<Void> resetPassword(
+            @RequestBody @Valid PasswordChangeReqDTO request) {
+
+        passwordResetService.resetPassword(request);
+        return CustomResponse.onSuccess(GeneralSuccessCode.PASSWORD_CHANGED, null);
     }
 }
