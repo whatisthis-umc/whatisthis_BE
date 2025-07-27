@@ -110,7 +110,7 @@ public class PostServiceImpl implements PostService {
 
         // 삭제하기
         postScrapRepository.delete(postScrap);
-
+    }
     @Override
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
         // 1. 정렬 기준(Sort) 객체 생성
