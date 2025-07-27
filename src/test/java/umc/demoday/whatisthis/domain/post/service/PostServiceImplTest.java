@@ -224,6 +224,48 @@ class PostServiceImplTest {
             verify(postScrapRepository, never()).save(any(PostScrap.class));
         }
 
+
+
+    @Test
+    @DisplayName("스크랩 삭제 성공")
+    void 스크랩_삭제_성공() {
+        // given
+        Integer scrapId = 100;
+        Integer memberId = 1;
+
+        // SecurityContext 설정
+        CustomUserDetails userDetails = new CustomUserDetails(memberId, "tester", "pw", new ArrayList<>());
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        SecurityContextHolder.setContext(securityContext);
+
+        // 소유자 정보가 일치하는 스크랩 객체 모킹
+        Member owner = Member.builder()
+                .id(memberId)
+                .memberId("user123")
+                .email("user@example.com")
+                .password("encoded_password")
+                .nickname("강력한닉네임")
+                .serviceAgreed(true)
+                .privacyAgreed(true)
+                .build();
+
+        Post post = Post.builder()
+                .id(2)
+                .build();
+
+        PostScrap mockScrap = new PostScrap(owner, post);
+
+        when(postScrapRepository.findById(scrapId)).thenReturn(Optional.of(mockScrap));
+
+        // when
+        postService.deleteScrap(scrapId);
+
+        // then
+        verify(postScrapRepository, times(1)).delete(mockScrap);
+    }
+    
+
     @Mock
     private PageConverter pageConverter;
 
@@ -419,4 +461,5 @@ class PostServiceImplTest {
         Assertions.assertThat(categoryListCaptor.getAllValues().get(0)).isEqualTo(expectedItemCategories);
         Assertions.assertThat(categoryListCaptor.getAllValues().get(1)).isEqualTo(expectedItemCategories);
     }
+
 }

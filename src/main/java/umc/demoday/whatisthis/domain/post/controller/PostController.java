@@ -39,6 +39,13 @@ public class PostController {
         postService.scrapPost(postId);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, null);
     }
+
+    @DeleteMapping("/{post-id}/scraps/{scrap-id}")
+    @Operation(summary = "스크랩 삭제 API - by 천성호")
+    public CustomResponse<Void> deleteScrap (@PathVariable("scrap-id") Integer scrapId){
+        postService.deleteScrap(scrapId);
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK, null);
+=======
   
     @GetMapping("/life-tips")
     @Operation(summary = "생활 꿀팁 카테고리 별 게시글 목록 조회 API - by 천성호" )

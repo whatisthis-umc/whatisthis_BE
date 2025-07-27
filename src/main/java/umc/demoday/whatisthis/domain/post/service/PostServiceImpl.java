@@ -92,6 +92,25 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+
+    public void deleteScrap(Integer scrapId) {
+        // 현재 멤버의 ID 찾기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer currentMemberId = userDetails.getId();
+
+        // PostScrap 찾기
+        PostScrap postScrap = postScrapRepository.findById(scrapId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+
+        // 스크랩 소유자가 현재 멤버인지 검증하기
+        if (!postScrap.getMember().getId().equals(currentMemberId)) {
+            throw new GeneralException(GeneralErrorCode.FORBIDDEN_403); // 권한 없음 예외
+        }
+
+        // 삭제하기
+        postScrapRepository.delete(postScrap);
+
     @Override
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
         // 1. 정렬 기준(Sort) 객체 생성
@@ -139,6 +158,7 @@ public class PostServiceImpl implements PostService {
 
         //  4. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
         return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, categoryList);
+
     }
 }
 
