@@ -31,6 +31,7 @@ public class SecurityConfig {
                                 "/members/login",
                                 "/members/reissue",
                                 "/members/find-id",
+                                "/members/reset-password/send-code",
 
                                 "/support/notices",
                                 "/support/notices/*",
