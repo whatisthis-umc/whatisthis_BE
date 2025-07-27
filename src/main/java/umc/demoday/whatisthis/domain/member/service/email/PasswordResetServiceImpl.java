@@ -6,7 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.member.dto.member.PasswordChangeReqDTO;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
@@ -21,6 +24,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final MemberRepository memberRepository;
     private final StringRedisTemplate redisTemplate;
     private final JavaMailSender mailSender;
+    private final PasswordEncoder passwordEncoder;
 
     private static final long EXPIRE_MINUTES = 3;
     private final EmailAuthService emailAuthService;
@@ -64,6 +68,27 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
 
         redisTemplate.opsForValue().set("PW_RESET_VERIFIED:" + email, "true", Duration.ofMinutes(5));
+    }
+
+    @Override
+    public void resetPassword(PasswordChangeReqDTO dto) {
+        String redisKey = "PW_RESET_VERIFIED:" + dto.getEmail();
+        String verified = redisTemplate.opsForValue().get(redisKey);
+        if (!"true".equals(verified)) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401);
+        }
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new GeneralException(GeneralErrorCode.PASSWORD_MISMATCH);
+        }
+
+        Member member = memberRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+
+        member.changePassword(passwordEncoder.encode(dto.getNewPassword()));
+        memberRepository.save(member);
+
+        redisTemplate.delete(redisKey);
     }
 
     private String buildKey(String email) {
