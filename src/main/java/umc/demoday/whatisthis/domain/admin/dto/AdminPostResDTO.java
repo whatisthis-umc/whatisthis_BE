@@ -34,4 +34,17 @@ public class AdminPostResDTO {
         List<String> imageUrls;
         LocalDateTime updatedAt;
     }
+
+    @Setter
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class createPostResDTO{
+        Integer postId;
+        String title;
+        String content;
+        Category category;
+        List<String> imageUrls;
+        LocalDateTime createdAt;
+    }
 }

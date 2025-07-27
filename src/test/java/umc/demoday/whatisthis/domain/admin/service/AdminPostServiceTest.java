@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.admin.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -289,5 +290,59 @@ class AdminPostServiceTest {
         // 게시글이 없으므로 이미지 관련 로직은 절대 실행되면 안 됨
         verify(postImageRepository, never()).deleteAllByPost(any());
         verify(postImageRepository, never()).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("게시글 생성 성공")
+    void 게시글_생성_성공() {
+        // given (테스트 데이터 준비)
+        // 생성 요청 DTO 준비
+        List<String> imageUrls = List.of("http://image.url/1", "http://image.url/2");
+        AdminPostReqDTO.createPostReqDTO request = new AdminPostReqDTO.createPostReqDTO(
+                "새 게시글 제목",
+                "새 게시글 내용",
+                Category.LIFE_TIP,
+                imageUrls
+        );
+
+        // postRepository.save()가 호출되면, ID가 부여된 Post 객체를 반환하도록 설정
+        // any(Post.class)를 통해 어떤 Post 객체가 들어오든 동일하게 동작
+
+        Post savedPost = Post.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .category(request.getCategory())
+                .build();
+        // PostImage 리스트도 설정해줌 (응답 DTO 생성 로직에 필요)
+        List<PostImage> savedImages = imageUrls.stream()
+                .map(url -> PostImage.builder().imageUrl(url).post(savedPost).build())
+                .toList();
+        savedPost.setPostImageList(savedImages);
+
+        given(postRepository.save(any())).willReturn(savedPost);
+
+
+        // when (테스트할 메서드 호출)
+        AdminPostResDTO.createPostResDTO result = adminPostService.createPost(request);
+
+
+        // then (결과 검증)
+        // ArgumentCaptor를 사용하여 save 메서드에 전달된 실제 Post 객체를 캡처
+        ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(postCaptor.capture());
+        Post capturedPost = postCaptor.getValue();
+
+        // 캡처된 Post 객체의 내용 검증
+        assertThat(capturedPost.getTitle()).isEqualTo("새 게시글 제목");
+        assertThat(capturedPost.getContent()).isEqualTo("새 게시글 내용");
+        assertThat(capturedPost.getCategory()).isEqualTo(Category.LIFE_TIP);
+        assertThat(capturedPost.getPostImageList()).hasSize(2);
+        assertThat(capturedPost.getPostImageList().get(0).getImageUrl()).isEqualTo("http://image.url/1");
+
+        // 반환된 응답 DTO의 내용 검증
+        assertThat(result).isNotNull();
+        assertThat(result.getTitle()).isEqualTo("새 게시글 제목");
+        assertThat(result.getImageUrls()).hasSize(2);
+        assertThat(result.getImageUrls().get(0)).isEqualTo("http://image.url/1");
     }
 }

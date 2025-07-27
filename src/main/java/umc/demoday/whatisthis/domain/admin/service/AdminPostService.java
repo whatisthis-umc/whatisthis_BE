@@ -115,4 +115,39 @@ public class AdminPostService {
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
+
+
+    @Transactional
+    public AdminPostResDTO.createPostResDTO createPost(AdminPostReqDTO.createPostReqDTO request) {
+
+        Post newPost = Post.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .category(request.getCategory())
+                .build();
+
+        //일단 게시글 생성
+        postRepository.save(newPost);
+
+        // ImageUrls -> List<PostImage> 타입으로 변경
+        List<PostImage> images = request.getImageUrls().stream()
+                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(newPost).build())
+                .toList();
+
+        // PostImageList setting
+        newPost.setPostImageList(images);
+
+        //response 용 savedImageUrls 생성
+        List<String> savedImageUrls = newPost.getPostImageList().stream()
+                .map(PostImage::getImageUrl)
+                .toList();
+
+        return AdminPostResDTO.createPostResDTO.builder()
+                .postId(newPost.getId())
+                .title(newPost.getTitle())
+                .content(newPost.getContent())
+                .category(newPost.getCategory())
+                .imageUrls(savedImageUrls)
+                .build();
+    }
 }
