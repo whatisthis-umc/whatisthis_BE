@@ -47,4 +47,29 @@ public class AdminPostResDTO {
         List<String> imageUrls;
         LocalDateTime createdAt;
     }
+
+    @Setter
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class getAllPostResDTO{
+        Integer postId;
+        String title;
+        String content;
+        Category category;
+        LocalDateTime createdAt;
+    }
+
+    @Setter
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class allPostResDTO{
+        List<getAllPostResDTO> posts;
+        Integer page;
+        Integer size;
+        Integer totalPages;
+        Long totalElements;
+    }
+
 }

@@ -32,4 +32,5 @@ public class AdminPostReqDTO {
         Category category;
         List<String> imageUrls;
     }
+
 }

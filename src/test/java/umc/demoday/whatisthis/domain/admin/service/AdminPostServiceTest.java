@@ -11,8 +11,11 @@ import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
+import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
+import umc.demoday.whatisthis.domain.post.service.PostService;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
@@ -27,8 +30,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -344,5 +346,61 @@ class AdminPostServiceTest {
         assertThat(result.getTitle()).isEqualTo("새 게시글 제목");
         assertThat(result.getImageUrls()).hasSize(2);
         assertThat(result.getImageUrls().get(0)).isEqualTo("http://image.url/1");
+    }
+
+    @Mock
+    private PostService postService;
+
+
+    @Test
+    @DisplayName("전체 게시글 조회 및 Admin DTO 변환 성공")
+    void 전체_게시글_조회() {
+        // GIVEN: 테스트를 위한 사전 데이터 준비
+        Category testCategory = Category.LIFE_TIP;
+        int page = 0;
+        int size = 4;
+
+        // 1. postService.getGgulPostsByCategory가 반환할 가짜 응답 데이터 생성
+        List<PostResponseDTO.GgulPostSummaryDTO> postSummaries = List.of(
+                new PostResponseDTO.GgulPostSummaryDTO(
+                        101, "thumb1.url", "테스트 제목1", "테스트 요약1", null, 50, 10, 5, LocalDateTime.now()
+                ),
+                new PostResponseDTO.GgulPostSummaryDTO(
+                        102, "thumb2.url", "테스트 제목2", "테스트 요약2", null, 100, 20, 15, LocalDateTime.now().minusDays(1)
+                )
+        );
+
+        PostResponseDTO.GgulPostsByCategoryResponseDTO mockServiceResponse = new PostResponseDTO.GgulPostsByCategoryResponseDTO(
+                testCategory, SortBy.LATEST, page, size, 2L, 1, postSummaries
+        );
+
+        // 2. Mockito 설정: postService의 특정 메서드가 호출되면 위에서 만든 가짜 데이터를 반환하도록 설정
+        given(postService.getGgulPostsByCategory(eq(testCategory), any(SortBy.class), eq(page), eq(size)))
+                .willReturn(mockServiceResponse);
+
+
+        // WHEN: 테스트할 메서드 호출
+        AdminPostResDTO.allPostResDTO result = adminPostService.getAllPosts(testCategory, page, size);
+
+
+        // THEN: 결과 검증
+        assertThat(result).isNotNull(); // 결과 객체가 null이 아닌지 확인
+
+        // 페이지네이션 정보가 올바르게 전달되었는지 확인
+        assertThat(result.getPage()).isEqualTo(page);
+        assertThat(result.getSize()).isEqualTo(size);
+        assertThat(result.getTotalPages()).isEqualTo(1);
+        assertThat(result.getTotalElements()).isEqualTo(2L);
+        assertThat(result.getPosts()).hasSize(2); // 게시글 목록의 크기 확인
+
+        // DTO 필드 매핑이 올바르게 되었는지 첫 번째 게시글을 샘플로 확인
+        AdminPostResDTO.getAllPostResDTO firstPost = result.getPosts().get(0);
+        assertThat(firstPost.getPostId()).isEqualTo(101);
+        assertThat(firstPost.getTitle()).isEqualTo("테스트 제목1");
+        assertThat(firstPost.getContent()).isEqualTo("테스트 요약1"); // summary -> content 매핑 확인
+        assertThat(firstPost.getCategory()).isEqualTo(testCategory); // 입력된 category가 잘 설정되었는지 확인
+
+        // postService의 메서드가 정확히 1번 호출되었는지 검증
+        verify(postService).getGgulPostsByCategory(eq(testCategory), any(SortBy.class), eq(page), eq(size));
     }
 }
