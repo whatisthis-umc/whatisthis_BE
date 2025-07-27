@@ -85,6 +85,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         Member member = memberRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
 
+        if (passwordEncoder.matches(dto.getNewPassword(), member.getPassword())) {
+            throw new GeneralException(GeneralErrorCode.PASSWORD_SAME_AS_BEFORE);
+        }
+
         member.changePassword(passwordEncoder.encode(dto.getNewPassword()));
         memberRepository.save(member);
 

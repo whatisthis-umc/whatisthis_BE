@@ -22,6 +22,7 @@ public enum GeneralErrorCode implements BaseErrorCode {
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER4010", "비밀번호가 일치하지 않습니다."),
     MEMBER_NOT_FOUND_BY_EMAIL(HttpStatus.NOT_FOUND, "MEMBER4041", "해당 이메일로 가입된 회원이 존재하지 않습니다"),
     PASSWORD_MISMATCH(HttpStatus.UNAUTHORIZED, "MEMBER4042", "비밀번호가 일치하지 않습니다."),
+    PASSWORD_SAME_AS_BEFORE(HttpStatus.BAD_REQUEST, "MEMBER4043", "기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다."),
 
 
     // 관리자 관련 에러
