@@ -11,6 +11,7 @@ import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -22,6 +23,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final JavaMailSender mailSender;
 
     private static final long EXPIRE_MINUTES = 3;
+    private final EmailAuthService emailAuthService;
 
     @Override
     public void sendResetCode(String memberId, String email) {
@@ -52,6 +54,18 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
     }
 
+    @Override
+    public void verifyResetCode(String email, String code) {
+        String redisKey = buildKey(email);
+        String savedCode = redisTemplate.opsForValue().get(redisKey);
+
+        if (savedCode == null || !savedCode.trim().equals(code.trim())) {
+            throw new GeneralException(GeneralErrorCode.EMAIL_AUTH_CODE_MISMATCH);
+        }
+
+        redisTemplate.opsForValue().set("PW_RESET_VERIFIED:" + email, "true", Duration.ofMinutes(5));
+    }
+
     private String buildKey(String email) {
         return "PW_RESET:" + email;
     }
@@ -60,5 +74,4 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         int code = (int) ((Math.random() * 900_000) + 100_000);
         return String.valueOf(code);
     }
-
 }
