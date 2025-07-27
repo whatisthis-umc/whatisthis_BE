@@ -15,8 +15,7 @@ import umc.demoday.whatisthis.domain.report.service.AdminReportService;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 
-import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportDetailResponseDTO;
-import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportListResponseDTO;
+import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,7 +51,11 @@ public class AdminReportController {
     public CustomResponse<AdminReportResponseDTO.ProcessResponseDTO> getReportDetail(
             @Parameter(description = "신고 id") @PathVariable(name = "report-id") Integer reportId,
             @Valid @RequestBody AdminReportRequestDTO.ProcessRequestDTO request) {
-        return null;
+
+        Report report = adminReportService.getReport(reportId);
+        adminReportService.processReport(report, request.getDelete());
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK,toProcessResponseDTO(report));
     }
 
 

@@ -3,8 +3,10 @@ package umc.demoday.whatisthis.domain.report.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.report.Report;
 import umc.demoday.whatisthis.domain.report.enums.ReportStatus;
 
@@ -39,4 +41,9 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     Page<Report> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     Page<Report> findByStatus(ReportStatus status, Pageable pageable);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Report r SET r.post = null WHERE r.post.id = :postId")
+    void detachAllByPostId(@Param("postId") Integer postId);
 }

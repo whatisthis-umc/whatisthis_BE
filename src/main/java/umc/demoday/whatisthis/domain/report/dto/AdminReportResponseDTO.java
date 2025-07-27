@@ -74,7 +74,6 @@ public class AdminReportResponseDTO {
 
         Integer reportId;
         ReportStatus status;
-        Boolean isDeleted;
 
     }
 

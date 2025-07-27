@@ -189,4 +189,12 @@ public class ReportConverter {
                 .commentContent(report.getComment().getContent())
                 .build();
     }
+
+    public static AdminReportResponseDTO.ProcessResponseDTO toProcessResponseDTO(Report report) {
+
+        return AdminReportResponseDTO.ProcessResponseDTO.builder()
+                .reportId(report.getId())
+                .status(report.getStatus())
+                .build();
+    }
 }
