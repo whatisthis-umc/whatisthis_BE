@@ -20,6 +20,8 @@ public enum GeneralErrorCode implements BaseErrorCode {
     ALREADY_EXIST_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용 중인 닉네임입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4040", "존재하지 않는 회원입니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER4010", "비밀번호가 일치하지 않습니다."),
+    MEMBER_NOT_FOUND_BY_EMAIL(HttpStatus.NOT_FOUND, "MEMBER4041", "해당 이메일로 가입된 회원이 존재하지 않습니다"),
+
 
 
     // 관리자 관련 에러
