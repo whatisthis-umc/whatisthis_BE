@@ -46,4 +46,9 @@ public class Inquiry {
 
     @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL)
     private List<Answer> answers = new ArrayList<>();
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

@@ -37,7 +37,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/posts/**"
+                                "/posts/**",
+
+                                "/admin/inquiries"//추후 삭제 예정
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/members/**").hasRole("USER")
