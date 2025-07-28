@@ -50,4 +50,6 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {// 계정이 활성화(사용 가능) 상태인지 리턴 (true: 활성화)
         return true;
     }
+
+
 }
