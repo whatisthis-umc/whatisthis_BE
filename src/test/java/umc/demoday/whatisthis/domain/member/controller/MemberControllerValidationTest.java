@@ -64,7 +64,7 @@ public class MemberControllerValidationTest {
     @DisplayName("회원가입 실패 - username 특수문자 포함")
     void signup_fail_invalidUsername() throws Exception {
         MemberReqDTO.JoinRequestDTO requestDTO = createValidRequest();
-        requestDTO.setUsername("user@name");
+        requestDTO.setMemberId("user@name");
 
         mockMvc.perform(
                         post("/api/v0/members/signup")
@@ -164,7 +164,7 @@ public class MemberControllerValidationTest {
         MemberReqDTO.JoinRequestDTO requestDTO = new MemberReqDTO.JoinRequestDTO();
         requestDTO.setEmail("test@email.com");
         requestDTO.setEmailAuthCode("123456");
-        requestDTO.setUsername("testuser");
+        requestDTO.setMemberId("testuser");
         requestDTO.setPassword("password12");
         requestDTO.setPasswordCheck("password12");
         requestDTO.setNickname("nickname");

@@ -56,7 +56,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
 
         // 아이디 중복 검사
-        if (memberRepository.existsByMemberId(dto.getUsername())) {
+        if (memberRepository.existsByMemberId(dto.getMemberId())) {
             throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_MEMBER_ID);
         }
 

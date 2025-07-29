@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.domain.member.dto.member;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +26,7 @@ public class MemberReqDTO {
         // 아이디 유효성 검사
         @NotBlank
         @Pattern(regexp = "^[a-zA-Z0-9가-힣]+$", message = "특수문자는 사용할 수 없습니다.")
-        private String username;
+        private String memberId;
 
         // 비밀번호 유효성 검사
         @NotBlank

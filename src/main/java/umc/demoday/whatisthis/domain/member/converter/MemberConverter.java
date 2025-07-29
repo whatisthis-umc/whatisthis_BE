@@ -11,7 +11,7 @@ public class MemberConverter {
     public static Member toMember(MemberReqDTO.JoinRequestDTO dto, PasswordEncoder encoder) {
         return Member.builder()
                 .email(dto.getEmail())
-                .memberId(dto.getUsername())
+                .memberId(dto.getMemberId())
                 .password(encoder.encode(dto.getPassword()))
                 .nickname(dto.getNickname())
                 .serviceAgreed(dto.getServiceAgreed())
