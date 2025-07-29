@@ -60,7 +60,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/posts/**"
+                                "/posts/**",
+
+                                "/upload" // S3 테스트 용, 추후 삭제(?)
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/members/**").hasRole("USER")
