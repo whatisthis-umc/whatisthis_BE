@@ -24,11 +24,14 @@ public class S3TestController {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Value("${cloud.aws.region.static}")
+    private String region;
+
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
-            String fileUrl = "https://" + bucket + "/test/" + fileName;
+            String fileUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/test/" + fileName;
 
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType(file.getContentType());
