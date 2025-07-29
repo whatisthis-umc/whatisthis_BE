@@ -78,4 +78,8 @@ public class Member {
             this.isBest = false;
         }
     }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }
