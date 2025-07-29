@@ -27,7 +27,7 @@ public class MemberAuthServiceImpl implements MemberAuthService {
     @Override
     public LoginResDTO login(LoginReqDTO request) {
 
-        Member member = memberRepository.findByMemberId(request.getUsername())
+        Member member = memberRepository.findByMemberId(request.getMemberId())
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
