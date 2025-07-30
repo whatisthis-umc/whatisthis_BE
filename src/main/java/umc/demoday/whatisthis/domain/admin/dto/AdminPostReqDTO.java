@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,9 @@ public class AdminPostReqDTO {
         String title;
         String content;
         Category category;
+        Category subCategory;
         List<String> imageUrls;
+        List<String> hashtags;
     }
 
     @Getter
@@ -30,7 +33,9 @@ public class AdminPostReqDTO {
         String title;
         String content;
         Category category;
+        Category subCategory;
         List<String> imageUrls;
+        List<String> hashtags;
     }
 
 }

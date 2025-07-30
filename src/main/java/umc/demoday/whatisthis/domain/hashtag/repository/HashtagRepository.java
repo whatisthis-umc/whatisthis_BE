@@ -10,4 +10,6 @@ import java.util.List;
 public interface HashtagRepository extends JpaRepository<Hashtag, Integer> {
     List<Hashtag> findAllByPostId(Integer postId);
     List<Hashtag> findAllByPost_IdIn(List<Integer> postIds);
+
+    void deleteAllByPost(Post post);
 }
