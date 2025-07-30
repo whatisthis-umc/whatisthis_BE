@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.domain.admin.dto;
 
 import lombok.*;
 import umc.demoday.whatisthis.domain.admin.Admin;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ public class AdminPostResDTO {
     String title;
     String content;
     Category category;
+    Category subCategory;
     String nickname;
     LocalDateTime createdAt;
     Integer viewCount;
@@ -32,6 +34,7 @@ public class AdminPostResDTO {
         String content;
         Category category;
         List<String> imageUrls;
+        List<String> hashtags;
         LocalDateTime updatedAt;
     }
 
@@ -44,7 +47,9 @@ public class AdminPostResDTO {
         String title;
         String content;
         Category category;
+        Category subCategory;
         List<String> imageUrls;
+        List<String> hashtags;
         LocalDateTime createdAt;
     }
 
@@ -57,6 +62,7 @@ public class AdminPostResDTO {
         String title;
         String content;
         Category category;
+        Category subCategory;
         LocalDateTime createdAt;
     }
 

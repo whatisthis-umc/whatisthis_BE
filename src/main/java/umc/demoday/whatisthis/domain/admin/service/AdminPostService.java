@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
+import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
@@ -30,6 +31,7 @@ public class AdminPostService {
     private final PostRepository postRepository;
     private final PostScrapRepository postScrapRepository;
     private final PostImageRepository postImageRepository;
+    private final HashtagRepository hashtagRepository;
     private final PostService postService;
 
 
@@ -55,6 +57,7 @@ public class AdminPostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(category)
+                .subCategory(post.getCategory())
                 .nickname(post.getMember().getNickname())
                 .createdAt(post.getCreatedAt())
                 .viewCount(post.getViewCount())
@@ -88,8 +91,8 @@ public class AdminPostService {
         if (request.getContent() != null)
             post.setContent(request.getContent());
 
-        if (request.getCategory() != null)
-            post.setCategory(request.getCategory());
+        if (request.getSubCategory() != null)
+            post.setCategory(request.getSubCategory());
 
         // 이미지 정보 업데이트
         if (request.getImageUrls() != null) {
@@ -110,6 +113,28 @@ public class AdminPostService {
                 .map(PostImage::getImageUrl)
                 .collect(Collectors.toList());
 
+
+        // 해시태그 정보 업데이트
+        if (request.getHashtags() != null)
+        {
+            // 기존에 연관된 해시태그 모두 삭제
+            hashtagRepository.deleteAllByPost(post);
+
+            // 새로운 해시태그 목록으로 Hashtag 객체를 생성하고 저장.
+            List<Hashtag> newHashtags = request.getHashtags().stream()
+                    .map(hashtag -> Hashtag.builder().content(hashtag).post(post).build())
+                    .toList();
+            hashtagRepository.saveAll(newHashtags);
+
+            // Post 엔티티에도 새로운 해시태그 목록을 설정하여 상태를 동기화합니다.
+            post.setHashtagList(newHashtags);
+        }
+
+        // 업데이트된 해시태그 목록을 가져오기
+        List<String> updatedHashtags = post.getHashtagList().stream()
+                .map(Hashtag::getContent)
+                .toList();
+
         // 모든 필드를 채워서 반환
         return AdminPostResDTO.updatePostResDTO.builder()
                 .postId(post.getId())
@@ -117,6 +142,7 @@ public class AdminPostService {
                 .content(post.getContent())
                 .category(post.getCategory())
                 .imageUrls(updatedImageUrls)
+                .hashtags(updatedHashtags)
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
@@ -128,8 +154,17 @@ public class AdminPostService {
         Post newPost = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
-                .category(request.getCategory())
+                .category(request.getSubCategory())
+                .likeCount(0)
+                .viewCount(0)
                 .build();
+
+        // 카테고리 지정 잘했는지 확인
+        if(request.getSubCategory().toString().endsWith("_TIP") && !request.getCategory().toString().equals("LIFE_TIP"))
+            throw new IllegalStateException("올바른 카테고리가 아닙니다.");
+
+        if(request.getSubCategory().toString().endsWith("_TEM") && !request.getCategory().toString().equals("LIFE_TEM"))
+            throw new IllegalStateException("올바른 카테고리가 아닙니다.");
 
         //일단 게시글 생성
         postRepository.save(newPost);
@@ -147,27 +182,49 @@ public class AdminPostService {
                 .map(PostImage::getImageUrl)
                 .toList();
 
+        // Hashtag -> List<Hashtag> 타입으로 변경
+        List<Hashtag> hashtags = request.getHashtags().stream()
+                .map(hashtag -> Hashtag.builder().content(hashtag).post(newPost).build())
+                .toList();
+
+        // HashTags setting
+        newPost.setHashtagList(hashtags);
+
+        //response 용 savedHashtags 생성
+        List<String> savedHashtags = newPost.getHashtagList().stream()
+                .map(Hashtag::getContent)
+                .toList();
+
         return AdminPostResDTO.createPostResDTO.builder()
                 .postId(newPost.getId())
                 .title(newPost.getTitle())
                 .content(newPost.getContent())
-                .category(newPost.getCategory())
+                .category(request.getCategory())
+                .subCategory(newPost.getCategory())
                 .imageUrls(savedImageUrls)
+                .hashtags(savedHashtags)
                 .build();
     }
 
     public AdminPostResDTO.allPostResDTO getAllPosts(Category category, Integer page, Integer size) {
         PostResponseDTO.GgulPostsByCategoryResponseDTO ggulPostsByCategoryResponseDTO = postService.getGgulPostsByCategory(category, SortBy.LATEST, page, size);  //나중에는 requestParam에 따라서 category에 해당하는 게시글만 찾는 것으로 수정
 
+        Category mainCategory;
+        if(category.toString().endsWith("_TEM"))
+            mainCategory = Category.LIFE_ITEM;
+        else {
+            mainCategory = Category.LIFE_TIP;
+        }
+
         List<AdminPostResDTO.getAllPostResDTO> allPosts = ggulPostsByCategoryResponseDTO.getPosts().stream()
                 .map(post -> AdminPostResDTO.getAllPostResDTO.builder()
-                .postId(post.getPostId())
-                .title(post.getTitle())
-                .content(post.getSummary())
-                .category(category)
-                .createdAt(post.getCreatedAt())
-                .build())
-                .toList();
+                    .postId(post.getPostId())
+                    .title(post.getTitle())
+                    .content(post.getSummary())
+                    .category(mainCategory).subCategory(category)
+                    .createdAt(post.getCreatedAt())
+                    .build())
+                    .toList();
 
         return AdminPostResDTO.allPostResDTO.builder()
                 .posts(allPosts)
