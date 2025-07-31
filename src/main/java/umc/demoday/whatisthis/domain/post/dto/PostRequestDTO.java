@@ -28,7 +28,7 @@ public class PostRequestDTO {
         @Size(max = 3000, message = "본문은 3000자 이내로 작성해야합니다.")
         String content;
 
-        List<String> imageUrls; // 추후 삭제해도 될듯
+        //List<String> imageUrls; // 추후 삭제해도 될듯
 
         List<String> hashtags;
     }
