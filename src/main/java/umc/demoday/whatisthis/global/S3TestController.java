@@ -2,14 +2,15 @@ package umc.demoday.whatisthis.global;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,8 +28,12 @@ public class S3TestController {
     @Value("${cloud.aws.region.static}")
     private String region;
 
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    @Operation(summary = "S3 이미지 업로드 by-윤영석", description = "multipart/form-data 형식의 파일을 업로드합니다.")
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadFile(
+            @Parameter(description = "업로드할 이미지 파일", required = true, content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
+            @RequestPart("file") MultipartFile file) {
+
         try {
             String fileName = file.getOriginalFilename();
             String fileUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/test/" + fileName;
