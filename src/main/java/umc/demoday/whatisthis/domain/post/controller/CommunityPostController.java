@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.comment.converter.CommentConverter;
 import umc.demoday.whatisthis.domain.comment.dto.CommentRequestDTO;
@@ -30,7 +32,9 @@ import umc.demoday.whatisthis.domain.report.dto.ReportResponseDTO;
 import umc.demoday.whatisthis.domain.report.service.ReportService;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
+import umc.demoday.whatisthis.global.service.S3Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,6 +52,7 @@ public class CommunityPostController {
     private final MemberCommandService memberCommandService;
     private final CommentService commentService;
     private final ReportService reportService;
+    private final S3Service s3Service;
 
     @GetMapping("/communities")
     @Operation(summary = "커뮤니티 페이지 조회 API (전체) -by 남성현")
@@ -167,15 +172,22 @@ public class CommunityPostController {
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,toCommunityPostPreviewListDTO(postList));
     }
 
-    @PostMapping
-    @Operation(summary = "커뮤니티 글 작성 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
-    public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost
-            (@Valid @RequestBody PostRequestDTO.NewPostRequestDTO request,
-             @AuthenticationPrincipal Member loginUser) {
+    @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "커뮤니티 글 작성 API -by 남성현, 윤영석", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost(
+            @RequestPart("request") @Valid PostRequestDTO.NewPostRequestDTO request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @AuthenticationPrincipal Member loginUser) {
 
-        Post newPost = communityPostService.insertNewPost(toNewPost(request, loginUser));
+        // S3에 이미지 업로드
+        List<String> imageUrls = (images != null && !images.isEmpty())
+                ? s3Service.uploadFiles(images, "post")
+                : Collections.emptyList();
 
-        return CustomResponse.onSuccess(GeneralSuccessCode.CREATED,toNewPostDTO(newPost));
+        // 게시글 + 이미지 URL 저장
+        Post newPost = communityPostService.insertNewPost(request, imageUrls, loginUser);
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.CREATED, toNewPostDTO(newPost));
     }
 
     @GetMapping("/communities/{post-id}")

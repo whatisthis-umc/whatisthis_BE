@@ -5,6 +5,7 @@ import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
@@ -17,7 +18,7 @@ public interface CommunityPostService {
     Page<Post> getBestPosts(Integer page, Integer size);
     Page<Post> getAllPostsByCategory(Integer page, Integer size, SortBy sort, Category category);
 
-    Post insertNewPost (Post post);
+    Post insertNewPost (PostRequestDTO.NewPostRequestDTO request, List<String> imageUrls, Member member);
 
     Post getPost(Integer id);
     Page<Comment> getCommentListByPost(Integer page, Integer size, SortBy sort, Post post);
