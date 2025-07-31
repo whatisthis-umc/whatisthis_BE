@@ -14,6 +14,7 @@ import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.code.PostErrorCode;
+import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
@@ -25,6 +26,7 @@ import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -100,8 +102,40 @@ public class CommunityPostServiceImpl implements CommunityPostService {
     }
 
     @Override
-    public Post insertNewPost(Post post) {
+    public Post insertNewPost(PostRequestDTO.NewPostRequestDTO request, List<String> imageUrls, Member member) {
 
+        Post post = Post.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .category(request.getCategory())
+                .member(member)
+                .likeCount(0)
+                .viewCount(0)
+                .build();
+
+        // PostImage 리스트 생성 후 Post에 추가
+        List<PostImage> postImages = imageUrls.stream()
+                .map(url -> PostImage.builder()
+                        .imageUrl(url)
+                        .post(post)  // savedPost가 아니라 post로 세팅! (아직 저장 전이라 post 객체를 그대로 사용)
+                        .build())
+                .collect(Collectors.toList());
+
+        // 해시태그 리스트 생성 후 Post에 추가
+        if (request.getHashtags() != null) {
+            List<Hashtag> hashtags = request.getHashtags().stream()
+                    .map(content -> Hashtag.builder()
+                            .content(content)
+                            .post(post)
+                            .build())
+                    .collect(Collectors.toList());
+            post.getHashtagList().addAll(hashtags);
+        }
+
+
+        post.getPostImageList().addAll(postImages);
+
+        // Post 저장 시 cascade 옵션으로 PostImage도 함께 저장됨
         return postRepository.save(post);
     }
 
