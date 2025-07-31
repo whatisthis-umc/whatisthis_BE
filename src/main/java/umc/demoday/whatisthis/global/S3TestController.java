@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping
@@ -30,24 +33,30 @@ public class S3TestController {
 
     @Operation(summary = "S3 이미지 업로드 by-윤영석", description = "multipart/form-data 형식의 파일을 업로드합니다.")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadFile(
-            @Parameter(description = "업로드할 이미지 파일", required = true, content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
-            @RequestPart("file") MultipartFile file) {
+    public ResponseEntity<List<String>> uploadFiles(
+            @RequestPart("files") List<MultipartFile> files) {
 
-        try {
-            String fileName = file.getOriginalFilename();
-            String fileUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/test/" + fileName;
+        List<String> fileUrls = new ArrayList<>();
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(file.getSize());
+        for (MultipartFile file : files) {
+            try {
+                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                String fileUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/test/" + fileName;
 
-            amazonS3Client.putObject(bucket, "test/" + fileName, file.getInputStream(), metadata);
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentType(file.getContentType());
+                metadata.setContentLength(file.getSize());
 
-            return ResponseEntity.ok(fileUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                amazonS3Client.putObject(bucket, "test/" + fileName, file.getInputStream(), metadata);
+
+                fileUrls.add(fileUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
         }
+
+        return ResponseEntity.ok(fileUrls);
     }
+
 }
