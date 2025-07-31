@@ -34,7 +34,10 @@ public enum GeneralErrorCode implements BaseErrorCode {
     EMAIL_AUTH_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "EMAIL4000", "인증 코드 번호가 일치하지 않습니다."),
 
     // 약관 관련 에러
-    TERMS_REQUIRED(HttpStatus.BAD_REQUEST, "TERMS4000", "필수 항목에 체크해주세요.");
+    TERMS_REQUIRED(HttpStatus.BAD_REQUEST, "TERMS4000", "필수 항목에 체크해주세요."),
+
+    // 이미지 업로드 에러
+    IMAGE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE5000", "이미지 업로드에 실패했습니다.")
     ;
 
     private final HttpStatus httpStatus;

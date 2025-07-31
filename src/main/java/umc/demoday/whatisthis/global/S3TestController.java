@@ -12,11 +12,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode.IMAGE_UPLOAD_ERROR;
 
 @RestController
 @RequestMapping
@@ -33,7 +36,7 @@ public class S3TestController {
 
     @Operation(summary = "S3 이미지 업로드 by-윤영석", description = "multipart/form-data 형식의 파일을 업로드합니다.")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<String>> uploadFiles(
+    public CustomResponse<List<String>> uploadFiles(
             @RequestPart("files") List<MultipartFile> files) {
 
         List<String> fileUrls = new ArrayList<>();
@@ -52,11 +55,12 @@ public class S3TestController {
                 fileUrls.add(fileUrl);
             } catch (IOException e) {
                 e.printStackTrace();
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                return CustomResponse.onFailure("IMAGE_UPLOAD_ERROR", "이미지 업로드에 실패했습니다.");
+
             }
         }
 
-        return ResponseEntity.ok(fileUrls);
+        return CustomResponse.ok(fileUrls);
     }
 
 }
