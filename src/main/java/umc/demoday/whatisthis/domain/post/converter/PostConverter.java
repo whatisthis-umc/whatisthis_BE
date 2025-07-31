@@ -64,12 +64,12 @@ public class PostConverter {
                 .member(loginMember)
                 .build();
 
-        List<PostImage> postImages = request.getImageUrls().stream()
-                .map(url -> PostImage.builder()
-                        .imageUrl(url)
-                        .post(post)
-                        .build())
-                .collect(Collectors.toList());
+//        List<PostImage> postImages = request.getImageUrls().stream()
+//                .map(url -> PostImage.builder()
+//                        .imageUrl(url)
+//                        .post(post)
+//                        .build())
+//                .collect(Collectors.toList());
 
         List<Hashtag> hashtags = request.getHashtags().stream()
                         .map(hashtag -> Hashtag.builder()
@@ -78,7 +78,7 @@ public class PostConverter {
                                 .build())
                 .collect(Collectors.toList());
 
-        post.setPostImageList(postImages);
+        // post.setPostImageList(postImages);
         post.setHashtagList(hashtags);
 
         return post;
