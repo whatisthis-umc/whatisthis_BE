@@ -2,9 +2,11 @@ package umc.demoday.whatisthis.domain.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.MyPageInquiryResponseDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MyPageAccountDTO;
 import umc.demoday.whatisthis.domain.post.dto.MyPagePostResponseDTO;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 
@@ -52,6 +54,15 @@ public class MyPageController {
 
     @GetMapping("/account")
     @Operation(summary = "마이페이지 계정 관리 페이지 조회 API -by 남성현")
-    public CustomResponse
+    public CustomResponse<MyPageAccountDTO.MyPageAccountResponseDTO> getMyPageAccount() {
+        return null;
+    }
+
+    @PatchMapping("/account")
+    @Operation(summary = "마이페이지 계정 관리 페이지 수정 API -by 남성현")
+    public CustomResponse<MyPageAccountDTO.MyPageAccountResponseDTO> patchMyPageAccount
+            (@Valid @RequestBody MyPageAccountDTO.MyPageAccountRequestDTO request) {
+        return null;
+    }
 
 }
