@@ -44,8 +44,8 @@ public class Inquiry {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL)
-    private List<Answer> answers = new ArrayList<>();
+    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL)
+    private Answer answer;
 
     public void update(String title, String content) {
         this.title = title;
