@@ -54,6 +54,9 @@ dependencies {
 
 	// AWS S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	// Pinecone (AI vector DB)
+	implementation "io.pinecone:pinecone-client:5.0.0"
 }
 
 tasks.named('test') {
