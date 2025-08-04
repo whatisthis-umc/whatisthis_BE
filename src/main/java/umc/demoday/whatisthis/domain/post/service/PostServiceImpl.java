@@ -26,6 +26,7 @@ import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.PostScrap;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
+import umc.demoday.whatisthis.domain.recommendation.RecommendationService;
 import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
@@ -46,7 +47,9 @@ public class PostServiceImpl implements PostService {
     private final HashtagRepository hashtagRepository;
     private final MemberRepository memberRepository;
     private final PageConverter pageConverter;
-  
+
+    private final RecommendationService recommendationService;
+
     @Override
     public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId) {
         // 1. 게시글 정보 조회
@@ -135,6 +138,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size){
+
         // 1. category Enum List 생성
         List<Category> categoryList = List.of();
         if(category == Category.LIFE_TIP)

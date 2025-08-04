@@ -82,4 +82,5 @@ public class PostController {
         MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_ITEM, page, 6);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
+
 }
