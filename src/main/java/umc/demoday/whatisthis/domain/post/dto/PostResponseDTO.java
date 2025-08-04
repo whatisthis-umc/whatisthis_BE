@@ -187,9 +187,11 @@ public class PostResponseDTO {
     public static class GgulPostSummaryDTO {
         Integer postId;
         String thumnailUrl;
+        Category category;
+        Category subCategory;
         String title;
         String summary;
-        List<Hashtag> hashtags;
+        List<String> hashtags;
         Integer viewCount;
         Integer likeCount;
         Integer scrapCount;
