@@ -21,7 +21,6 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOauth2UserService customOauth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
@@ -69,6 +68,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/posts/**",
+                                "/",
                                 "/oauth2/**",
 
                                 "/upload" // S3 테스트 용, 추후 삭제(?)
@@ -77,7 +77,7 @@ public class SecurityConfig {
                         .requestMatchers("/members/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth ->oauth
+                .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
                         .successHandler(oAuth2SuccessHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
