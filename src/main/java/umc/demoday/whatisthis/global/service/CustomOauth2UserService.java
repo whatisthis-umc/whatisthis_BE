@@ -30,7 +30,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         Map<String, Object> attributes = oauth2User.getAttributes();
         Map<String, Object> customAttributes = new HashMap<>(attributes);
 
-        // 카카오일 경우 파싱 방식 (여기서 직접 이메일 꺼낼 수 있음)
+        // 카카오일 경우
         if ("kakao".equals(registrationId)) {
             Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
             String email = (String) kakaoAccount.get("email");
