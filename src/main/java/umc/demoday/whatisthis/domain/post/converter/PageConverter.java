@@ -15,6 +15,7 @@ import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class PageConverter {
     }
 
 
-    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Category> categories) {
+    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Category> categories, Category category) {
         List<Post> bestPosts = bestPostPage.getContent();
         List<Post> latestPosts = latestPostPage.getContent();
         // 게시글이 없는 경우 빈 응답을 즉시 반환
@@ -116,27 +117,56 @@ public class PageConverter {
                 )).toList();
 
         // section dto 생성
-        List<MainPageResponseDTO.SectionDTO> sections = getSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList);
+        List<MainPageResponseDTO.SectionDTO> sections = category.toString().endsWith("_TIP") ? getHoneyTipSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList) : getHoneyItemSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList);
         return new MainPageResponseDTO(
                 categories,
                 sections
         );
     }
 
-    private List<MainPageResponseDTO.SectionDTO> getSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList) {
+    private List<MainPageResponseDTO.SectionDTO> getHoneyTipSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList) {
         MainPageResponseDTO.SectionDTO bestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
                 "인기 게시물",
                 bestPostSummaryDTOList,
-                "/life-tips/posts?sort=BEST&page=1&size=6"
+                "/posts/life-tips?sort=BEST&page=1&size=6"
         );
         MainPageResponseDTO.SectionDTO latestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
                 "최신 게시물",
                 latestPostSummaryDTOList,
-                "/life-tips/posts?sort=LATEST&page=1&size=6"
+                "/posts/life-tips?sort=LATEST&page=1&size=6"
+        );
+        MainPageResponseDTO.SectionDTO aiRecommendationPostSectionDTO = new MainPageResponseDTO.SectionDTO(
+                "AI 추천 게시물",
+                null,
+                "/posts/life-tips?sort=AI&page=1&size=6"
         );
         List<MainPageResponseDTO.SectionDTO> sections = new java.util.ArrayList<>(List.of());
         sections.add(bestPostSectionDTO);
         sections.add(latestPostSectionDTO);
+        sections.add(aiRecommendationPostSectionDTO);
+        return sections;
+    }
+
+    private List<MainPageResponseDTO.SectionDTO> getHoneyItemSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList) {
+        MainPageResponseDTO.SectionDTO bestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
+                "인기 게시물",
+                bestPostSummaryDTOList,
+                "/posts/life-items?sort=BEST&page=1&size=6"
+        );
+        MainPageResponseDTO.SectionDTO latestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
+                "최신 게시물",
+                latestPostSummaryDTOList,
+                "/posts/life-items?sort=LATEST&page=1&size=6"
+        );
+        MainPageResponseDTO.SectionDTO aiRecommendationPostSectionDTO = new MainPageResponseDTO.SectionDTO(
+                "AI 추천 게시물",
+                null,
+                "/posts/life-items?sort=AI&page=1&size=6"
+        );
+        List<MainPageResponseDTO.SectionDTO> sections = new java.util.ArrayList<>(List.of());
+        sections.add(bestPostSectionDTO);
+        sections.add(latestPostSectionDTO);
+        sections.add(aiRecommendationPostSectionDTO);
         return sections;
     }
 
@@ -148,12 +178,18 @@ public class PageConverter {
             summary = summary.substring(0, 30) + "...";
         }
 
+        List<String> hashtagContents = hashtags.stream()
+                .map(Hashtag::getContent)
+                .toList();
+
         return new PostResponseDTO.GgulPostSummaryDTO(
                 post.getId(),
                 thumbnailUrl, // 조회된 썸네일 URL
+                post.getCategory().toString().endsWith("_TIP") ? Category.LIFE_TIP : Category.LIFE_ITEM,
+                post.getCategory(), //subCategory
                 post.getTitle(),
                 summary,
-                hashtags, // 조회된 해시태그 리스트
+                hashtagContents, // 조회된 해시태그 리스트
                 post.getViewCount(),
                 post.getLikeCount(),
                 scrapCount, // 조회된 스크랩 수
