@@ -59,6 +59,12 @@ public class Member {
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
+    @Column(name = "provider")
+    private String provider; // kakao, google, naver
+
+    @Column(name = "provider_id")
+    private String providerId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id", referencedColumnName = "id")
     private ProfileImage profileImage;
