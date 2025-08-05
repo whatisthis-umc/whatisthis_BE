@@ -30,7 +30,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         Map<String, Object> attributes = oauth2User.getAttributes();
         Map<String, Object> customAttributes = new HashMap<>(attributes);
 
-        // 카카오일 경우 파싱 방식 (여기서 직접 이메일 꺼낼 수 있음)
+        // 카카오일 경우
         if ("kakao".equals(registrationId)) {
             Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
             String email = (String) kakaoAccount.get("email");
@@ -45,6 +45,21 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
             customAttributes.put("provider", registrationId);
             customAttributes.put("providerId", providerId);
         }
+
+        // 구글일 경우
+        if ("google".equals(registrationId)) {
+            String email = (String) attributes.get("email");
+            String providerId = (String) attributes.get("sub"); // 구글은 "sub"이 고유 ID
+
+            if (email == null) {
+                throw new OAuth2AuthenticationException("이메일 제공에 동의하지 않았습니다.");
+            }
+
+            customAttributes.put("email", email);
+            customAttributes.put("provider", registrationId);
+            customAttributes.put("providerId", providerId);
+        }
+
 
         // 기본적으로 ROLE_USER로 부여
         return new DefaultOAuth2User(

@@ -31,6 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        // 소셜 로그인 경로는 필터에서 제외
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/oauth2/") || uri.startsWith("/login/oauth2/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 1. Authorization 헤더에서 Bearer 토큰 추출
         String bearerToken = request.getHeader("Authorization");
