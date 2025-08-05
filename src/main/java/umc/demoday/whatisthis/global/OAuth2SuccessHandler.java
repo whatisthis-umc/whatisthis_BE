@@ -38,9 +38,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
 
         Member member = memberRepository.findByEmail(email).orElse(null);
-        // 테스트용 추후 제거
-        response.setContentType("application/json; charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
 
         if (member != null) {
             if (member.getProvider() == null) {
