@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.domain.post.service;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
@@ -16,6 +17,9 @@ public interface PostService {
     public void deleteScrap (Integer scrapId);
 
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size);
+
+    PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(@AuthenticationPrincipal CustomUserDetails custumDetails, Integer page, Integer size, Category category);
+
     public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, CustomUserDetails customUserDetails);
 
 }

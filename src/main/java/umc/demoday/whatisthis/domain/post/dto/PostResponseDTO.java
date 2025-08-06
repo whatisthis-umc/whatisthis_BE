@@ -179,6 +179,19 @@ public class PostResponseDTO {
         List<PostResponseDTO.GgulPostSummaryDTO> posts;
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GgulPostsByAiResponseDTO {
+        SortBy  sortBy;
+        Integer page;
+        Integer size;
+        Long totalElements;
+        Integer totalPages;
+        List<PostResponseDTO.GgulPostSummaryDTO> posts;
+    }
+
 
     @Getter
     @Setter
@@ -189,7 +202,7 @@ public class PostResponseDTO {
         String thumnailUrl;
         String title;
         String summary;
-        List<Hashtag> hashtags;
+        List<String> hashtags;
         Integer viewCount;
         Integer likeCount;
         Integer scrapCount;

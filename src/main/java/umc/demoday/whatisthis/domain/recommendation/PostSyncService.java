@@ -24,7 +24,7 @@ public class PostSyncService {
     private final SyncStatusRepository syncStatusRepository;
     private final RecommendationService recommendationService;
 
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     @Transactional
     public void syncPostsToVectorDB() {
 //         1. 마지막으로 동기화된 시점 조회

@@ -5,7 +5,6 @@ import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
@@ -32,10 +31,7 @@ import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
-import java.awt.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -122,17 +118,17 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
         // 1. 정렬 기준(Sort) 객체 생성
-        Sort sortKey;
+        Sort sortKey = null;
         if ("BEST".equalsIgnoreCase(sort.toString())) {
             // BEST(인기순) -> likeCount(좋아요 수)가 높은 순서대로 정렬
             sortKey = Sort.by(Sort.Direction.DESC, "likeCount");
-        } else {
+        } else if("LATEST".equalsIgnoreCase(sort.toString())) {
             // LATEST(최신순) -> createdAt(생성일)이 최신인 순서대로 정렬
             sortKey = Sort.by(Sort.Direction.DESC, "createdAt");
         }
 
         // 2. 페이지 요청(Pageable) 객체 생성
-        Pageable pageable = PageRequest.of(page, size, sortKey);
+        Pageable pageable = PageRequest.of(page, size, Objects.requireNonNull(sortKey));
 
         // 3. Repository를 통해 데이터베이스에서 데이터 조회
         Page<Post> postPage = postRepository.findByCategory(category, pageable);
@@ -141,6 +137,32 @@ public class PostServiceImpl implements PostService {
         return pageConverter.toGgulPostsByCategoryResponseDTO(postPage,category,sort);
     }
 
+    @Override
+    public PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(@AuthenticationPrincipal CustomUserDetails custumDetails, Integer page, Integer size, Category category) {
+        List<Integer> allRecommendedList = recommendationService.findRecommendationsForMember(custumDetails.getId(), (page + 1) * size, category);
+        //원하는 페이지만큼 짜르기
+        List<Post> posts = postRepository.findAllById(allRecommendedList.subList(page * size, (page + 1) * size));
+        Map<Integer, String> aiPostThumbnailsMap = pageConverter.findThumbnails(allRecommendedList);
+        Map<Integer, List<Hashtag>> aiPostHashtagsMap = pageConverter.findHashtags(allRecommendedList);
+        Map<Integer, Integer> aiPostScrapCountsMap = pageConverter.getScrapCountMap(allRecommendedList);
+
+        List<PostResponseDTO.GgulPostSummaryDTO> summaryDTOS = posts.stream().map(post -> pageConverter.toGgulPostSummaryDTO(
+                post,
+                aiPostThumbnailsMap.get(post.getId()),
+                aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                aiPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                ))
+                .toList();
+
+        return new PostResponseDTO.GgulPostsByAiResponseDTO(
+                SortBy.AI,
+                page,
+                size,
+                ((long) (page + 1) * size),
+                page,
+                summaryDTOS
+        );
+    }
     @Override
     public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
@@ -165,15 +187,16 @@ public class PostServiceImpl implements PostService {
         Pageable pageableAi = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
         Integer memberId = customUserDetails.getId();
         MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
-        List<Integer> recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(),size);
-
+        List<Integer> recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(),size,category);
         // 5. Repository를 통해 데이터베이스에서 데이터 조회
         Page<Post> bestPostPage = postRepository.findByCategoryIn(categoryList, pageableBest);
         Page<Post> latestPostPage = postRepository.findByCategoryIn(categoryList, pageableLatest);
 
         // 6. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
-        return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, recommendedPostIds, categoryList);
+        return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, recommendedPostIds, categoryList, category);
 
     }
+
+
 }
 
