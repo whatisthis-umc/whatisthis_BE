@@ -18,6 +18,7 @@ public enum GeneralErrorCode implements BaseErrorCode {
     // 멤버 관련 에러
     ALREADY_EXIST_MEMBER_ID(HttpStatus.BAD_REQUEST, "MEMBER4001", "이미 사용 중인 아이디입니다."),
     ALREADY_EXIST_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용 중인 닉네임입니다."),
+    NICKNAME_SAME_AS_BEFORE(HttpStatus.BAD_REQUEST, "MEMBER4003", "기존 닉네임과 동일한 닉네임은 사용할 수 없습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4040", "존재하지 않는 회원입니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER4010", "비밀번호가 일치하지 않습니다."),
     MEMBER_NOT_FOUND_BY_EMAIL(HttpStatus.NOT_FOUND, "MEMBER4041", "해당 이메일로 가입된 회원이 존재하지 않습니다"),

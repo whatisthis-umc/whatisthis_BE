@@ -16,7 +16,7 @@ public class MyPagePostResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MyPostDTO {
-        Integer id;
+        Integer postId;
         Category category;
         String title;
         String content;

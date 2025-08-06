@@ -15,8 +15,8 @@ public class MyPageInquiryResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class myInquiryDTO {
-        Integer id;
+    public static class MyInquiryDTO {
+        Integer inquiryId;
         String title;
         InquiryStatus status;
         LocalDateTime createdAt;
@@ -31,15 +31,15 @@ public class MyPageInquiryResponseDTO {
         String nickname;
         String profileImageUrl;
         String email;
-        List<myInquiryDTO> inquiries;
+        List<MyInquiryDTO> inquiries;
     }
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class myInquiryDetailDTO {
-        Integer id;
+    public static class MyInquiryDetailDTO {
+        Integer inquiryId;
         String title;
         String inquiryContent;
         String answerContent;
