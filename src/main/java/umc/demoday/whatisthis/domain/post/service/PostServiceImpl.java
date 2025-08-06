@@ -1,19 +1,20 @@
 package umc.demoday.whatisthis.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
+import umc.demoday.whatisthis.domain.member_profile.MemberProfile;
+import umc.demoday.whatisthis.domain.member_profile.MemberProfileRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.converter.PageConverter;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
@@ -47,11 +48,12 @@ public class PostServiceImpl implements PostService {
     private final HashtagRepository hashtagRepository;
     private final MemberRepository memberRepository;
     private final PageConverter pageConverter;
-
+    private final MemberProfileRepository memberProfileRepository;
     private final RecommendationService recommendationService;
+    private final MemberActivityService memberActivityService;
 
     @Override
-    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId) {
+    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         // 1. 게시글 정보 조회
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
@@ -73,6 +75,9 @@ public class PostServiceImpl implements PostService {
 
         // 2-3. 스크랩 수 조회
         int postScrapCount = postScrapRepository.countByPostId(postId);
+
+        // 최근 조회한 게시글 갱신
+        memberActivityService.updateLastSeenPost(customUserDetails.getId(),postId);
 
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
@@ -137,7 +142,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size){
+    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         // 1. category Enum List 생성
         List<Category> categoryList = List.of();
@@ -156,12 +161,18 @@ public class PostServiceImpl implements PostService {
         // 3. Latest 정렬 페이지 요청(Pageable) 객체 생성
         Pageable pageableLatest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // 3. Repository를 통해 데이터베이스에서 데이터 조회
+        // 4. Ai 추천 페이지 요청(Pageable) 객체 생성
+        Pageable pageableAi = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+        Integer memberId = customUserDetails.getId();
+        MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
+        List<Integer> recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(),size);
+
+        // 5. Repository를 통해 데이터베이스에서 데이터 조회
         Page<Post> bestPostPage = postRepository.findByCategoryIn(categoryList, pageableBest);
         Page<Post> latestPostPage = postRepository.findByCategoryIn(categoryList, pageableLatest);
 
-        //  4. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
-        return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, categoryList);
+        // 6. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
+        return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, recommendedPostIds, categoryList);
 
     }
 }

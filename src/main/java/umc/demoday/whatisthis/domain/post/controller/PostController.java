@@ -5,8 +5,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
@@ -14,8 +16,12 @@ import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.service.PostService;
 import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
+import umc.demoday.whatisthis.domain.recommendation.RecommendationService;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,12 +29,13 @@ import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 public class PostController {
 
     private final PostService postService;
-
+    private final MemberActivityService memberActivityService;
+    private final RecommendationService recommendationService;
     @GetMapping("/{post-id}")
     @Operation(summary = "생활꿀팁 or 생활꿀팁 페이지 조회 API -by 천성호")
-    public CustomResponse<PostResponseDTO.GgulPostResponseDTO> getGgulPost(@PathVariable("post-id") Integer postId){
+    public CustomResponse<PostResponseDTO.GgulPostResponseDTO> getGgulPost(@PathVariable("post-id") Integer postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        PostResponseDTO.GgulPostResponseDTO result = postService.getGgulPost(postId);
+        PostResponseDTO.GgulPostResponseDTO result = postService.getGgulPost(postId,customUserDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
 
@@ -67,20 +74,38 @@ public class PostController {
         PostResponseDTO.GgulPostsByCategoryResponseDTO result = postService.getGgulPostsByCategory(category,sort,page,size);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
-
+//    @GetMapping("/ai?page=1&size=6")
+//    public CustomResponse<PostResponseDTO.GgulPostsByCategoryResponseDTO> getGgulItemPostsByAi(@RequestParam("page") Integer page,
+//                                                                                               @RequestParam("size") Integer size,
+//                                                                                               @AuthenticationPrincipal CustomUserDetails custumDetails){
+//
+//        List<Integer> recommendedList = recommendationService.findRecommendationsForMember(custumDetails.getId(),size);
+//        PostResponseDTO.GgulPostsByCategoryResponseDTO result =
+//        return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
+//    }
     @GetMapping("/life-tips/all")
     @Operation(summary = "생활 꿀팁 전체 페이지 API - by 천성호")
-    public CustomResponse<MainPageResponseDTO> getAllGgulTipPosts(@RequestParam("page") Integer page){
-        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_TIP, page, 6);
+    public CustomResponse<MainPageResponseDTO> getAllGgulTipPosts(@RequestParam("page") Integer page,@AuthenticationPrincipal CustomUserDetails userDetails){
+        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_TIP, page, 6, userDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
 
     @GetMapping("/life-items/all")
     @Operation(summary = "생활 꿀템 전체 페이지 API - by 천성호")
-    public CustomResponse<MainPageResponseDTO> getAllGgulItemPosts(@RequestParam("page") Integer page){
+    public CustomResponse<MainPageResponseDTO> getAllGgulItemPosts(@RequestParam("page") Integer page,@AuthenticationPrincipal CustomUserDetails userDetails){
 
-        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_ITEM, page, 6);
+        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_ITEM, page, 6, userDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
+    }
+
+    // 사용자가 게시물을 조회했음을 기록하는 API
+    @PostMapping("/posts/{postId}/view-history")
+    @Operation(summary = "최근 조회한 게시물 기록하는 API - by 천성호")
+    public CustomResponse<Void> recordPostView(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails userDetails)
+    {
+        Integer memberId = userDetails.getId(); // JWT에서 사용자 ID 추출
+        memberActivityService.updateLastSeenPost(memberId, postId);
+        return CustomResponse.ok(null);
     }
 
 

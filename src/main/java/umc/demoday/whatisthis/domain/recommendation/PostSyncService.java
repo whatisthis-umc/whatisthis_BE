@@ -27,7 +27,7 @@ public class PostSyncService {
     @Scheduled(cron = "0 */1 * * * *")
     @Transactional
     public void syncPostsToVectorDB() {
-        // 1. 마지막으로 동기화된 시점 조회
+//         1. 마지막으로 동기화된 시점 조회
         LocalDateTime lastProcessedTime = syncStatusRepository.findBySyncId(SYNC_ID)
                 .map(SyncStatus::getLastProcessedAt)
                 .orElse(LocalDateTime.of(1970, 1, 1, 0, 0)); // 최초 실행 시 아주 오래된 시간으로 설정

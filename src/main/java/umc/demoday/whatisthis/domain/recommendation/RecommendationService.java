@@ -4,14 +4,23 @@ package umc.demoday.whatisthis.domain.recommendation;
 import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.openapitools.db_data.client.ApiException;
+import org.openapitools.db_data.client.model.Hit;
+import org.openapitools.db_data.client.model.SearchRecordsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.demoday.whatisthis.domain.member_profile.MemberProfile;
+import umc.demoday.whatisthis.domain.member_profile.MemberProfileRepository;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -23,6 +32,8 @@ public class RecommendationService {
 
     private final GeminiInterface geminiInterface;
     private final Index index;
+    private final MemberProfileRepository memberProfileRepository;
+    private final PostRepository postRepository;
 
     public void savePostToVectorDB(Post post) {
         try{
@@ -60,4 +71,55 @@ public class RecommendationService {
         }
     }
 
+    @SneakyThrows
+    @Transactional(readOnly = true)
+    public List<Integer> findRecommendationsForMember(Integer memberId, Integer topK) {
+        return memberProfileRepository.findByMember_Id(memberId)
+                .map(MemberProfile::getLastSeenPostId)
+                // 2. 람다 표현식을 사용하여 postId와 topK를 모두 전달합니다.
+                .map(postId -> findSimilarPostsInVectorDB(postId, topK))
+                // 3. orElseGet에도 람다를 사용해 topK를 전달합니다.
+                .orElseGet(() -> getDefaultRecommendations(topK));
+    }
+    private List<Integer> findSimilarPostsInVectorDB(Integer postId, Integer topK){
+        try {
+            // 이 메소드 안에서 Pinecone 벡터 검색 로직을 수행합니다.
+            //  벡터와 유사한 벡터들을 Pinecone에서 검색하여 Post 목록을 반환합니다.
+            List<String> fields = new ArrayList<>();
+            fields.add("category");
+            fields.add("chunk_text");
+            SearchRecordsResponse response = index.searchRecordsById(postId.toString(), "__default__", fields, topK, null, null);
+            List<Hit> hits = response.getResult().getHits();
+
+            // 문자열 ID에서 숫자 부분만 추출하여 Long 타입의 ID 리스트를 생성합니다.
+            List<Integer> postIds = hits.stream()
+                    .map(hit -> Integer.parseInt(hit.getId()))
+                    .toList();
+            return postIds;
+        }
+        catch (ApiException e) {
+            log.error("Post ID {} 기반 벡터 검색 중 API 에러 발생", postId, e);
+            return Collections.emptyList();
+        }
+    }
+
+    private List<Integer> getDefaultRecommendations(Integer topK) {
+        try {
+            List<String> fields = new ArrayList<>();
+            fields.add("category");
+            fields.add("chunk_text");
+            SearchRecordsResponse response = index.searchRecordsByText("추천하는 생활팁", "__default__", fields, topK, null, null);
+            List<Hit> hits = response.getResult().getHits();
+
+            // 문자열 ID에서 숫자 부분만 추출하여 Long 타입의 ID 리스트를 생성합니다.
+            return hits.stream()
+                    .map(hit -> Integer.parseInt(hit.getId()))
+                    .toList();
+
+        }
+        catch (ApiException e) {
+            log.error("Default 벡터 검색 중 API 에러 발생", e);
+            return Collections.emptyList();
+        }
+    }
 }

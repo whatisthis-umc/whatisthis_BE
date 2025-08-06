@@ -75,7 +75,7 @@ public class PageConverter {
     }
 
 
-    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Category> categories) {
+    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Integer> recomededPostIds, List<Category> categories) {
         List<Post> bestPosts = bestPostPage.getContent();
         List<Post> latestPosts = latestPostPage.getContent();
         // 게시글이 없는 경우 빈 응답을 즉시 반환
@@ -90,6 +90,8 @@ public class PageConverter {
         List<Integer> latestPostIds = latestPosts.stream()
                 .map(Post::getId)
                 .toList();
+
+
         // 2. 연관 데이터 일괄 조회 (Batch Fetching)
         Map<Integer, String> bestPostThumbnailsMap = findThumbnails(bestPostIds);
         Map<Integer, List<Hashtag>> bestPostHashtagsMap = findHashtags(bestPostIds);
@@ -98,6 +100,10 @@ public class PageConverter {
         Map<Integer, String> latestPostThumbnailsMap = findThumbnails(latestPostIds);
         Map<Integer, List<Hashtag>> latestPostHashtagsMap = findHashtags(latestPostIds);
         Map<Integer, Integer> latestPostScrapCountsMap = getScrapCountMap(latestPostIds);
+
+        Map<Integer, String> aiPostThumbnailsMap = findThumbnails(recomededPostIds);
+        Map<Integer, List<Hashtag>> aiPostHashtagsMap = findHashtags(recomededPostIds);
+        Map<Integer, Integer> aiPostScrapCountsMap = getScrapCountMap(recomededPostIds);
 
         // summaryDTO 생성
         List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList = bestPostPage.stream()
@@ -114,25 +120,37 @@ public class PageConverter {
                         latestPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
                         latestPostScrapCountsMap.getOrDefault(post.getId(), 0)
                 )).toList();
+        List<PostResponseDTO.GgulPostSummaryDTO> aiPostSummaryDTOList = bestPostPage.stream()
+                .map(post -> toGgulPostSummaryDTO(
+                        post,
+                        aiPostThumbnailsMap.get(post.getId()),
+                        aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        aiPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                )).toList();
 
         // section dto 생성
-        List<MainPageResponseDTO.SectionDTO> sections = getSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList);
+        List<MainPageResponseDTO.SectionDTO> sections = getSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList, aiPostSummaryDTOList);
         return new MainPageResponseDTO(
                 categories,
                 sections
         );
     }
 
-    private List<MainPageResponseDTO.SectionDTO> getSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList) {
+    private List<MainPageResponseDTO.SectionDTO> getSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> aiPostSummaryDTOList) {
         MainPageResponseDTO.SectionDTO bestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
                 "인기 게시물",
                 bestPostSummaryDTOList,
-                "/life-tips/posts?sort=BEST&page=1&size=6"
+                "/life-tips 또는 life-items/posts?sort=BEST&page=1&size=6"
         );
         MainPageResponseDTO.SectionDTO latestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
                 "최신 게시물",
                 latestPostSummaryDTOList,
-                "/life-tips/posts?sort=LATEST&page=1&size=6"
+                "/life-tips 또는 life-items/posts?sort=LATEST&page=1&size=6"
+        );
+        MainPageResponseDTO.SectionDTO aiPostSectionDTO = new MainPageResponseDTO.SectionDTO(
+                "Ai 추천 게시물",
+                aiPostSummaryDTOList,
+                "/life-tips 또는 life-items/posts/ai?page=1&size=6"
         );
         List<MainPageResponseDTO.SectionDTO> sections = new java.util.ArrayList<>(List.of());
         sections.add(bestPostSectionDTO);
