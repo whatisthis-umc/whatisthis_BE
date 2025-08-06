@@ -5,9 +5,9 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class InquiryPageResDTO {
+public class InquiryAdminPageResDTO {
 
-    private final List<InquiryResDTO> inquiries;
+    private final List<InquiryAdminResDTO> inquiries;
     private final int pageNumber;       // 클라이언트 기준 1부터 시작
     private final int pageSize;
     private final int totalPages;
@@ -15,7 +15,7 @@ public class InquiryPageResDTO {
     private final boolean isFirst;
     private final boolean isLast;
 
-    public InquiryPageResDTO(List<InquiryResDTO> inquiries,
+    public InquiryAdminPageResDTO(List<InquiryAdminResDTO> inquiries,
                                   int pageNumber,
                                   int pageSize,
                                   int totalPages,
