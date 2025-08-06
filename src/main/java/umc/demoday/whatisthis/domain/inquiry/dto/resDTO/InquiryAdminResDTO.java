@@ -6,29 +6,26 @@ import lombok.Getter;
 import umc.demoday.whatisthis.domain.inquiry.Inquiry;
 import umc.demoday.whatisthis.domain.inquiry.enums.InquiryStatus;
 
+
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
 @AllArgsConstructor
-public class InquiryResDTO {
+public class InquiryAdminResDTO {
     private Integer id;
     private String title;
     private String content;
+    private InquiryStatus status;
     private LocalDateTime createdAt;
-    private String memberNickname;  // 작성자 닉네임 추가
-    private String answerContent; // 답변 내용 추가 (없으면 null)
-    private Boolean isSecret;
 
-    public static InquiryResDTO from(Inquiry inquiry) {
-        return InquiryResDTO.builder()
+    public static InquiryAdminResDTO from(Inquiry inquiry) {
+        return InquiryAdminResDTO.builder()
                 .id(inquiry.getId())
                 .title(inquiry.getTitle())
                 .content(inquiry.getContent())
+                .status(inquiry.getStatus())
                 .createdAt(inquiry.getCreatedAt())
-                .memberNickname(inquiry.getMember() != null ? inquiry.getMember().getNickname() : null)
-                .answerContent(inquiry.getAnswer() != null ? inquiry.getAnswer().getContent() : null)
-                .isSecret(inquiry.getIsSecret())
                 .build();
     }
 }

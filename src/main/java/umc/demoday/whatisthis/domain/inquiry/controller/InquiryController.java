@@ -1,13 +1,20 @@
 package umc.demoday.whatisthis.domain.inquiry.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import umc.demoday.whatisthis.domain.inquiry.dto.reqDTO.InquiryCreateReqDTO;
+import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryAdminPageResDTO;
+import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryPageResDTO;
 import umc.demoday.whatisthis.domain.inquiry.service.InquiryCommandService;
+import umc.demoday.whatisthis.domain.inquiry.service.InquiryQueryService;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.service.S3Service;
@@ -15,15 +22,19 @@ import umc.demoday.whatisthis.global.service.S3Service;
 import java.util.Collections;
 import java.util.List;
 
+import static umc.demoday.whatisthis.domain.inquiry.code.InquirySuccessCode.INQUIRY_OK;
+
 @RestController
 @RequestMapping("/support/inquiries")
 @RequiredArgsConstructor
 public class InquiryController {
 
     private final InquiryCommandService inquiryCommandService;
+    private final InquiryQueryService inquiryQueryService;
     private final S3Service s3Service;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "문의내역 작성 api-by 윤영석")
     public CustomResponse<Void> createInquiry(
             @RequestPart("request") @Valid InquiryCreateReqDTO dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
@@ -38,5 +49,18 @@ public class InquiryController {
         inquiryCommandService.createInquiry(dto, fileUrls, loginUser);
 
         return CustomResponse.ok(null);
+    }
+
+    @GetMapping
+    @Operation(summary = "문의내역 목록조회 api -by 윤영석")
+    public CustomResponse<InquiryPageResDTO> getInquiryList(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        InquiryPageResDTO result = inquiryQueryService.getInquiryList(pageable);
+
+        return CustomResponse.onSuccess(INQUIRY_OK, result);
     }
 }

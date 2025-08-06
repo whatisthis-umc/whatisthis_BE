@@ -5,18 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.answer.dto.reqDTO.AnswerRegisterReqDTO;
 import umc.demoday.whatisthis.domain.answer.service.AnswerCommandService;
-import umc.demoday.whatisthis.domain.inquiry.dto.reqDTO.InquiryCreateReqDTO;
-import umc.demoday.whatisthis.domain.inquiry.dto.reqDTO.InquiryUpdateReqDTO;
-import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryPageResDTO;
-import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryResDTO;
-import umc.demoday.whatisthis.domain.inquiry.enums.InquiryStatus;
-import umc.demoday.whatisthis.domain.inquiry.service.InquiryCommandService;
+import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryAdminPageResDTO;
+import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryAdminResDTO;
 import umc.demoday.whatisthis.domain.inquiry.service.InquiryQueryService;
-import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 
 import static umc.demoday.whatisthis.domain.answer.code.AnswerSuccessCode.ANSWER_REGISTER_OK;
@@ -33,23 +27,23 @@ public class AdminInquiryController {
 
 
     @GetMapping
-    @Operation(summary = "문의내역 목록조회 api -by 윤영석")
-    public CustomResponse<InquiryPageResDTO> getInquiryList(
+    @Operation(summary = "관리자 페이지 문의내역 목록조회 api -by 윤영석")
+    public CustomResponse<InquiryAdminPageResDTO> getAdminInquiryList(
             @RequestParam(defaultValue = "ALL") String statusStr,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size) {
 
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        InquiryPageResDTO result = inquiryQueryService.getInquiryList(pageable, statusStr);
+        InquiryAdminPageResDTO result = inquiryQueryService.getAdminInquiryList(pageable, statusStr);
 
         return CustomResponse.onSuccess(INQUIRY_OK, result);
     }
 
     @GetMapping("/{inquiryId}")
     @Operation(summary = "문의내역 상세조회 api-by 윤영석")
-    public CustomResponse<InquiryResDTO> getInquiry(@PathVariable("inquiryId") Integer inquiryId) {
-        InquiryResDTO result = inquiryQueryService.getInquiry(inquiryId);
+    public CustomResponse<InquiryAdminResDTO> getInquiry(@PathVariable("inquiryId") Integer inquiryId) {
+        InquiryAdminResDTO result = inquiryQueryService.getInquiry(inquiryId);
         return CustomResponse.onSuccess(INQUIRY_OK, result);
     }
 
