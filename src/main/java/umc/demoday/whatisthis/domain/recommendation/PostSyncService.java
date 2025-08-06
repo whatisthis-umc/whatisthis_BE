@@ -23,16 +23,14 @@ public class PostSyncService {
     private final PostRepository postRepository;
     private final SyncStatusRepository syncStatusRepository;
     private final RecommendationService recommendationService;
-    private final Pinecone pineconeClient;
 
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     @Transactional
     public void syncPostsToVectorDB() {
         // 1. 마지막으로 동기화된 시점 조회
         LocalDateTime lastProcessedTime = syncStatusRepository.findBySyncId(SYNC_ID)
                 .map(SyncStatus::getLastProcessedAt)
                 .orElse(LocalDateTime.of(1970, 1, 1, 0, 0)); // 최초 실행 시 아주 오래된 시간으로 설정
-
         System.out.println("벡터 DB 동기화 시작. 기준 시간: " + lastProcessedTime);
 
         // 2. 기준 시간 이후에 업데이트된 게시물 조회 (100개씩)
@@ -47,6 +45,8 @@ public class PostSyncService {
         for (Post post : postsToProcess) {
             try {
                 recommendationService.savePostToVectorDB(post);
+                // 1분(60초)에 60번 미만으로 요청하도록 1.1초 대기
+                Thread.sleep(1100);
             } catch (Exception e) {
                 System.err.println("Post ID " + post.getId() + " 처리 중 에러 발생: " + e.getMessage());
             }

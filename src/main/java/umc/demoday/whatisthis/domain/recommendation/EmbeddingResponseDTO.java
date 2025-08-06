@@ -1,19 +1,17 @@
 package umc.demoday.whatisthis.domain.recommendation;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
-import umc.demoday.whatisthis.domain.post.enums.Category;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class EmbeddingResponseDTO {
-    List<Float> embeddings;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record EmbeddingResponseDTO(
+        Embedding embedding,      // 차단되면 이 필드는 null 입니다.
+        PromptFeedback promptFeedback  // 차단되면 여기에 정보가 담깁니다.
+) {
+    public record Embedding(List<Float> values) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record PromptFeedback(String blockReason) {}
 }
