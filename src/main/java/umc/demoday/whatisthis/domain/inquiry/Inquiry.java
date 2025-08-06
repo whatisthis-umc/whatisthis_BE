@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import umc.demoday.whatisthis.domain.answer.Answer;
+import umc.demoday.whatisthis.domain.file.File;
 import umc.demoday.whatisthis.domain.inquiry.enums.InquiryStatus;
 import umc.demoday.whatisthis.domain.member.Member;
 
@@ -47,8 +48,19 @@ public class Inquiry {
     @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL)
     private Answer answer;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<File> files = new ArrayList<>();
+
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void addFiles(List<File> files) {
+        this.files.addAll(files);
+        for (File file : files) {
+            file.setInquiry(this); // 양방향 설정
+        }
     }
 }
