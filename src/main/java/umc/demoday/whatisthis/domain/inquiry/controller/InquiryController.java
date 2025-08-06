@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import umc.demoday.whatisthis.domain.inquiry.dto.reqDTO.InquiryCreateReqDTO;
 import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryAdminPageResDTO;
 import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryPageResDTO;
+import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryResDTO;
 import umc.demoday.whatisthis.domain.inquiry.service.InquiryCommandService;
 import umc.demoday.whatisthis.domain.inquiry.service.InquiryQueryService;
 import umc.demoday.whatisthis.domain.member.Member;
@@ -61,6 +62,16 @@ public class InquiryController {
 
         InquiryPageResDTO result = inquiryQueryService.getInquiryList(pageable);
 
+        return CustomResponse.onSuccess(INQUIRY_OK, result);
+    }
+
+    @GetMapping("/{inquiryId}")
+    @Operation(summary = "문의내역 상세조회 API -by 윤영석")
+    public CustomResponse<InquiryResDTO> getInquiry(
+            @PathVariable int inquiryId,
+            @AuthenticationPrincipal Member loginUser) {
+
+        InquiryResDTO result = inquiryQueryService.getInquiry(inquiryId, loginUser);
         return CustomResponse.onSuccess(INQUIRY_OK, result);
     }
 }

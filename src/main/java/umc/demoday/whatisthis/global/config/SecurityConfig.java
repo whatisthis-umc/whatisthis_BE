@@ -56,6 +56,9 @@ public class SecurityConfig {
 
                                 "/support/notices",
                                 "/support/notices/*",
+                                "/support/inquiries",
+                                "/support/inquiries/*",
+
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",

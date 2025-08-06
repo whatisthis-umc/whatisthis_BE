@@ -43,7 +43,7 @@ public class AdminInquiryController {
     @GetMapping("/{inquiryId}")
     @Operation(summary = "문의내역 상세조회 api-by 윤영석")
     public CustomResponse<InquiryAdminResDTO> getInquiry(@PathVariable("inquiryId") Integer inquiryId) {
-        InquiryAdminResDTO result = inquiryQueryService.getInquiry(inquiryId);
+        InquiryAdminResDTO result = inquiryQueryService.getAdminInquiry(inquiryId);
         return CustomResponse.onSuccess(INQUIRY_OK, result);
     }
 
