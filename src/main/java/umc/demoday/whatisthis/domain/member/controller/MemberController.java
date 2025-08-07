@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.member.dto.email.EmailAuthReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.SocialSignupReqDTO;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 import umc.demoday.whatisthis.domain.member.service.email.EmailAuthService;
@@ -28,6 +29,16 @@ public class MemberController {
             @RequestBody @Valid MemberReqDTO.JoinRequestDTO request
     ) {
         MemberResDTO.JoinResponseDTO response = memberCommandService.signUp(request);
+        return CustomResponse.created(response);
+    }
+
+    @PostMapping("/signup/social")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "소셜 로그인 회원가입 API - by 이정준")
+    public CustomResponse<MemberResDTO.JoinResponseDTO> socialSignup(
+            @RequestBody @Valid SocialSignupReqDTO request
+    ) {
+        MemberResDTO.JoinResponseDTO response = memberCommandService.signUpSocial(request);
         return CustomResponse.created(response);
     }
 
