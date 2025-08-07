@@ -98,7 +98,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         else {
             if ((recentPosts >= 10) && (recentComments >= 20) && (totalLikes >= 50)
-                && (reportRepository.countReportsByReportedMemberId(memberId) ==0)) {
+                    && (reportRepository.countReportsByReportedMemberId(memberId) ==0)) {
                 member.setIsBest(true);
             }
         }
