@@ -11,6 +11,7 @@ import umc.demoday.whatisthis.domain.member.converter.MemberConverter;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.SocialSignupReqDTO;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
 import umc.demoday.whatisthis.domain.report.repository.ReportRepository;
@@ -74,6 +75,35 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         // Entity -> ResponseDTO
         return MemberConverter.toJoinResponseDTO(newMember);
     }
+
+    @Override
+    public MemberResDTO.JoinResponseDTO signUpSocial(SocialSignupReqDTO dto) {
+
+        if (memberRepository.existsByNickname(dto.getNickname())) {
+            throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_NICKNAME);
+        }
+
+        if (!Boolean.TRUE.equals(dto.getServiceAgreed())) {
+            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
+        }
+
+        if (!Boolean.TRUE.equals(dto.getPrivacyAgreed())) {
+            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
+        }
+
+        Member newMember = Member.builder()
+                .email(dto.getEmail())
+                .nickname(dto.getNickname())
+                .provider(dto.getProvider())
+                .providerId(dto.getProviderId())
+                .serviceAgreed(dto.getServiceAgreed())
+                .privacyAgreed(dto.getPrivacyAgreed())
+                .build();
+
+        memberRepository.save(newMember);
+        return new MemberResDTO.JoinResponseDTO(newMember.getNickname());
+    }
+
 
     @Override
     public void evaluateIsBest(Member member) {
