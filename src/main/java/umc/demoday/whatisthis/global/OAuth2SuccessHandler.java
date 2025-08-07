@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.global;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -55,10 +56,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 String accessToken = jwtProvider.createAccessToken(member.getId(), "USER");
                 String refreshToken = jwtProvider.createRefreshToken(member.getId());
 
-                response.sendRedirect("http://localhost:5173/oauth-callback"
-                        + "?isNew=false"
-                        + "&accessToken=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8)
-                        + "&refreshToken=" + URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+                addHttpOnlyCookie(response, "accessToken", accessToken, 60 * 60); // 1시간
+                addHttpOnlyCookie(response, "refreshToken", refreshToken, 60 * 60 * 24 * 7); // 7일
+
+                response.sendRedirect("http://localhost:5173/oauth-callback?isNew=false");
                 return;
             } else {
                 // 이메일은 같지만 다른 provider에 연동되어 있음
@@ -75,6 +76,15 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 + "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8)
                 + "&provider=" + URLEncoder.encode(provider, StandardCharsets.UTF_8)
                 + "&providerId=" + URLEncoder.encode(providerId, StandardCharsets.UTF_8));
+    }
+
+    private void addHttpOnlyCookie(HttpServletResponse response, String name, String value, int maxAge) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // 로컬 개발 시 false, 배포 시 true (https)
+        cookie.setPath("/");
+        cookie.setMaxAge(maxAge);
+        response.addCookie(cookie);
     }
 }
 
