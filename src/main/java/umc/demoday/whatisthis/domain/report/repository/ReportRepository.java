@@ -46,4 +46,6 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Transactional
     @Query("UPDATE Report r SET r.post = null WHERE r.post.id = :postId")
     void detachAllByPostId(@Param("postId") Integer postId);
+
+    Integer countByStatus(ReportStatus status);
 }

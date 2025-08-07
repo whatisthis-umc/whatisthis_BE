@@ -176,6 +176,7 @@ public class PostServiceImpl implements PostService {
             categoryList = Arrays.stream(Category.values())
                     .filter(ct -> ct.name().endsWith("_ITEM"))
                     .toList();
+        else throw new IllegalArgumentException("지원하지 않는 카테고리입니다: " + category);
 
         // 2. Best 정렬 페이지 요청(Pageable) 객체 생성
         Pageable pageableBest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
@@ -194,6 +195,7 @@ public class PostServiceImpl implements PostService {
 
         // 6. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
         return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, recommendedPostIds, categoryList, category);
+
 
     }
 

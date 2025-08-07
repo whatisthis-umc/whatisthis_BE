@@ -1,8 +1,10 @@
 package umc.demoday.whatisthis.domain.inquiry;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import umc.demoday.whatisthis.domain.answer.Answer;
+import umc.demoday.whatisthis.domain.file.File;
 import umc.demoday.whatisthis.domain.inquiry.enums.InquiryStatus;
 import umc.demoday.whatisthis.domain.member.Member;
 
@@ -44,11 +46,23 @@ public class Inquiry {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL)
-    private List<Answer> answers = new ArrayList<>();
+    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Answer answer;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<File> files = new ArrayList<>();
 
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void addFiles(List<File> files) {
+        this.files.addAll(files);
+        for (File file : files) {
+            file.setInquiry(this); // 양방향 설정
+        }
     }
 }
