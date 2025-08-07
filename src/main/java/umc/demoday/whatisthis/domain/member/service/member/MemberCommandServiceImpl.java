@@ -11,6 +11,7 @@ import umc.demoday.whatisthis.domain.member.converter.MemberConverter;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.SocialLinkReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.SocialSignupReqDTO;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
@@ -132,5 +133,17 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 member.setIsBest(true);
             }
         }
+    }
+
+    public void linkSocial(SocialLinkReqDTO dto) {
+        Member member = memberRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getProvider() != null) {
+            throw new GeneralException(GeneralErrorCode.ALREADY_SOCIAL_LINKED);
+        }
+
+        member.linkSocial(dto.getProvider(), dto.getProviderId());
+        memberRepository.save(member);
     }
 }
