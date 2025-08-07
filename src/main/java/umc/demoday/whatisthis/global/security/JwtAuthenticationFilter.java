@@ -33,10 +33,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        String token = null;
+
         // 1. Authorization 헤더에서 Bearer 토큰 추출
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            String token = bearerToken.substring(7);
+            token = bearerToken.substring(7);
+        } else {
+            // 2. 쿠키에서 accessToken 확인
+            if (request.getCookies() != null) {
+                for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                    if ("accessToken".equals(cookie.getName())) {
+                        token = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+        }
 
             // 2. 토큰 유효성 검사
             if (jwtProvider.validateToken(token)) {
@@ -45,25 +58,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 3. DB에서 사용자 조회 (기본 정보만 필요하면 생략 가능)
                 if ("ROLE_USER".equals(role)) {
-                    memberRepository.findById(memberId).ifPresent(member -> {
-                        // 4. Member 객체를 기반으로 CustomUserDetails 객체를 생성
-                        CustomUserDetails userDetails = new CustomUserDetails(
-                                member.getId(),
-                                member.getEmail(), // 또는 getUsername() 등 Member 엔티티의 실제 메소드 사용
-                                member.getPassword(),
-                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                        );
-
+                    Member member = memberRepository.findById(memberId)
+                            .orElse(null);
+                    if (member != null) {
                         UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(
-                                        userDetails,
-                                        null,
-                                        userDetails.getAuthorities()
-                                );
+                                new UsernamePasswordAuthenticationToken(member, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         // 5. SecurityContext에 등록
                         SecurityContextHolder.getContext().setAuthentication(authentication);
-                    });
+                    }
                 } else if ("ROLE_ADMIN".equals(role)) {
                     Admin admin = adminRepository.findById(memberId)
                             .orElse(null);
@@ -77,7 +80,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             }
-        }
         // 6. 다음 필터로 넘김
         filterChain.doFilter(request, response);
     }

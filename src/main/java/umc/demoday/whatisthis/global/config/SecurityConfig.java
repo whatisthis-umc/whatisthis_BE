@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.global.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,12 +11,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import umc.demoday.whatisthis.global.OAuth2SuccessHandler;
 import umc.demoday.whatisthis.global.security.JwtAuthenticationFilter;
+import umc.demoday.whatisthis.global.service.CustomOauth2UserService;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
+
+    private final CustomOauth2UserService customOauth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     // PasswordEncoder Bean 등록
     @Bean
@@ -73,6 +80,9 @@ public class SecurityConfig {
                                 .requestMatchers("/posts/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
+                        .successHandler(oAuth2SuccessHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
