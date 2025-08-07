@@ -1,6 +1,7 @@
 package umc.demoday.whatisthis.domain.post.converter;
 
 import org.springframework.data.domain.Page;
+import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.MyPagePostResponseDTO;
@@ -26,7 +27,6 @@ public class MyPagePostConverter {
                 .findFirst()
                 .orElseThrow(() -> new GeneralException(MEMBER_NOT_FOUND));
 
-        // 3) ProfileImage가 null일 수 있으므로 안전하게 꺼내기
         String profileImageUrl = Optional.ofNullable(author.getProfileImage())
                 .map(ProfileImage::getImageUrl)
                 .orElse(null);
@@ -57,6 +57,25 @@ public class MyPagePostConverter {
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentList().size())
                 .postImageUrls(postImageUrls)
+                .build();
+    }
+
+    public static MyPagePostResponseDTO.MyPostModifyDTO toMyPostModifyDTO (Post post) {
+
+        List<String> postImageUrls = post.getPostImageList().stream()
+                .map(PostImage::getImageUrl)
+                .toList();
+
+        List<String> hashtags = post.getHashtagList().stream()
+                .map(Hashtag::getContent)
+                .toList();
+
+        return MyPagePostResponseDTO.MyPostModifyDTO.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .postImageUrls(postImageUrls)
+                .hashtags(hashtags)
                 .build();
     }
 

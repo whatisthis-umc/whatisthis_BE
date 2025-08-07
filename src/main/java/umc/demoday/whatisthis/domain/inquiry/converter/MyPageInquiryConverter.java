@@ -52,7 +52,9 @@ public class MyPageInquiryConverter {
                 .inquiryId(inquiry.getId())
                 .title(inquiry.getTitle())
                 .inquiryContent(inquiry.getContent())
-                .answerContent(inquiry.getAnswer().getContent())
+                .answerContent(
+                        inquiry.getAnswer() != null ? inquiry.getAnswer().getContent() : null
+                )
                 .createdAt(inquiry.getCreatedAt())
                 .build();
     }

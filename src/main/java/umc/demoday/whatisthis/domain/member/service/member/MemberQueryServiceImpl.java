@@ -48,4 +48,11 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
         return sb.toString();
     }
+
+    @Override
+    public Member fetchedMember(Member member) {
+
+        return memberRepository.findByIdWithProfileImage(member.getId())
+                .orElseThrow(()-> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+    }
 }

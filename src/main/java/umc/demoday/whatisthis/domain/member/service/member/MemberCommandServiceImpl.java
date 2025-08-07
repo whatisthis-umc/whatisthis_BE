@@ -140,21 +140,34 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             String newUrl = request.getProfileImage();
 
             if (newUrl != null) {
-                profileImageRepository.deleteByMemberId(member.getId());
+                // 🔸 1. 기존 연결 제거
+                if (member.getProfileImage() != null) {
+                    ProfileImage oldImage = member.getProfileImage();
+                    member.setProfileImage(null);
+                    memberRepository.save(member);
 
+                    memberRepository.flush();
+                    profileImageRepository.delete(oldImage);
+                }
+
+                // 🔸 2. 새 이미지 저장
                 ProfileImage profileImage = ProfileImage.builder()
-                        .member(member)
                         .imageUrl(newUrl)
                         .build();
+                profileImage.setMember(member);
                 member.setProfileImage(profileImageRepository.save(profileImage));
             } else {
-                // 삭제 요청
+                // 삭제만 요청된 경우
                 if (member.getProfileImage() != null) {
-                    profileImageRepository.delete(member.getProfileImage());
+                    ProfileImage oldImage = member.getProfileImage();
                     member.setProfileImage(null);
+                    memberRepository.save(member);
+                    memberRepository.flush();
+                    profileImageRepository.delete(oldImage);
                 }
             }
         }
+        else {}
 
         return memberRepository.save(member);
     }

@@ -14,6 +14,7 @@ import umc.demoday.whatisthis.domain.inquiry.service.MyPageInquiryService;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.dto.member.MyPageAccountDTO;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
+import umc.demoday.whatisthis.domain.member.service.member.MemberQueryService;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.MyPagePostResponseDTO;
 import umc.demoday.whatisthis.domain.post.service.MyPagePostService;
@@ -34,6 +35,7 @@ public class MyPageController {
     private final MyPagePostService myPagePostService;
     private final MyPageInquiryService myPageInquiryService;
     private final MemberCommandService memberCommandService;
+    private final MemberQueryService memberQueryService;
 
     @GetMapping("/posts")
     @Operation(summary = "마이페이지 나의 작성내역 조회 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
@@ -70,7 +72,7 @@ public class MyPageController {
         return CustomResponse.ok(toMyInquiryPageDTO(inquiryList));
     }
 
-    @GetMapping("/inquiries/detail")
+    @GetMapping("/inquiries/{inquiry-id}/detail")
     @Operation(summary = "마이페이지 나의 문의내역 상세조회 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<MyPageInquiryResponseDTO.MyInquiryDetailDTO> getMyInquiryDetail
             (@Parameter(description = "조회 할 inquiry id") @PathVariable(name = "inquiry-id") Integer id,
@@ -96,18 +98,21 @@ public class MyPageController {
     @Operation(summary = "마이페이지 계정 관리 페이지 조회 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<MyPageAccountDTO.MyPageAccountResponseDTO> getMyPageAccount(@AuthenticationPrincipal Member loginUser) {
 
-        return CustomResponse.ok(toMyPageAccountResponseDTO(loginUser));
+        Member member = memberQueryService.fetchedMember(loginUser);
+
+        return CustomResponse.ok(toMyPageAccountResponseDTO(member));
     }
 
     @PatchMapping("/account")
-    @Operation(summary = "마이페이지 계정 관리 페이지 수정 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    @Operation(summary = "마이페이지 계정 관리 페이지 수정 API -by 남성현", description = "id는 검증 용도이고, 그외 필드들은 수정하려는 값 외에는 null로 설정하시면 됩니다.", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<MyPageAccountDTO.MyPageAccountModifyDTO> patchMyPageAccount
             (@Valid @RequestBody MyPageAccountDTO.MyPageAccountRequestDTO request,
              @AuthenticationPrincipal Member loginUser) {
 
-        Member member = memberCommandService.updateMember(request,loginUser);
+        Member fetchedmember = memberQueryService.fetchedMember(loginUser);
+        Member member = memberCommandService.updateMember(request,fetchedmember);
 
-        return CustomResponse.ok(toMyPageAccountModifyDTO(loginUser));
+        return CustomResponse.ok(toMyPageAccountModifyDTO(member));
     }
 
 }

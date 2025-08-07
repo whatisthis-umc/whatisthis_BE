@@ -29,7 +29,7 @@ public class ProfileImage {
     @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
-    @OneToOne
+    @OneToOne(mappedBy = "profileImage")
     @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member member;
 }

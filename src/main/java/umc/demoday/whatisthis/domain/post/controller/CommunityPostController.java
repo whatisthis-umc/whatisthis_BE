@@ -19,11 +19,13 @@ import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.MyPagePostResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.service.CommunityPostService;
+import umc.demoday.whatisthis.domain.post.service.MyPagePostService;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.report.Report;
 import umc.demoday.whatisthis.domain.report.converter.ReportConverter;
@@ -39,6 +41,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static umc.demoday.whatisthis.domain.post.converter.MyPagePostConverter.toMyPostModifyDTO;
 import static umc.demoday.whatisthis.domain.post.converter.PostConverter.*;
 import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportCommentResponseDTO;
 import static umc.demoday.whatisthis.domain.report.converter.ReportConverter.toReportPostResponseDTO;
@@ -53,6 +56,7 @@ public class CommunityPostController {
     private final CommentService commentService;
     private final ReportService reportService;
     private final S3Service s3Service;
+    private final MyPagePostService myPagePostService;
 
     @GetMapping("/communities")
     @Operation(summary = "커뮤니티 페이지 조회 API (전체) -by 남성현")
@@ -204,6 +208,35 @@ public class CommunityPostController {
         communityPostService.plusOneViewCount(post);
 
         return CustomResponse.ok(toCommunityPostViewDTO(post, commentList,postImageList,hashtagList));
+    }
+
+    @DeleteMapping("/communities/{post-id}")
+    @Operation(summary = "자신의 게시물 삭제 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<Void> deleteMyPagePosts
+            (@Parameter(description = "삭제할 post id") @PathVariable(name = "post-id") Integer id,
+             @AuthenticationPrincipal Member loginUser) {
+
+        myPagePostService.deletePost(id, loginUser);
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204, null);
+    }
+
+    @PatchMapping(value = "/communities/{post-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "자신의 게시물 수정 API -by 남성현", description = "내용을 전체 덮어쓰기하는 방식이므로 수정없는 부분도 입력해야합니다.", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<MyPagePostResponseDTO.MyPostModifyDTO> patchMyPagePosts
+            (@Parameter(description = "수정할 post id") @PathVariable(name = "post-id") Integer id,
+             @RequestPart("request") @Valid PostRequestDTO.ModifyPostRequestDTO request,
+             @RequestPart(value = "images", required = false) List<MultipartFile> images,
+             @AuthenticationPrincipal Member loginUser) {
+
+        // S3에 이미지 업로드
+        List<String> imageUrls = (images != null && !images.isEmpty())
+                ? s3Service.uploadFiles(images, "post")
+                : Collections.emptyList();
+
+        Post post = communityPostService.updatePost(id,request,imageUrls, loginUser);
+
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK,toMyPostModifyDTO(post));
     }
 
     @PostMapping("/{post-id}/likes")

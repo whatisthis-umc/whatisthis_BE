@@ -19,6 +19,7 @@ public interface CommunityPostService {
     Page<Post> getAllPostsByCategory(Integer page, Integer size, SortBy sort, Category category);
 
     Post insertNewPost (PostRequestDTO.NewPostRequestDTO request, List<String> imageUrls, Member member);
+    Post updatePost(Integer postId,PostRequestDTO.ModifyPostRequestDTO request, List<String> imageUrls, Member member);
 
     Post getPost(Integer id);
     Page<Comment> getCommentListByPost(Integer page, Integer size, SortBy sort, Post post);

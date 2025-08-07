@@ -40,5 +40,16 @@ public class MyPagePostResponseDTO {
         List<MyPostDTO> posts;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MyPostModifyDTO {
+        Integer postId;
+        String title;
+        String content;
+        List<String> postImageUrls;
+        List<String> hashtags;
+    }
 
 }

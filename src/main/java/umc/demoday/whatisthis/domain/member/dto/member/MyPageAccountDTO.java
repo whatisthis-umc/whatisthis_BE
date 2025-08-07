@@ -37,10 +37,6 @@ public class MyPageAccountDTO {
         @Pattern(regexp = "^[a-zA-Z0-9가-힣]+$", message = "닉네임은 영문, 한글, 숫자만 사용할 수 있습니다.")
         String nickname;
 
-        @NotBlank (message = "이메일은 필수입니다.")
-        @Email
-        String email;
-
         @Size(min = 10, max = 100, message = "비밀번호는 10자 이상이어야합니다.")
         @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "비밀번호는 영문과 숫자만 사용할 수 있습니다.")
         String password;
