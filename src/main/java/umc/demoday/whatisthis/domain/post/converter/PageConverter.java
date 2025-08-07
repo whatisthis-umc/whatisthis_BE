@@ -76,7 +76,7 @@ public class PageConverter {
     }
 
 
-    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Category> categories, Category category) {
+    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Integer> recomededPostIds, List<Category> categories, Category category) {
         List<Post> bestPosts = bestPostPage.getContent();
         List<Post> latestPosts = latestPostPage.getContent();
         // 게시글이 없는 경우 빈 응답을 즉시 반환
@@ -91,6 +91,8 @@ public class PageConverter {
         List<Integer> latestPostIds = latestPosts.stream()
                 .map(Post::getId)
                 .toList();
+
+
         // 2. 연관 데이터 일괄 조회 (Batch Fetching)
         Map<Integer, String> bestPostThumbnailsMap = findThumbnails(bestPostIds);
         Map<Integer, List<Hashtag>> bestPostHashtagsMap = findHashtags(bestPostIds);
@@ -99,6 +101,10 @@ public class PageConverter {
         Map<Integer, String> latestPostThumbnailsMap = findThumbnails(latestPostIds);
         Map<Integer, List<Hashtag>> latestPostHashtagsMap = findHashtags(latestPostIds);
         Map<Integer, Integer> latestPostScrapCountsMap = getScrapCountMap(latestPostIds);
+
+        Map<Integer, String> aiPostThumbnailsMap = findThumbnails(recomededPostIds);
+        Map<Integer, List<Hashtag>> aiPostHashtagsMap = findHashtags(recomededPostIds);
+        Map<Integer, Integer> aiPostScrapCountsMap = getScrapCountMap(recomededPostIds);
 
         // summaryDTO 생성
         List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList = bestPostPage.stream()
@@ -115,72 +121,55 @@ public class PageConverter {
                         latestPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
                         latestPostScrapCountsMap.getOrDefault(post.getId(), 0)
                 )).toList();
+        List<PostResponseDTO.GgulPostSummaryDTO> aiPostSummaryDTOList = bestPostPage.stream()
+                .map(post -> toGgulPostSummaryDTO(
+                        post,
+                        aiPostThumbnailsMap.get(post.getId()),
+                        aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        aiPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                )).toList();
 
         // section dto 생성
-        List<MainPageResponseDTO.SectionDTO> sections = category.toString().endsWith("_TIP") ? getHoneyTipSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList) : getHoneyItemSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList);
+        List<MainPageResponseDTO.SectionDTO> sections = getSectionDTOS(bestPostSummaryDTOList, latestPostSummaryDTOList, aiPostSummaryDTOList,category);
         return new MainPageResponseDTO(
                 categories,
                 sections
         );
     }
 
-    private List<MainPageResponseDTO.SectionDTO> getHoneyTipSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList) {
+    private List<MainPageResponseDTO.SectionDTO> getSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> aiPostSummaryDTOList, Category category) {
+        String url = category.name().endsWith("_TIP") ? "LIFE_TIPS" : "LIFE_ITEMS";
         MainPageResponseDTO.SectionDTO bestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
                 "인기 게시물",
                 bestPostSummaryDTOList,
-                "/posts/life-tips?sort=BEST&page=1&size=6"
-        );
-        MainPageResponseDTO.SectionDTO latestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
-                "최신 게시물",
-                latestPostSummaryDTOList,
-                "/posts/life-tips?sort=LATEST&page=1&size=6"
-        );
-        MainPageResponseDTO.SectionDTO aiRecommendationPostSectionDTO = new MainPageResponseDTO.SectionDTO(
-                "AI 추천 게시물",
-                null,
-                "/posts/life-tips?sort=AI&page=1&size=6"
-        );
-        List<MainPageResponseDTO.SectionDTO> sections = new java.util.ArrayList<>(List.of());
-        sections.add(bestPostSectionDTO);
-        sections.add(latestPostSectionDTO);
-        sections.add(aiRecommendationPostSectionDTO);
-        return sections;
-    }
+                "posts/" + url + "?sort=BEST&page=1&size=6"
 
-    private List<MainPageResponseDTO.SectionDTO> getHoneyItemSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList) {
-        MainPageResponseDTO.SectionDTO bestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
-                "인기 게시물",
-                bestPostSummaryDTOList,
-                "/posts/life-items?sort=BEST&page=1&size=6"
         );
         MainPageResponseDTO.SectionDTO latestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
                 "최신 게시물",
                 latestPostSummaryDTOList,
-                "/posts/life-items?sort=LATEST&page=1&size=6"
+                "posts/"  + url + "?sort=LATEST&page=1&size=6"
         );
-        MainPageResponseDTO.SectionDTO aiRecommendationPostSectionDTO = new MainPageResponseDTO.SectionDTO(
-                "AI 추천 게시물",
-                null,
-                "/posts/life-items?sort=AI&page=1&size=6"
+        MainPageResponseDTO.SectionDTO aiPostSectionDTO = new MainPageResponseDTO.SectionDTO(
+                "Ai 추천 게시물",
+                aiPostSummaryDTOList,
+                "posts/" + url + "/ai?page=1&size=6"
         );
         List<MainPageResponseDTO.SectionDTO> sections = new java.util.ArrayList<>(List.of());
         sections.add(bestPostSectionDTO);
         sections.add(latestPostSectionDTO);
-        sections.add(aiRecommendationPostSectionDTO);
+        sections.add(aiPostSectionDTO);
         return sections;
     }
 
     // Post 엔티티를 GgulPostSummaryDTO로 변환
-    private PostResponseDTO.GgulPostSummaryDTO toGgulPostSummaryDTO(Post post, String thumbnailUrl, List<Hashtag> hashtags, Integer scrapCount) {
+    public PostResponseDTO.GgulPostSummaryDTO toGgulPostSummaryDTO(Post post, String thumbnailUrl, List<Hashtag> hashtags, Integer scrapCount) {
         String summary = post.getContent();
         // 내용이 30자 이상일 경우 자르기 (Null-safe)
         if (summary != null && summary.length() > 30) {
             summary = summary.substring(0, 30) + "...";
         }
-
-        List<String> hashtagContents = hashtags.stream()
-                .map(Hashtag::getContent)
-                .toList();
+        List<String> hashtagList = hashtags.stream().map(Hashtag::getContent).toList();
 
         return new PostResponseDTO.GgulPostSummaryDTO(
                 post.getId(),
@@ -189,7 +178,7 @@ public class PageConverter {
                 post.getCategory(), //subCategory
                 post.getTitle(),
                 summary,
-                hashtagContents, // 조회된 해시태그 리스트
+                hashtagList, // 조회된 해시태그 리스트
                 post.getViewCount(),
                 post.getLikeCount(),
                 scrapCount, // 조회된 스크랩 수
@@ -199,7 +188,7 @@ public class PageConverter {
 
     // 주어진 Post ID 리스트에 해당하는 썸네일들을 한 번의 쿼리로 조회
 
-    private Map<Integer, String> findThumbnails(List<Integer> postIds) {
+    public Map<Integer, String> findThumbnails(List<Integer> postIds) {
         // 각 post의 첫 번째 이미지를 썸네일로 간주
         return postImageRepository.findAllByPost_IdIn(postIds).stream()
                 .collect(Collectors.toMap(
@@ -210,13 +199,13 @@ public class PageConverter {
     }
 
     // 주어진 Post ID 리스트에 해당하는 해시태그들을 한 번의 쿼리로 조회
-    private Map<Integer, List<Hashtag>> findHashtags(List<Integer> postIds) {
+    public Map<Integer, List<Hashtag>> findHashtags(List<Integer> postIds) {
         return hashtagRepository.findAllByPost_IdIn(postIds).stream()
                 .collect(Collectors.groupingBy(hashtag -> hashtag.getPost().getId())); // Hashtag 객체에서 id 가져옴
     }
 
     // 주어진 Post ID 리스트에 해당하는 스크랩 수 카운팅
-    private Map<Integer, Integer> getScrapCountMap(List<Integer> postIds) {
+    public Map<Integer, Integer> getScrapCountMap(List<Integer> postIds) {
         return postScrapRepository.findScrapCountsByPostIds(postIds)
                 .stream()
                 .collect(Collectors.toMap(

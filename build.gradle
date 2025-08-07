@@ -54,6 +54,12 @@ dependencies {
 
 	// AWS S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	// vectorDB
+	implementation "io.pinecone:pinecone-client:5.0.0" // Pinecone용
+	//protobuf 버전 강제
+	implementation 'com.google.protobuf:protobuf-java:4.29.3'
+
 }
 
 tasks.named('test') {

@@ -15,6 +15,7 @@ import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.repository.AdminRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,21 +45,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 3. DB에서 사용자 조회 (기본 정보만 필요하면 생략 가능)
                 if ("ROLE_USER".equals(role)) {
-                    Member member = memberRepository.findById(memberId)
-                            .orElse(null);
+                    memberRepository.findById(memberId).ifPresent(member -> {
+                        // 4. Member 객체를 기반으로 CustomUserDetails 객체를 생성
+                        CustomUserDetails userDetails = new CustomUserDetails(
+                                member.getId(),
+                                member.getEmail(), // 또는 getUsername() 등 Member 엔티티의 실제 메소드 사용
+                                member.getPassword(),
+                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        );
 
-                    if (member != null) {
-                        // 4. 인증 객체 생성
                         UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(member, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails,
+                                        null,
+                                        userDetails.getAuthorities()
+                                );
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                         // 5. SecurityContext에 등록
                         SecurityContextHolder.getContext().setAuthentication(authentication);
-                    }
+                    });
                 } else if ("ROLE_ADMIN".equals(role)) {
                     Admin admin = adminRepository.findById(memberId)
                             .orElse(null);
+
                     if (admin != null) {
                         UsernamePasswordAuthenticationToken auth =
                                 new UsernamePasswordAuthenticationToken(admin, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));

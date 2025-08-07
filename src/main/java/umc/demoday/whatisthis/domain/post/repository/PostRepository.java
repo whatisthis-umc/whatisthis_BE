@@ -38,4 +38,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     // 여러 카테고리로 조회
     Page<Post> findByCategoryIn(List<Category> categories, Pageable pageable);
+
+    // UpdatedAt 기준으로 오름차순 정렬 조회
+    Page<Post> findByUpdatedAtAfterOrderByUpdatedAtAsc(LocalDateTime lastUpdatedAt, Pageable pageable);
 }
