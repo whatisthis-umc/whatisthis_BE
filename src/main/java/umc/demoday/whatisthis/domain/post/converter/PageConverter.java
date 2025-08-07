@@ -15,6 +15,7 @@ import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,7 @@ public class PageConverter {
                 "인기 게시물",
                 bestPostSummaryDTOList,
                 "posts/" + url + "?sort=BEST&page=1&size=6"
+
         );
         MainPageResponseDTO.SectionDTO latestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
                 "최신 게시물",
@@ -167,12 +169,13 @@ public class PageConverter {
         if (summary != null && summary.length() > 30) {
             summary = summary.substring(0, 30) + "...";
         }
-
         List<String> hashtagList = hashtags.stream().map(Hashtag::getContent).toList();
 
         return new PostResponseDTO.GgulPostSummaryDTO(
                 post.getId(),
                 thumbnailUrl, // 조회된 썸네일 URL
+                post.getCategory().toString().endsWith("_TIP") ? Category.LIFE_TIP : Category.LIFE_ITEM,
+                post.getCategory(), //subCategory
                 post.getTitle(),
                 summary,
                 hashtagList, // 조회된 해시태그 리스트
