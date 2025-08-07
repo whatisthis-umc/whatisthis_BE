@@ -60,6 +60,22 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
             customAttributes.put("providerId", providerId);
         }
 
+        // 네이버일 경우
+        else if ("naver".equals(registrationId)) {
+            // 네이버는 response 내부에 유저 정보가 들어 있음
+            Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+            String email = (String) response.get("email");
+            String providerId = (String) response.get("id");
+
+            if (email == null) {
+                throw new OAuth2AuthenticationException("이메일 제공에 동의하지 않았습니다.");
+            }
+
+            customAttributes.put("email", email);
+            customAttributes.put("provider", registrationId);
+            customAttributes.put("providerId", providerId);
+        }
+
 
         // 기본적으로 ROLE_USER로 부여
         return new DefaultOAuth2User(

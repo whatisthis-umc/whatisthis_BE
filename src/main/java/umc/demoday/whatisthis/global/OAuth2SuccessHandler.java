@@ -31,7 +31,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String email = (String) oAuth2User.getAttribute("email");
         String provider = (String) oAuth2User.getAttribute("provider");
         String providerId = (String) oAuth2User.getAttribute("providerId");
-
+        response.setContentType("text/plain; charset=UTF-8");
         if (email == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "이메일 정보를 받아올 수 없습니다.");
             return;
