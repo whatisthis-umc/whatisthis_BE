@@ -45,25 +45,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 3. DB에서 사용자 조회 (기본 정보만 필요하면 생략 가능)
                 if ("ROLE_USER".equals(role)) {
-                    memberRepository.findById(memberId).ifPresent(member -> {
-                        // 4. Member 객체를 기반으로 CustomUserDetails 객체를 생성
-                        CustomUserDetails userDetails = new CustomUserDetails(
-                                member.getId(),
-                                member.getEmail(), // 또는 getUsername() 등 Member 엔티티의 실제 메소드 사용
-                                member.getPassword(),
-                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                        );
-
+                    Member member = memberRepository.findById(memberId)
+                            .orElse(null);
+                    if (member != null) {
                         UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(
-                                        userDetails,
-                                        null,
-                                        userDetails.getAuthorities()
-                                );
+                                new UsernamePasswordAuthenticationToken(member, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         // 5. SecurityContext에 등록
                         SecurityContextHolder.getContext().setAuthentication(authentication);
-                    });
+                    }
                 } else if ("ROLE_ADMIN".equals(role)) {
                     Admin admin = adminRepository.findById(memberId)
                             .orElse(null);

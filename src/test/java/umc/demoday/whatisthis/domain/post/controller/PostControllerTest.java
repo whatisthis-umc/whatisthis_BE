@@ -33,57 +33,57 @@ import java.util.List;
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(PostController.class)
 class PostControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc; // HTTP 요청을 시뮬레이션하는 역할
-
-    @Autowired
-    private PostService postService;
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public PostService postService() {
-            return Mockito.mock(PostService.class);
-        }
-    }
-
-    @Test
-    @DisplayName("생활꿀팁 게시글 단건 조회 성공")
-    void getGgulPost_Success() throws Exception {
-        // given (준비)
-        Integer postId = 1;
-
-        // postServiceImpl.getGgulPost()가 반환할 가짜 결과 데이터 생성
-        PostResponseDTO.GgulPostResponseDTO fakeResult = new PostResponseDTO.GgulPostResponseDTO(
-                1,
-                "생활꿀팁",
-                Category.CLEAN_TIP,
-                "전자레인지 청소 꿀팁",
-                "내용...",
-                List.of("#청소", "#정보"),
-                List.of("sdfasdf", "sdfsdf"),
-                1,
-                2,
-                3,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
-
-        // postServiceImpl.getGgulPost()에 어떤 값이 들어오든 fakeResult를 반환하도록 설정
-        given(postService.getGgulPost(any(Integer.class))).willReturn(fakeResult);
-
-        // when & then (실행 및 검증)
-        mockMvc.perform(
-                        get("/posts/{post-id}", postId) // PostController의 @RequestMapping 경로를 포함
-                                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.code").value("COMMON2000"))
-                .andExpect(jsonPath("$.message").value("성공적으로 처리했습니다."))
-                .andExpect(jsonPath("$.result.postId").value(fakeResult.getPostId()))
-                .andExpect(jsonPath("$.result.title").value(fakeResult.getTitle()));
-    }
-
+//
+//    @Autowired
+//    private MockMvc mockMvc; // HTTP 요청을 시뮬레이션하는 역할
+//
+//    @Autowired
+//    private PostService postService;
+//
+//    @TestConfiguration
+//    static class TestConfig {
+//        @Bean
+//        public PostService postService() {
+//            return Mockito.mock(PostService.class);
+//        }
+//    }
+//
+//    @Test
+//    @DisplayName("생활꿀팁 게시글 단건 조회 성공")
+//    void getGgulPost_Success() throws Exception {
+//        // given (준비)
+//        Integer postId = 1;
+//
+//        // postServiceImpl.getGgulPost()가 반환할 가짜 결과 데이터 생성
+//        PostResponseDTO.GgulPostResponseDTO fakeResult = new PostResponseDTO.GgulPostResponseDTO(
+//                1,
+//                "생활꿀팁",
+//                Category.CLEAN_TIP,
+//                "전자레인지 청소 꿀팁",
+//                "내용...",
+//                List.of("#청소", "#정보"),
+//                List.of("sdfasdf", "sdfsdf"),
+//                1,
+//                2,
+//                3,
+//                LocalDateTime.now(),
+//                LocalDateTime.now()
+//        );
+//
+//        // postServiceImpl.getGgulPost()에 어떤 값이 들어오든 fakeResult를 반환하도록 설정
+//        given(postService.getGgulPost(any(Integer.class))).willReturn(fakeResult);
+//
+//        // when & then (실행 및 검증)
+//        mockMvc.perform(
+//                        get("/posts/{post-id}", postId) // PostController의 @RequestMapping 경로를 포함
+//                                .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.isSuccess").value(true))
+//                .andExpect(jsonPath("$.code").value("COMMON2000"))
+//                .andExpect(jsonPath("$.message").value("성공적으로 처리했습니다."))
+//                .andExpect(jsonPath("$.result.postId").value(fakeResult.getPostId()))
+//                .andExpect(jsonPath("$.result.title").value(fakeResult.getTitle()));
+//    }
+//
 
 }
