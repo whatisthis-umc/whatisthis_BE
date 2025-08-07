@@ -33,7 +33,7 @@ public class Member {
     @Column(length = 100)
     private String password;
 
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String nickname;
 
     @CreatedDate
@@ -87,5 +87,10 @@ public class Member {
 
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
+    }
+
+    public void linkSocial(String provider, String providerId) {
+        this.provider = provider;
+        this.providerId = providerId;
     }
 }
