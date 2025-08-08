@@ -179,6 +179,19 @@ public class PostResponseDTO {
         List<PostResponseDTO.GgulPostSummaryDTO> posts;
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GgulPostsByAiResponseDTO {
+        SortBy  sortBy;
+        Integer page;
+        Integer size;
+        Long totalElements;
+        Integer totalPages;
+        List<PostResponseDTO.GgulPostSummaryDTO> posts;
+    }
+
 
     @Getter
     @Setter

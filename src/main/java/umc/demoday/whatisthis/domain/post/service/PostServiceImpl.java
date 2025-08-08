@@ -1,19 +1,19 @@
 package umc.demoday.whatisthis.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
+import umc.demoday.whatisthis.domain.member_profile.MemberProfile;
+import umc.demoday.whatisthis.domain.member_profile.MemberProfileRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.converter.PageConverter;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
@@ -26,14 +26,12 @@ import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.PostScrap;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
+import umc.demoday.whatisthis.domain.recommendation.RecommendationService;
 import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
-import java.awt.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +44,12 @@ public class PostServiceImpl implements PostService {
     private final HashtagRepository hashtagRepository;
     private final MemberRepository memberRepository;
     private final PageConverter pageConverter;
-  
+    private final MemberProfileRepository memberProfileRepository;
+    private final RecommendationService recommendationService;
+    private final MemberActivityService memberActivityService;
+
     @Override
-    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId) {
+    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, Member memberDetails) {
         // 1. 게시글 정보 조회
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
@@ -71,33 +72,26 @@ public class PostServiceImpl implements PostService {
         // 2-3. 스크랩 수 조회
         int postScrapCount = postScrapRepository.countByPostId(postId);
 
+        // 최근 조회한 게시글 갱신
+        memberActivityService.updateLastSeenPost(memberDetails.getId(), postId);
+
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
     }
 
-    public void scrapPost(Integer postId) {
+    public void scrapPost(Integer postId, @AuthenticationPrincipal Member memberDetails) {
 
         // Post 불러오기
         Post post = postRepository.findById(postId).orElse(null);
         if (post == null) throw new GeneralException(GeneralErrorCode.NOT_FOUND_404);
-
-        // 멤버 ID 불러오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            Integer memberId = userDetails.getId();
-            // 멤버 엔티티 불러오기
-            Member member = memberRepository.findById(memberId).orElseThrow();
-            PostScrap postScrap = new PostScrap(member, post);
-            postScrapRepository.save(postScrap);
-        }
+        PostScrap postScrap = new PostScrap(memberDetails, post);
+        postScrapRepository.save(postScrap);
     }
 
 
-    public void deleteScrap(Integer scrapId) {
+    public void deleteScrap(Integer scrapId,@AuthenticationPrincipal Member memberDetails) {
         // 현재 멤버의 ID 찾기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Integer currentMemberId = userDetails.getId();
+        Integer currentMemberId = memberDetails.getId();
 
         // PostScrap 찾기
         PostScrap postScrap = postScrapRepository.findById(scrapId)
@@ -114,17 +108,17 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
         // 1. 정렬 기준(Sort) 객체 생성
-        Sort sortKey;
+        Sort sortKey = null;
         if ("BEST".equalsIgnoreCase(sort.toString())) {
             // BEST(인기순) -> likeCount(좋아요 수)가 높은 순서대로 정렬
             sortKey = Sort.by(Sort.Direction.DESC, "likeCount");
-        } else {
+        } else if("LATEST".equalsIgnoreCase(sort.toString())) {
             // LATEST(최신순) -> createdAt(생성일)이 최신인 순서대로 정렬
             sortKey = Sort.by(Sort.Direction.DESC, "createdAt");
         }
 
         // 2. 페이지 요청(Pageable) 객체 생성
-        Pageable pageable = PageRequest.of(page, size, sortKey);
+        Pageable pageable = PageRequest.of(page, size, Objects.requireNonNull(sortKey));
 
         // 3. Repository를 통해 데이터베이스에서 데이터 조회
         Page<Post> postPage = postRepository.findByCategory(category, pageable);
@@ -134,7 +128,34 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size){
+    public PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(Member memberDetails, Integer page, Integer size, Category category) {
+        List<Integer> allRecommendedList = recommendationService.findRecommendationsForMember(memberDetails.getId(), (page + 1) * size, category);
+        //원하는 페이지만큼 짜르기
+        List<Post> posts = postRepository.findAllById(allRecommendedList.subList(page * size, (page + 1) * size));
+        Map<Integer, String> aiPostThumbnailsMap = pageConverter.findThumbnails(allRecommendedList);
+        Map<Integer, List<Hashtag>> aiPostHashtagsMap = pageConverter.findHashtags(allRecommendedList);
+        Map<Integer, Integer> aiPostScrapCountsMap = pageConverter.getScrapCountMap(allRecommendedList);
+
+        List<PostResponseDTO.GgulPostSummaryDTO> summaryDTOS = posts.stream().map(post -> pageConverter.toGgulPostSummaryDTO(
+                post,
+                aiPostThumbnailsMap.get(post.getId()),
+                aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                aiPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                ))
+                .toList();
+
+        return new PostResponseDTO.GgulPostsByAiResponseDTO(
+                SortBy.AI,
+                page,
+                size,
+                ((long) (page + 1) * size),
+                page,
+                summaryDTOS
+        );
+    }
+    @Override
+    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size,Member memberDetails) {
+
         // 1. category Enum List 생성
         List<Category> categoryList = List.of();
         if(category == Category.LIFE_TIP)
@@ -153,13 +174,21 @@ public class PostServiceImpl implements PostService {
         // 3. Latest 정렬 페이지 요청(Pageable) 객체 생성
         Pageable pageableLatest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // 3. Repository를 통해 데이터베이스에서 데이터 조회
+        // 4. Ai 추천 페이지 요청(Pageable) 객체 생성
+        Pageable pageableAi = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+        Integer memberId = memberDetails.getId();
+        MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
+        List<Integer> recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(),size,category);
+        // 5. Repository를 통해 데이터베이스에서 데이터 조회
         Page<Post> bestPostPage = postRepository.findByCategoryIn(categoryList, pageableBest);
         Page<Post> latestPostPage = postRepository.findByCategoryIn(categoryList, pageableLatest);
 
-        //  4. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
-        return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, categoryList, category);
+        // 6. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
+        return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, recommendedPostIds, categoryList, category);
+
 
     }
+
+
 }
 

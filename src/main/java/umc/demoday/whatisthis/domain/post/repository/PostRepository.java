@@ -40,6 +40,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     // 여러 카테고리로 조회
     Page<Post> findByCategoryIn(List<Category> categories, Pageable pageable);
 
+
     @Query("""
     SELECT p FROM Post p
     JOIN FETCH p.member m
@@ -47,4 +48,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     WHERE m = :member
 """)
     Page<Post> findAllByMember(@Param("member") Member member, Pageable pageable);
+
+    // UpdatedAt 기준으로 오름차순 정렬 조회
+    Page<Post> findByUpdatedAtAfterOrderByUpdatedAtAsc(LocalDateTime lastUpdatedAt, Pageable pageable);
+
 }

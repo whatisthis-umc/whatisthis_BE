@@ -15,6 +15,7 @@ import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.repository.AdminRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,19 +47,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if ("ROLE_USER".equals(role)) {
                     Member member = memberRepository.findById(memberId)
                             .orElse(null);
-
                     if (member != null) {
-                        // 4. 인증 객체 생성
                         UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(member, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                         // 5. SecurityContext에 등록
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 } else if ("ROLE_ADMIN".equals(role)) {
                     Admin admin = adminRepository.findById(memberId)
                             .orElse(null);
+
                     if (admin != null) {
                         UsernamePasswordAuthenticationToken auth =
                                 new UsernamePasswordAuthenticationToken(admin, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));

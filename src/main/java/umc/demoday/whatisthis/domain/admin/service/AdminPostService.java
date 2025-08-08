@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.domain.admin.service;
 
+import io.pinecone.clients.Index;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class AdminPostService {
     private final HashtagRepository hashtagRepository;
     private final PostService postService;
 
+    private final Index index;
 
     public AdminPostResDTO getPost(Integer postId) {
 
@@ -74,7 +76,8 @@ public class AdminPostService {
 
         //존재하면 삭제
         postRepository.delete(postToDelete);
-
+        //벡터 DB에서도 삭제
+        index.deleteByIds(List.of(postToDelete.getId().toString()));
         return postId;
     }
 
