@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 
@@ -39,6 +40,16 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     // 여러 카테고리로 조회
     Page<Post> findByCategoryIn(List<Category> categories, Pageable pageable);
 
+
+    @Query("""
+    SELECT p FROM Post p
+    JOIN FETCH p.member m
+    LEFT JOIN FETCH m.profileImage
+    WHERE m = :member
+""")
+    Page<Post> findAllByMember(@Param("member") Member member, Pageable pageable);
+
     // UpdatedAt 기준으로 오름차순 정렬 조회
     Page<Post> findByUpdatedAtAfterOrderByUpdatedAtAsc(LocalDateTime lastUpdatedAt, Pageable pageable);
+
 }

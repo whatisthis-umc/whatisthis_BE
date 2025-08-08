@@ -11,14 +11,20 @@ import umc.demoday.whatisthis.domain.member.converter.MemberConverter;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.MyPageAccountDTO;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
+import umc.demoday.whatisthis.domain.profile_image.ProfileImage;
+import umc.demoday.whatisthis.domain.profile_image.repository.ProfileImageRepository;
 import umc.demoday.whatisthis.domain.report.repository.ReportRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 
+import java.lang.module.FindException;
 import java.time.LocalDateTime;
+
+import static umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode.BAD_REQUEST_400;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +39,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final ReportRepository reportRepository;
+    private final ProfileImageRepository profileImageRepository;
 
     @Override
     public MemberResDTO.JoinResponseDTO signUp(MemberReqDTO.JoinRequestDTO dto) {
@@ -102,5 +109,66 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 member.setIsBest(true);
             }
         }
+    }
+
+    @Override
+    public Member updateMember(MyPageAccountDTO.MyPageAccountRequestDTO request, Member member) {
+
+        if (!member.getId().equals(request.getId())) {
+            throw new GeneralException(BAD_REQUEST_400);
+        }
+
+        if (request.getNickname() != null && !member.getNickname().equals(request.getNickname())) {
+            if (memberRepository.existsByNickname(request.getNickname())) {
+                throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_NICKNAME);
+            }
+            member.setNickname(request.getNickname());
+        } else if (member.getNickname().equals(request.getNickname())) {
+            throw new GeneralException(GeneralErrorCode.NICKNAME_SAME_AS_BEFORE);
+        }
+
+        if (request.getPassword() != null) {
+
+            String password = passwordEncoder.encode(request.getPassword());
+            if (password.equals(member.getPassword())) {
+                throw new GeneralException(GeneralErrorCode.PASSWORD_SAME_AS_BEFORE);
+            }
+            member.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        if (request.getModifyProfileImage()) {
+            String newUrl = request.getProfileImage();
+
+            if (newUrl != null) {
+                // 🔸 1. 기존 연결 제거
+                if (member.getProfileImage() != null) {
+                    ProfileImage oldImage = member.getProfileImage();
+                    member.setProfileImage(null);
+                    memberRepository.save(member);
+
+                    memberRepository.flush();
+                    profileImageRepository.delete(oldImage);
+                }
+
+                // 🔸 2. 새 이미지 저장
+                ProfileImage profileImage = ProfileImage.builder()
+                        .imageUrl(newUrl)
+                        .build();
+                profileImage.setMember(member);
+                member.setProfileImage(profileImageRepository.save(profileImage));
+            } else {
+                // 삭제만 요청된 경우
+                if (member.getProfileImage() != null) {
+                    ProfileImage oldImage = member.getProfileImage();
+                    member.setProfileImage(null);
+                    memberRepository.save(member);
+                    memberRepository.flush();
+                    profileImageRepository.delete(oldImage);
+                }
+            }
+        }
+        else {}
+
+        return memberRepository.save(member);
     }
 }
