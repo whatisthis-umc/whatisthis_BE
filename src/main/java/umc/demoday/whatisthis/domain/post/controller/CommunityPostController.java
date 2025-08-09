@@ -176,7 +176,7 @@ public class CommunityPostController {
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,toCommunityPostPreviewListDTO(postList));
     }
 
-    @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/communities", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "커뮤니티 글 작성 API -by 남성현, 윤영석", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost(
             @RequestPart("request") @Valid PostRequestDTO.NewPostRequestDTO request,
