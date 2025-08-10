@@ -154,7 +154,7 @@ public class PostServiceImpl implements PostService {
         );
     }
     @Override
-    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size,Member memberDetails) {
+    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, Member memberDetails) {
 
         // 1. category Enum List 생성
         List<Category> categoryList = List.of();
@@ -175,14 +175,12 @@ public class PostServiceImpl implements PostService {
         Pageable pageableLatest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // 4. Ai 추천 페이지 요청(Pageable) 객체 생성
-        Pageable pageableAi = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
         Integer memberId = memberDetails.getId();
         MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
         List<Integer> recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(),size,category);
         // 5. Repository를 통해 데이터베이스에서 데이터 조회
         Page<Post> bestPostPage = postRepository.findByCategoryIn(categoryList, pageableBest);
         Page<Post> latestPostPage = postRepository.findByCategoryIn(categoryList, pageableLatest);
-
         // 6. 조회된 Post 엔티티를 MainPageResponseDTO 로 변환
         return pageConverter.toMainPageResponseDTO(bestPostPage, latestPostPage, recommendedPostIds, categoryList, category);
 

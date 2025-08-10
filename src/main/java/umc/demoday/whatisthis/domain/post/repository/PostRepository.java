@@ -40,6 +40,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     // 여러 카테고리로 조회
     Page<Post> findByCategoryIn(List<Category> categories, Pageable pageable);
 
+    Page<Post> findByIdIn(List<Integer> ids, Pageable pageable);
 
     @Query("""
     SELECT p FROM Post p
