@@ -80,10 +80,11 @@ public class AdminPostService {
         Post postToDelete = postRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
+        String category = postToDelete.getCategory().toString().endsWith("_TIP") ? "LIFE_TIP" : "LIFE_ITEM";
         //존재하면 삭제
         postRepository.delete(postToDelete);
         //벡터 DB에서도 삭제
-        index.deleteByIds(List.of(postToDelete.getId().toString()));
+        index.deleteByIds(List.of(postToDelete.getId().toString()), category);
         return postId;
     }
 
@@ -115,7 +116,8 @@ public class AdminPostService {
             postImageRepository.saveAll(newImages);
 
             // Post 엔티티에도 새로운 이미지 목록을 설정하여 상태를 동기화합니다.
-            post.setPostImageList(newImages);
+            post.getPostImageList().clear();
+            post.getPostImageList().addAll(newImages);
         }
         // 업데이트된 이미지 URL 목록을 가져오기
         List<String> updatedImageUrls = post.getPostImageList().stream()
@@ -136,7 +138,8 @@ public class AdminPostService {
             hashtagRepository.saveAll(newHashtags);
 
             // Post 엔티티에도 새로운 해시태그 목록을 설정하여 상태를 동기화합니다.
-            post.setHashtagList(newHashtags);
+            post.getHashtagList().clear();
+            post.getHashtagList().addAll(newHashtags);
         }
 
         // 업데이트된 해시태그 목록을 가져오기
