@@ -105,7 +105,7 @@ public class PostController {
 
     @GetMapping("/life-items/all")
     @Operation(summary = "생활 꿀템 전체 페이지 API - by 천성호")
-    public CustomResponse<MainPageResponseDTO> getAllGgulItemPosts(@RequestParam("page") Integer page,@AuthenticationPrincipal Member memberDetails){
+    public CustomResponse<MainPageResponseDTO> getAllGgulItemPosts(@RequestParam("page") Integer page, @AuthenticationPrincipal Member memberDetails){
 
         MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_ITEM, page, 6, memberDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
