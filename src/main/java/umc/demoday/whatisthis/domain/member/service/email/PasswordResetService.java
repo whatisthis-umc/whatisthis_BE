@@ -4,10 +4,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import umc.demoday.whatisthis.domain.member.dto.member.PasswordChangeReqDTO;
 
+import java.time.Duration;
+
 public interface PasswordResetService {
-    void sendResetCode(String memberId, String email);
-
-    void verifyResetCode(String memberId, String code);
-
-    void resetPassword(PasswordChangeReqDTO dto);
+    ResetToken verifyAndIssueResetToken(String memberId, String email, String code);
+    void resetPassword(String resetToken, PasswordChangeReqDTO dto);
+    void sendResetCode(String email);
+    record ResetToken(String value, Duration ttl) {}
 }
+
+

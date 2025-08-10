@@ -5,26 +5,30 @@ import jakarta.validation.ConstraintValidatorContext;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.domain.member.validation.annotation.PasswordMatches;
 
-public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, MemberReqDTO.JoinRequestDTO> {
+public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, Object> {
+    private String first;
+    private String second;
 
     @Override
-    public boolean isValid(MemberReqDTO.JoinRequestDTO dto, ConstraintValidatorContext context) {
-        if (dto == null) {
-            return true;
-        }
+    public void initialize(PasswordMatches ann) {
+        this.first = ann.first();
+        this.second = ann.second();
+    }
 
-        String password = dto.getPassword();
-        String passwordCheck = dto.getPasswordCheck();
+    @Override
+    public boolean isValid(Object value, ConstraintValidatorContext ctx) {
+        if (value == null) return true; // @NotNull이 따로 잡음
+        var w = new org.springframework.beans.BeanWrapperImpl(value);
+        Object a = w.getPropertyValue(first);
+        Object b = w.getPropertyValue(second);
 
-        boolean valid = password != null && password.equals(passwordCheck);
-
-        if (!valid) {
-            context.disableDefaultConstraintViolation();
-            context
-                    .buildConstraintViolationWithTemplate("비밀번호가 일치하지 않습니다.")
-                    .addPropertyNode("passwordCheck")
+        boolean ok = a != null && a.equals(b);
+        if (!ok) {
+            ctx.disableDefaultConstraintViolation();
+            ctx.buildConstraintViolationWithTemplate(ctx.getDefaultConstraintMessageTemplate())
+                    .addPropertyNode(second) // 두 번째 필드에 에러 표시
                     .addConstraintViolation();
         }
-        return valid;
+        return ok;
     }
 }
