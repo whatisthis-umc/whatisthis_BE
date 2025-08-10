@@ -11,9 +11,10 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private final Integer id;
+    private final Integer id; // Member 혹은 Admin ID 저장
     private final String username;
     private final String password;
+    private final String role; // 역할 정보를 저장할 필드
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Override

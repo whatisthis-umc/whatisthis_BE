@@ -37,9 +37,9 @@ public class PostController {
 
     @GetMapping("/{post-id}")
     @Operation(summary = "생활꿀팁 or 생활꿀팁 페이지 조회 API -by 천성호")
-    public CustomResponse<PostResponseDTO.GgulPostResponseDTO> getGgulPost(@PathVariable("post-id") Integer postId, @AuthenticationPrincipal Member memberDetails) {
+    public CustomResponse<PostResponseDTO.GgulPostResponseDTO> getGgulPost(@PathVariable("post-id") Integer postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        PostResponseDTO.GgulPostResponseDTO result = postService.getGgulPost(postId,memberDetails);
+        PostResponseDTO.GgulPostResponseDTO result = postService.getGgulPost(postId,customUserDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
 

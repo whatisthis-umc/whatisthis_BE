@@ -11,7 +11,7 @@ import umc.demoday.whatisthis.global.CustomUserDetails;
 import java.util.List;
 
 public interface PostService {
-    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, Member memberDetails);
+    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, CustomUserDetails customDetails);
 
     public void scrapPost (Integer postId, Member memberDetails);
   

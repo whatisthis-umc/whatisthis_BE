@@ -49,7 +49,7 @@ public class PostServiceImpl implements PostService {
     private final MemberActivityService memberActivityService;
 
     @Override
-    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, Member memberDetails) {
+    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, CustomUserDetails customUserDetails) {
         // 1. 게시글 정보 조회
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
@@ -73,7 +73,8 @@ public class PostServiceImpl implements PostService {
         int postScrapCount = postScrapRepository.countByPostId(postId);
 
         // 최근 조회한 게시글 갱신
-        memberActivityService.updateLastSeenPost(memberDetails.getId(), postId);
+        if (customUserDetails.getRole().equals("ROLE_USER"))
+            memberActivityService.updateLastSeenPost(customUserDetails.getId(), postId);
 
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
