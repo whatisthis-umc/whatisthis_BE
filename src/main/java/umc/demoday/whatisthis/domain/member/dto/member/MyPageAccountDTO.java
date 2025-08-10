@@ -44,7 +44,6 @@ public class MyPageAccountDTO {
         @NotNull(message = "프로필사진 수정 여부는 필수입니다.")
         Boolean modifyProfileImage;
 
-        String profileImage;
     }
 
 

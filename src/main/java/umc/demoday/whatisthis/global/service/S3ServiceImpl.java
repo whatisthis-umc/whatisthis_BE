@@ -46,4 +46,28 @@ public class S3ServiceImpl implements S3Service {
         }
         return fileUrls;
     }
+
+    public String uploadFile(MultipartFile file, String folder) {
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+        }
+
+        try {
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String key = folder + "/" + fileName;
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(file.getContentType());
+            metadata.setContentLength(file.getSize());
+
+            amazonS3Client.putObject(bucket, key, file.getInputStream(), metadata);
+
+            return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
+
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 업로드 실패", e);
+        }
+    }
+
 }

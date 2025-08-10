@@ -8,5 +8,5 @@ import umc.demoday.whatisthis.domain.member.dto.member.MyPageAccountDTO;
 public interface MemberCommandService {
     MemberResDTO.JoinResponseDTO signUp(MemberReqDTO.JoinRequestDTO dto);
     void evaluateIsBest(Member member);
-    Member updateMember(MyPageAccountDTO.MyPageAccountRequestDTO request, Member member);
+    Member updateMember(MyPageAccountDTO.MyPageAccountRequestDTO request, Member member, String url);
 }
