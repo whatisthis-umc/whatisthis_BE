@@ -112,7 +112,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
 
     @Override
-    public Member updateMember(MyPageAccountDTO.MyPageAccountRequestDTO request, Member member) {
+    public Member updateMember(MyPageAccountDTO.MyPageAccountRequestDTO request, Member member, String url) {
 
         if (!member.getId().equals(request.getId())) {
             throw new GeneralException(BAD_REQUEST_400);
@@ -137,7 +137,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         }
 
         if (request.getModifyProfileImage()) {
-            String newUrl = request.getProfileImage();
+            String newUrl = url;
 
             if (newUrl != null) {
                 // 🔸 1. 기존 연결 제거
@@ -167,7 +167,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 }
             }
         }
-        else {}
 
         return memberRepository.save(member);
     }

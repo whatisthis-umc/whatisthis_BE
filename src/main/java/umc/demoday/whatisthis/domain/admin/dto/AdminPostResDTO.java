@@ -18,7 +18,7 @@ public class AdminPostResDTO {
     String content;
     Category category;
     Category subCategory;
-    String nickname;
+    String adminName;
     LocalDateTime createdAt;
     Integer viewCount;
     Integer scrapCount;
