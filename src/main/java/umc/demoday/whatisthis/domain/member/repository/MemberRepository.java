@@ -14,11 +14,15 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     boolean existsByMemberId(String memberId);
 
+    boolean existsByEmail(String email);
+
     boolean existsByMemberIdAndEmail(String memberId, String email);
 
     Optional<Member> findByMemberId(String memberId);
 
     Optional<Member> findByEmail(String email);
+
+    Optional<Member> findByMemberIdAndEmail(String memberId, String email);
 
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.profileImage WHERE m.id = :id")
     Optional<Member> findByIdWithProfileImage(@Param("id") Integer id);
@@ -26,4 +30,5 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
     // 오늘 가입한 유저 수
     @Query("SELECT COUNT(m) FROM Member m WHERE m.createdAt >= CURRENT_DATE")
     Integer countTodaySignups();
+
 }
