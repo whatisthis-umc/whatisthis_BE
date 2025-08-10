@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 member.getId(),
                                 member.getMemberId(),
                                 "",
-                                "USER", // 역할 명시
+                                "ROLE_USER", // 역할 명시
                                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
                         );
                     }
@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 admin.getId(),
                                 admin.getAdminId(),
                                 "",
-                                "ADMIN", // 역할 명시
+                                "ROLE_ADMIN", // 역할 명시
                                 List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
                         );
                     }

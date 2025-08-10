@@ -46,15 +46,15 @@ public class PostController {
 
     @PostMapping("/{post-id}/scraps")
     @Operation(summary = "게시물 스크랩 API - by 천성호")
-    public CustomResponse<Void> scrapPost (@PathVariable("post-id") Integer postId, @AuthenticationPrincipal Member memberDetails){
-        postService.scrapPost(postId,memberDetails);
+    public CustomResponse<Void> scrapPost (@PathVariable("post-id") Integer postId, @AuthenticationPrincipal CustomUserDetails customUserDetails){
+        postService.scrapPost(postId,customUserDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, null);
     }
 
     @DeleteMapping("/{post-id}/scraps/{scrap-id}")
     @Operation(summary = "스크랩 삭제 API - by 천성호")
-    public CustomResponse<Void> deleteScrap (@PathVariable("scrap-id") Integer scrapId, @AuthenticationPrincipal Member memberDetails) {
-        postService.deleteScrap(scrapId, memberDetails);
+    public CustomResponse<Void> deleteScrap (@PathVariable("scrap-id") Integer scrapId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        postService.deleteScrap(scrapId, customUserDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, null);
     }
 
@@ -82,42 +82,42 @@ public class PostController {
     @Operation(summary = "생활 꿀팁 AI 추천 게시글 목록 조회 API - by 천성호" )
     public CustomResponse<PostResponseDTO.GgulPostsByAiResponseDTO> getGgulTipsPostsByAi(@RequestParam("page") Integer page,
                                                                                                @RequestParam("size") Integer size,
-                                                                                               @AuthenticationPrincipal Member memberDetails){
+                                                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails){
 
-        PostResponseDTO.GgulPostsByAiResponseDTO result = postService.getPostsByAiRecommendation(memberDetails,page,size,Category.LIFE_TIP);
+        PostResponseDTO.GgulPostsByAiResponseDTO result = postService.getPostsByAiRecommendation(customUserDetails,page,size,Category.LIFE_TIP);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
     @GetMapping("/life-items/ai")
     @Operation(summary = "생활 꿀템 AI 추천 게시글 목록 조회 API - by 천성호" )
     public CustomResponse<PostResponseDTO.GgulPostsByAiResponseDTO> getGgulItemPostsByAi(@RequestParam("page") Integer page,
                                                                                          @RequestParam("size") Integer size,
-                                                                                         @AuthenticationPrincipal Member memberDetails){
+                                                                                         @AuthenticationPrincipal CustomUserDetails customUserDetails){
 
-        PostResponseDTO.GgulPostsByAiResponseDTO result = postService.getPostsByAiRecommendation(memberDetails,page,size,Category.LIFE_ITEM);
+        PostResponseDTO.GgulPostsByAiResponseDTO result = postService.getPostsByAiRecommendation(customUserDetails,page,size,Category.LIFE_ITEM);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
     @GetMapping("/life-tips/all")
     @Operation(summary = "생활 꿀팁 전체 페이지 API - by 천성호")
-    public CustomResponse<MainPageResponseDTO> getAllGgulTipPosts(@RequestParam("page") Integer page,@AuthenticationPrincipal Member memberDetails){
-        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_TIP, page, 6, memberDetails);
+    public CustomResponse<MainPageResponseDTO> getAllGgulTipPosts(@RequestParam("page") Integer page,@AuthenticationPrincipal CustomUserDetails customUserDetails){
+        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_TIP, page, 6, customUserDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
 
     @GetMapping("/life-items/all")
     @Operation(summary = "생활 꿀템 전체 페이지 API - by 천성호")
-    public CustomResponse<MainPageResponseDTO> getAllGgulItemPosts(@RequestParam("page") Integer page, @AuthenticationPrincipal Member memberDetails){
+    public CustomResponse<MainPageResponseDTO> getAllGgulItemPosts(@RequestParam("page") Integer page, @AuthenticationPrincipal CustomUserDetails customUserDetails){
 
-        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_ITEM, page, 6, memberDetails);
+        MainPageResponseDTO result = postService.getAllGgulPosts(Category.LIFE_ITEM, page, 6, customUserDetails);
         return CustomResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
 
     // 사용자가 게시물을 조회했음을 기록하는 API
     @PostMapping("/{postId}/view-history")
     @Operation(summary = "최근 조회한 게시물로 기록하는 API - by 천성호")
-    public CustomResponse<Void> recordPostView(@PathVariable Integer postId, @AuthenticationPrincipal Member memberDetails)
+    public CustomResponse<Void> recordPostView(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails customUserDetails)
     {
-        Integer memberId = memberDetails.getId(); // JWT에서 사용자 ID 추출
-        memberActivityService.updateLastSeenPost(memberId, postId);
+        // JWT에서 사용자 ID 추출
+        memberActivityService.updateLastSeenPost(customUserDetails, postId);
         return CustomResponse.ok(null);
     }
 

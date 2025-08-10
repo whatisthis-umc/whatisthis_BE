@@ -73,38 +73,55 @@ public class PostServiceImpl implements PostService {
         int postScrapCount = postScrapRepository.countByPostId(postId);
 
         // 최근 조회한 게시글 갱신
-        if (customUserDetails.getRole().equals("ROLE_USER"))
-            memberActivityService.updateLastSeenPost(customUserDetails.getId(), postId);
+        if (customUserDetails.getRole().equals("ROLE_USER")) //유저면
+            memberActivityService.updateLastSeenPost(customUserDetails, postId);
 
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
     }
 
-    public void scrapPost(Integer postId, @AuthenticationPrincipal Member memberDetails) {
+    public void scrapPost(Integer postId, CustomUserDetails customUserDetails) {
 
         // Post 불러오기
-        Post post = postRepository.findById(postId).orElse(null);
-        if (post == null) throw new GeneralException(GeneralErrorCode.NOT_FOUND_404);
-        PostScrap postScrap = new PostScrap(memberDetails, post);
-        postScrapRepository.save(postScrap);
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+
+
+        // Member 불러와서 스크랩
+        if(customUserDetails.getRole().equals("ROLE_USER")) {
+
+            Member member = memberRepository.findById(customUserDetails.getId())
+                    .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+
+
+            if (postScrapRepository.existsByMemberAndPost(member, post)) {
+                throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_MEMBER_ID, "이미 스크랩한 게시물입니다.");
+            }
+            PostScrap postScrap = new PostScrap(member, post);
+            postScrapRepository.save(postScrap);
+
+        }
+        else throw new GeneralException(GeneralErrorCode.FORBIDDEN_403, "스크랩 권한이 없습니다.");
     }
 
 
-    public void deleteScrap(Integer scrapId,@AuthenticationPrincipal Member memberDetails) {
-        // 현재 멤버의 ID 찾기
-        Integer currentMemberId = memberDetails.getId();
+    public void deleteScrap(Integer scrapId,CustomUserDetails customUserDetails) {
+        if(customUserDetails.getRole().equals("ROLE_USER")) {
+            // 현재 멤버의 ID 찾기
+            Integer currentMemberId = customUserDetails.getId();
 
-        // PostScrap 찾기
-        PostScrap postScrap = postScrapRepository.findById(scrapId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+            // PostScrap 찾기
+            PostScrap postScrap = postScrapRepository.findById(scrapId)
+                    .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
-        // 스크랩 소유자가 현재 멤버인지 검증하기
-        if (!postScrap.getMember().getId().equals(currentMemberId)) {
-            throw new GeneralException(GeneralErrorCode.FORBIDDEN_403); // 권한 없음 예외
+            // 스크랩 소유자가 현재 멤버인지 검증하기
+            if (!postScrap.getMember().getId().equals(currentMemberId)) {
+                throw new GeneralException(GeneralErrorCode.FORBIDDEN_403); // 권한 없음 예외
+            }
+
+            // 삭제하기
+            postScrapRepository.delete(postScrap);
         }
-
-        // 삭제하기
-        postScrapRepository.delete(postScrap);
+        else throw new GeneralException(GeneralErrorCode.FORBIDDEN_403, "스크랩 권한이 없습니다.");
     }
     @Override
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size) {
@@ -129,8 +146,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(Member memberDetails, Integer page, Integer size, Category category) {
-        List<Integer> allRecommendedList = recommendationService.findRecommendationsForMember(memberDetails.getId(), (page + 1) * size, category);
+    public PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(CustomUserDetails customUserDetails, Integer page, Integer size, Category category) {
+        List<Integer> allRecommendedList = null;
+        if(customUserDetails.getRole().equals("ROLE_USER")) { // 유저면 맞춤 추천
+            allRecommendedList = recommendationService.findRecommendationsForMember(customUserDetails.getId(), (page + 1) * size, category);
+        }
+        else if(customUserDetails.getRole().equals("ROLE_ADMIN")) { // 관리자면 기본 추천
+            allRecommendedList = recommendationService.getDefaultRecommendations((page+1)*size, category);
+        }
         //원하는 페이지만큼 짜르기
         List<Post> posts = postRepository.findAllById(allRecommendedList.subList(page * size, (page + 1) * size));
         Map<Integer, String> aiPostThumbnailsMap = pageConverter.findThumbnails(allRecommendedList);
@@ -155,7 +178,7 @@ public class PostServiceImpl implements PostService {
         );
     }
     @Override
-    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, Member memberDetails) {
+    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, CustomUserDetails customUserDetails) {
 
         // 1. category Enum List 생성
         List<Category> categoryList = List.of();
@@ -175,10 +198,17 @@ public class PostServiceImpl implements PostService {
         // 3. Latest 정렬 페이지 요청(Pageable) 객체 생성
         Pageable pageableLatest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
+        List<Integer> recommendedPostIds = new ArrayList<>();
         // 4. Ai 추천 페이지 요청(Pageable) 객체 생성
-        Integer memberId = memberDetails.getId();
-        MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
-        List<Integer> recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(),size,category);
+        if(customUserDetails.getRole().equals("ROLE_USER")) {  //유저면 맞춤 추천
+            Integer memberId = customUserDetails.getId();
+            MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
+            recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(), size, category);
+        }
+        else if(customUserDetails.getRole().equals("ROLE_ADMIN"))
+        { //어드민이면 기본 추천
+            recommendedPostIds = recommendationService.getDefaultRecommendations(size, category);
+        }
         // 5. Repository를 통해 데이터베이스에서 데이터 조회
         Page<Post> bestPostPage = postRepository.findByCategoryIn(categoryList, pageableBest);
         Page<Post> latestPostPage = postRepository.findByCategoryIn(categoryList, pageableLatest);
