@@ -10,19 +10,19 @@ import java.util.List;
 public class MyScrapSummaryResDTO {
     private Integer id;
     private String title;
-    private String content; // 필요한 필드만
-    private String authorName;
+    private String content;
     private String thumbnailUrl;
+    private int viewCount;
 
 
     public MyScrapSummaryResDTO(Post post) {
         this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
-        this.authorName = post.getMember().getNickname();
         this.thumbnailUrl = post.getPostImageList().stream()
                 .findFirst()
                 .map(PostImage::getImageUrl)
                 .orElse(null);
+        this.viewCount = post.getViewCount();
     }
 }
