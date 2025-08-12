@@ -2,6 +2,8 @@ package umc.demoday.whatisthis.global.config;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -9,9 +11,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Configuration
+// @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CorsConfig {
-    public static CorsConfigurationSource apiConfigurationSource() {
+    @Bean
+    public CorsConfigurationSource apiConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         List<String> allowedOriginPatterns = new ArrayList<>();
