@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post_like.PostLike;
 import umc.demoday.whatisthis.domain.post_scrap.PostScrap;
@@ -24,4 +25,6 @@ public interface PostScrapRepository extends JpaRepository<PostScrap, Integer> {
 
     // 특정 회원이 좋아요한 PostLike 리스트 조회
     Page<PostScrap> findByMember(Member member, Pageable pageable);
+
+    boolean existsByMemberAndPost(Member member, Post post);
 }
