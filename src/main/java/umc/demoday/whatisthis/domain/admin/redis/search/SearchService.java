@@ -11,6 +11,7 @@ import redis.clients.jedis.search.SearchResult;
 import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
 import umc.demoday.whatisthis.domain.admin.redis.PostMapper;
 import umc.demoday.whatisthis.domain.admin.redis.PostSearchRepository;
+import umc.demoday.whatisthis.domain.admin.redis.SearchPostResponseDTO;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.converter.CategoryConverter;
 import umc.demoday.whatisthis.domain.post.enums.Category;
@@ -37,6 +38,7 @@ public class SearchService {
         List<String> categories = CategoryConverter.getDynamicCategories(category.toString());
         // 실제 검색 로직 수행
         Page<PostDocument> posts = searchPosts(keyword, categories, pageable);
+
         // 검색어 카운트 증가
         if (keyword != null && !keyword.isBlank()) {
             redisTemplate.opsForZSet().incrementScore(POPULAR_SEARCH_KEY, keyword.trim(), 1);

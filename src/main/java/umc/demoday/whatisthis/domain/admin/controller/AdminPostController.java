@@ -82,6 +82,7 @@ public class AdminPostController {
     }
 
     @PostMapping("/reindex")
+    @Operation(summary = "Redis Reindexing API")
     public ResponseEntity<String> reindexAllPosts() {
         // 비동기 실행을 위해 별도 스레드에서 리인덱싱 작업을 시작
         new Thread(initialDataIndexer::reindexAllPosts).start();
