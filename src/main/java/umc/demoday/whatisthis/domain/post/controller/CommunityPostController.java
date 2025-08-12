@@ -18,6 +18,7 @@ import umc.demoday.whatisthis.domain.comment.service.CommentService;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
+import umc.demoday.whatisthis.domain.member.service.member.MemberQueryService;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.MyPagePostResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
@@ -58,6 +59,7 @@ public class CommunityPostController {
     private final ReportService reportService;
     private final S3Service s3Service;
     private final MyPagePostService myPagePostService;
+    private final MemberQueryService memberQueryService;
 
     @GetMapping("/communities")
     @Operation(summary = "커뮤니티 페이지 조회 API (전체) -by 남성현")
@@ -188,6 +190,8 @@ public class CommunityPostController {
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "post")
                 : Collections.emptyList();
+
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
 
         // 게시글 + 이미지 URL 저장
         Post newPost = communityPostService.insertNewPost(request, imageUrls, loginUser);
