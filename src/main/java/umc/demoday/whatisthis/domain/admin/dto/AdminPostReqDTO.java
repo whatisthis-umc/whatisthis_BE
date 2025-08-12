@@ -34,7 +34,6 @@ public class AdminPostReqDTO {
         String content;
         Category category;
         Category subCategory;
-        List<String> imageUrls;
         List<String> hashtags;
     }
 

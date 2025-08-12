@@ -14,6 +14,7 @@ import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.code.PostErrorCode;
+import umc.demoday.whatisthis.domain.post.dto.MyPagePostResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostRequestDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
@@ -22,6 +23,7 @@ import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_like.PostLike;
 import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
+import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 import java.time.LocalDateTime;
@@ -111,6 +113,7 @@ public class CommunityPostServiceImpl implements CommunityPostService {
                 .member(member)
                 .likeCount(0)
                 .viewCount(0)
+                .scrapCount(0)
                 .build();
 
         // PostImage 리스트 생성 후 Post에 추가
@@ -136,6 +139,42 @@ public class CommunityPostServiceImpl implements CommunityPostService {
         post.getPostImageList().addAll(postImages);
 
         // Post 저장 시 cascade 옵션으로 PostImage도 함께 저장됨
+        return postRepository.save(post);
+    }
+
+    @Override
+    public Post updatePost(Integer postId,PostRequestDTO.ModifyPostRequestDTO request, List<String> imageUrls, Member member) {
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(PostErrorCode.POST_NOT_FOUND));
+
+        if (!post.getMember().getId().equals(member.getId())) {
+            throw new GeneralException(GeneralErrorCode.FORBIDDEN_403);
+        }
+
+        post.setTitle(request.getTitle());
+        post.setContent(request.getContent());
+        post.setCategory(request.getCategory());
+
+        post.getPostImageList().clear();
+        List<PostImage> postImages = imageUrls.stream()
+                .map(url -> PostImage.builder()
+                        .imageUrl(url)
+                        .post(post)
+                        .build())
+                .toList();
+        post.getPostImageList().addAll(postImages);
+
+        post.getHashtagList().clear();
+        if (request.getHashtags() != null) {
+            List<Hashtag> hashtags = request.getHashtags().stream()
+                    .map(content -> Hashtag.builder()
+                            .content(content)
+                            .post(post)
+                            .build())
+                    .toList();
+            post.getHashtagList().addAll(hashtags);
+        }
+
         return postRepository.save(post);
     }
 

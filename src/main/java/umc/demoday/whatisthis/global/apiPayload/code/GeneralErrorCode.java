@@ -14,10 +14,13 @@ public enum GeneralErrorCode implements BaseErrorCode {
     FORBIDDEN_403(HttpStatus.FORBIDDEN, "COMMON4030", "접근이 금지되었습니다"),
     NOT_FOUND_404(HttpStatus.NOT_FOUND, "COMMON4040", "요청한 자원을 찾을 수 없습니다"),
     INTERNAL_SERVER_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON5000", "서버 내부 오류가 발생했습니다"),
+    COMMUNITY_CATEGORY(HttpStatus.BAD_REQUEST, "CATEGORY4000", "해당 게시물은 커뮤니티 카테고리입니다."),
+    INVALID_ROLE(HttpStatus.BAD_REQUEST, "COMMON 4001", "올바른 권한이 아닙니다."),
 
     // 멤버 관련 에러
     ALREADY_EXIST_MEMBER_ID(HttpStatus.BAD_REQUEST, "MEMBER4001", "이미 사용 중인 아이디입니다."),
     ALREADY_EXIST_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용 중인 닉네임입니다."),
+    NICKNAME_SAME_AS_BEFORE(HttpStatus.BAD_REQUEST, "MEMBER4003", "기존 닉네임과 동일한 닉네임은 사용할 수 없습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4040", "존재하지 않는 회원입니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER4010", "비밀번호가 일치하지 않습니다."),
     MEMBER_NOT_FOUND_BY_EMAIL(HttpStatus.NOT_FOUND, "MEMBER4041", "해당 이메일로 가입된 회원이 존재하지 않습니다"),

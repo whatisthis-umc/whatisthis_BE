@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.inquiry.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,14 +18,20 @@ import umc.demoday.whatisthis.domain.inquiry.dto.resDTO.InquiryResDTO;
 import umc.demoday.whatisthis.domain.inquiry.service.InquiryCommandService;
 import umc.demoday.whatisthis.domain.inquiry.service.InquiryQueryService;
 import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.global.service.S3Service;
 
 import java.util.Collections;
 import java.util.List;
 
 import static umc.demoday.whatisthis.domain.inquiry.code.InquirySuccessCode.INQUIRY_OK;
+import static umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode.MEMBER_NOT_FOUND;
 
+
+@Slf4j
 @RestController
 @RequestMapping("/support/inquiries")
 @RequiredArgsConstructor
@@ -33,13 +40,17 @@ public class InquiryController {
     private final InquiryCommandService inquiryCommandService;
     private final InquiryQueryService inquiryQueryService;
     private final S3Service s3Service;
+    private final MemberRepository memberRepository;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "문의내역 작성 api-by 윤영석")
     public CustomResponse<Void> createInquiry(
             @RequestPart("request") @Valid InquiryCreateReqDTO dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
-            @AuthenticationPrincipal Member loginUser) {
+            @AuthenticationPrincipal CustomUserDetails user) {
+
+        Member loginUser = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new GeneralException(MEMBER_NOT_FOUND));
 
         // S3에 파일 업로드
         List<String> fileUrls = (files != null && !files.isEmpty())
@@ -69,7 +80,10 @@ public class InquiryController {
     @Operation(summary = "문의내역 상세조회 API -by 윤영석")
     public CustomResponse<InquiryResDTO> getInquiry(
             @PathVariable int inquiryId,
-            @AuthenticationPrincipal Member loginUser) {
+            @AuthenticationPrincipal CustomUserDetails user) {
+
+        Member loginUser = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new GeneralException(MEMBER_NOT_FOUND));
 
         InquiryResDTO result = inquiryQueryService.getInquiry(inquiryId, loginUser);
         return CustomResponse.onSuccess(INQUIRY_OK, result);

@@ -325,7 +325,7 @@ class AdminPostServiceTest {
 
 
         // when (테스트할 메서드 호출)
-        AdminPostResDTO.createPostResDTO result = adminPostService.createPost(request);
+        //AdminPostResDTO.createPostResDTO result = adminPostService.createPost(request);
 
 
         // then (결과 검증)

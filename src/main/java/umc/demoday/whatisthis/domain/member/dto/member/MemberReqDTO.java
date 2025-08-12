@@ -13,7 +13,7 @@ public class MemberReqDTO {
 
     @Getter
     @Setter
-    @PasswordMatches
+    @PasswordMatches(first = "password", second = "passwordCheck")
     public static class JoinRequestDTO {
 
         @Email(message = "이메일이 올바르지않습니다. 다시 확인해주세요.")

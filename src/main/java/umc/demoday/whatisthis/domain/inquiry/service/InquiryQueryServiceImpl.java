@@ -20,6 +20,7 @@ import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 
 import static com.amazonaws.services.ec2.model.PrincipalType.Role;
+import static umc.demoday.whatisthis.domain.inquiry.code.InquiryErrorCode.INQUIRY_NOT_FOUND;
 
 
 @Service
@@ -55,7 +56,7 @@ public class InquiryQueryServiceImpl implements InquiryQueryService {
     @Override
     public InquiryAdminResDTO getAdminInquiry(Integer inquiryId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 문의내역이 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(INQUIRY_NOT_FOUND));
 
         return InquiryConverter.toAdminDto(inquiry);
 
@@ -64,7 +65,7 @@ public class InquiryQueryServiceImpl implements InquiryQueryService {
     @Override
     public InquiryResDTO getInquiry(Integer inquiryId, Member loginUser) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 문의내역이 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(INQUIRY_NOT_FOUND));
 
         // 비밀글이라면 접근 권한 확인
         if (inquiry.getIsSecret()) {

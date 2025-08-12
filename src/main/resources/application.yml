@@ -10,6 +10,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 최대 파일 1개 크기 (필요에 맞게 조정)
+      max-request-size: 100MB  # 요청 전체 최대 크기 (여러 파일 포함)
 
   data:
     redis:

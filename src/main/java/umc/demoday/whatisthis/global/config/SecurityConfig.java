@@ -3,7 +3,12 @@ package umc.demoday.whatisthis.global.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -14,13 +19,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import umc.demoday.whatisthis.global.OAuth2SuccessHandler;
 import umc.demoday.whatisthis.global.security.JwtAuthenticationFilter;
 import umc.demoday.whatisthis.global.service.CustomOauth2UserService;
+import umc.demoday.whatisthis.global.service.CustomUserDetailsService;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOauth2UserService customOauth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
@@ -31,10 +39,23 @@ public class SecurityConfig {
     }
 
     @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider dap = new DaoAuthenticationProvider();
+        dap.setUserDetailsService(customUserDetailsService);
+        dap.setPasswordEncoder(passwordEncoder());
+        return dap;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager(); // DaoAuthenticationProvider가 내부에 등록됨
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:5173")); // 프론트 로컬 주소
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
@@ -44,7 +65,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
@@ -53,8 +74,10 @@ public class SecurityConfig {
                                 "/members/signup",
                                 "/members/email-auth",
                                 "/admin/login",
+                                "/admin/logout",
                                 "/admin/reissue",
                                 "/members/login",
+                                "/members/logout",
                                 "/members/reissue",
                                 "/members/find-id",
                                 "/members/reset-password/send-code",
@@ -71,15 +94,20 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
 
-//                              "/posts/**",
-
                                 "/upload" // S3 테스트 용, 추후 삭제(?)
                         ).permitAll()
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/posts",
+                                "/posts/**"
+                        ).permitAll()
+
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/members/**").hasRole("USER")
-                                .requestMatchers("/posts/**").hasRole("USER")
+                        .requestMatchers("/posts/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
+                .authenticationProvider(daoAuthenticationProvider())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
                         .successHandler(oAuth2SuccessHandler))

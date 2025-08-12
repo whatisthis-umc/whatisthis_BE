@@ -10,21 +10,20 @@ import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
+import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class PageConverter {
 
+    private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
     private final PostScrapRepository postScrapRepository;
     private final HashtagRepository hashtagRepository;
@@ -76,57 +75,51 @@ public class PageConverter {
     }
 
 
-    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Integer> recomededPostIds, List<Category> categories, Category category) {
+    public MainPageResponseDTO toMainPageResponseDTO(Page<Post> bestPostPage, Page<Post> latestPostPage, List<Integer> recommededPostIds, List<Category> categories, Category category) {
         List<Post> bestPosts = bestPostPage.getContent();
         List<Post> latestPosts = latestPostPage.getContent();
+        List<Post> recommendedPosts = postRepository.findAllById(recommededPostIds);
         // 게시글이 없는 경우 빈 응답을 즉시 반환
         if (bestPosts.isEmpty() && latestPosts.isEmpty()) {
             return new MainPageResponseDTO();
         }
-        // 1. 페이지 내 모든 게시글 ID 추출
-        List<Integer> bestPostIds = bestPosts.stream()
-                .map(Post::getId)
-                .toList();
-
-        List<Integer> latestPostIds = latestPosts.stream()
-                .map(Post::getId)
-                .toList();
 
 
-        // 2. 연관 데이터 일괄 조회 (Batch Fetching)
-        Map<Integer, String> bestPostThumbnailsMap = findThumbnails(bestPostIds);
-        Map<Integer, List<Hashtag>> bestPostHashtagsMap = findHashtags(bestPostIds);
-        Map<Integer, Integer> bestPostScrapCountsMap = getScrapCountMap(bestPostIds);
+        // 1. 모든 게시글 ID를 중복 없이 하나로 합친다.
+        Set<Integer> allPostIds = new HashSet<>();
+        bestPosts.forEach(post -> allPostIds.add(post.getId()));
+        latestPosts.forEach(post -> allPostIds.add(post.getId()));
+        allPostIds.addAll(recommededPostIds); // recomededPostIds는 이미 List<Integer>이므로 바로 추가
 
-        Map<Integer, String> latestPostThumbnailsMap = findThumbnails(latestPostIds);
-        Map<Integer, List<Hashtag>> latestPostHashtagsMap = findHashtags(latestPostIds);
-        Map<Integer, Integer> latestPostScrapCountsMap = getScrapCountMap(latestPostIds);
+        List<Integer> uniquePostIds = new ArrayList<>(allPostIds);
 
-        Map<Integer, String> aiPostThumbnailsMap = findThumbnails(recomededPostIds);
-        Map<Integer, List<Hashtag>> aiPostHashtagsMap = findHashtags(recomededPostIds);
-        Map<Integer, Integer> aiPostScrapCountsMap = getScrapCountMap(recomededPostIds);
+
+        // 2. 모든 연관 데이터를 한 번의 쿼리로 일괄 조회 (Batch Fetching)
+        Map<Integer, String> thumbnailsMap = findThumbnails(uniquePostIds);
+        Map<Integer, List<Hashtag>> hashtagsMap = findHashtags(uniquePostIds);
+        Map<Integer, Integer> scrapCountsMap = getScrapCountMap(uniquePostIds);
 
         // summaryDTO 생성
-        List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList = bestPostPage.stream()
+        List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList = bestPosts.stream()
                 .map(post -> toGgulPostSummaryDTO(
                         post,
-                        bestPostThumbnailsMap.get(post.getId()),
-                        bestPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
-                        bestPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                        thumbnailsMap.get(post.getId()),
+                        hashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        scrapCountsMap.getOrDefault(post.getId(), 0)
                 )).toList();
-        List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList = bestPostPage.stream()
+        List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList = latestPosts.stream()
                 .map(post -> toGgulPostSummaryDTO(
                         post,
-                        latestPostThumbnailsMap.get(post.getId()),
-                        latestPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
-                        latestPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                        thumbnailsMap.get(post.getId()),
+                        hashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        scrapCountsMap.getOrDefault(post.getId(), 0)
                 )).toList();
-        List<PostResponseDTO.GgulPostSummaryDTO> aiPostSummaryDTOList = bestPostPage.stream()
+        List<PostResponseDTO.GgulPostSummaryDTO> aiPostSummaryDTOList = recommendedPosts.stream()
                 .map(post -> toGgulPostSummaryDTO(
                         post,
-                        aiPostThumbnailsMap.get(post.getId()),
-                        aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
-                        aiPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                        thumbnailsMap.get(post.getId()),
+                        hashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        scrapCountsMap.getOrDefault(post.getId(), 0)
                 )).toList();
 
         // section dto 생성
@@ -210,7 +203,7 @@ public class PageConverter {
                 .stream()
                 .collect(Collectors.toMap(
                         result -> (Integer) result[0],    // postId
-                        result -> (Integer) result[1]) // count
+                        result -> ((Number)result[1]).intValue()) // count
                 );
     }
 

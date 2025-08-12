@@ -10,6 +10,9 @@ import umc.demoday.whatisthis.domain.notice.converter.NoticeConverter;
 import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticePageResDTO;
 import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticeResDTO;
 import umc.demoday.whatisthis.domain.notice.repository.NoticeRepository;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
+
+import static umc.demoday.whatisthis.domain.notice.code.NoticeErrorCode.NOTICE_NOT_FOUND;
 
 
 @Service
@@ -27,7 +30,7 @@ public class NoticeQueryServiceImpl implements NoticeQueryService {
     @Override
     public NoticeResDTO getNotice(Integer noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 공지사항이 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(NOTICE_NOT_FOUND));
 
         return NoticeConverter.toDto(notice);
 

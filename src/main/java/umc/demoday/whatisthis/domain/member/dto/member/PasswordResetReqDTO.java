@@ -8,9 +8,6 @@ import lombok.Getter;
 public class PasswordResetReqDTO {
 
     @NotBlank
-    private String memberId;
-
-    @NotBlank
     private String emailLocal;
 
     @NotBlank

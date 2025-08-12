@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import umc.demoday.whatisthis.domain.inquiry.Inquiry;
 import umc.demoday.whatisthis.domain.inquiry.enums.InquiryStatus;
+import umc.demoday.whatisthis.domain.member.Member;
 
 public interface InquiryRepository extends JpaRepository<Inquiry, Integer> {
     Page<Inquiry> findByStatus(InquiryStatus status, Pageable pageable);
@@ -13,4 +14,5 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Integer> {
     Integer countByStatus(InquiryStatus status);
 
 
+    Page<Inquiry> findAllByMember(Member member, Pageable pageable);
 }

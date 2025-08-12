@@ -2,13 +2,18 @@ package umc.demoday.whatisthis.domain.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.member.dto.login.LoginReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.login.LoginResDTO;
 import umc.demoday.whatisthis.domain.member.service.member.MemberAuthService;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
+import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +36,12 @@ public class MemberAuthController {
     public CustomResponse<LoginResDTO> reissue(@RequestHeader("Refresh-Token") String refreshToken) {
         LoginResDTO response = memberAuthService.reissue(refreshToken);
         return CustomResponse.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public CustomResponse<Void> logout(@AuthenticationPrincipal CustomUserDetails user,
+                                       HttpServletRequest request) {
+        memberAuthService.logout(user.getId(), request);
+        return CustomResponse.ok(null);
     }
 }

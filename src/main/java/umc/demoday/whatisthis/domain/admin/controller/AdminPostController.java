@@ -1,15 +1,26 @@
 package umc.demoday.whatisthis.domain.admin.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
+import umc.demoday.whatisthis.domain.admin.repository.AdminRepository;
 import umc.demoday.whatisthis.domain.admin.service.AdminPostService;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
+import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
+import umc.demoday.whatisthis.global.service.S3Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -18,9 +29,11 @@ import java.util.List;
 public class AdminPostController {
 
     private final AdminPostService adminPostService;
+    private final S3Service s3Service;
+    private final AdminRepository adminRepository;
 
     @GetMapping("/{post-id}")
-    @Operation(summary = "개별 게시글 조회 API -by 천성호")
+    @Operation(summary = "개별 게시글 조회 API -by 천성호, 남성현")
     public CustomResponse<AdminPostResDTO> getPost(@PathVariable("post-id") Integer postId){
         AdminPostResDTO response = adminPostService.getPost(postId);
         return CustomResponse.ok(response);
@@ -40,10 +53,18 @@ public class AdminPostController {
         return CustomResponse.ok(response);
     }
 
-    @PostMapping("/")
-    @Operation(summary = "게시글 작성 API -by 천성호")
-    public CustomResponse<AdminPostResDTO.createPostResDTO> createPost(@RequestBody AdminPostReqDTO.createPostReqDTO request){
-        AdminPostResDTO.createPostResDTO response = adminPostService.createPost(request);
+    @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "게시글 작성 API -by 천성호, 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    public CustomResponse<AdminPostResDTO.createPostResDTO> createPost(@RequestPart("request") AdminPostReqDTO.createPostReqDTO request,
+                                                                       @RequestPart(value = "images", required = false) List<MultipartFile> images,
+                                                                       @AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+        Admin admin = adminRepository.findById(customUserDetails.getId()).orElseThrow(()->new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+        List<String> imageUrls = (images != null && !images.isEmpty())
+                ? s3Service.uploadFiles(images, "post")
+                : Collections.emptyList();
+
+        AdminPostResDTO.createPostResDTO response = adminPostService.createPost(request, admin, imageUrls);
         return CustomResponse.ok(response);
     }
 

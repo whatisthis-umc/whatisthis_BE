@@ -14,4 +14,9 @@ public @interface PasswordMatches {
     String message() default "비밀번호가 일치하지 않습니다.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
+
+    // 비교할 필드명
+    String first();
+    String second();
+
 }

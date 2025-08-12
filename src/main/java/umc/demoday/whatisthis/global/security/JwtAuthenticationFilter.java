@@ -53,31 +53,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 2. 토큰 유효성 검사
             if (jwtProvider.validateToken(token)) {
-                Integer memberId = jwtProvider.getUserIdFromToken(token);
-                String role = jwtProvider.getRoleFromToken(token);
+                Integer id = jwtProvider.getUserIdFromToken(token);
+                String roleFromToken = jwtProvider.getRoleFromToken(token); // 토큰에서 역할 추출
 
-                // 3. DB에서 사용자 조회 (기본 정보만 필요하면 생략 가능)
-                if ("ROLE_USER".equals(role)) {
-                    Member member = memberRepository.findById(memberId)
-                            .orElse(null);
+                CustomUserDetails userDetails = null;
+
+                if ("ROLE_USER".equals(roleFromToken)) {
+                    Member member = memberRepository.findById(id).orElse(null);
                     if (member != null) {
-                        UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(member, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        // 5. SecurityContext에 등록
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        userDetails = new CustomUserDetails(
+                                member.getId(),
+                                member.getMemberId(),
+                                "",
+                                "ROLE_USER", // 역할 명시
+                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        );
                     }
-                } else if ("ROLE_ADMIN".equals(role)) {
-                    Admin admin = adminRepository.findById(memberId)
-                            .orElse(null);
-
+                } else if ("ROLE_ADMIN".equals(roleFromToken)) {
+                    Admin admin = adminRepository.findById(id).orElse(null);
                     if (admin != null) {
-                        UsernamePasswordAuthenticationToken auth =
-                                new UsernamePasswordAuthenticationToken(admin, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
-                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                        SecurityContextHolder.getContext().setAuthentication(auth);
+                        userDetails = new CustomUserDetails(
+                                admin.getId(),
+                                admin.getAdminId(),
+                                "",
+                                "ROLE_ADMIN", // 역할 명시
+                                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                        );
                     }
+                }
+
+                if (userDetails != null) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
         // 6. 다음 필터로 넘김

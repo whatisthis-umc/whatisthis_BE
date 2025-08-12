@@ -10,7 +10,11 @@ import umc.demoday.whatisthis.domain.post.Post;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "post_scrap")
+@Table(name = "post_scrap",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"member_id", "post_id"})
+        })
+
 public class PostScrap {
 
     @Id
