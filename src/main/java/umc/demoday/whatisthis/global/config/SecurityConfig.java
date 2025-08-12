@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,10 +65,14 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
 
-//                              "/posts/**",
-
                                 "/upload" // S3 테스트 용, 추후 삭제(?)
                         ).permitAll()
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/posts/communities",
+                                "/posts/communities/**"
+                        ).permitAll()
+
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/members/**").hasRole("USER")
                                 .requestMatchers("/posts/**").hasAnyRole("USER", "ADMIN")
