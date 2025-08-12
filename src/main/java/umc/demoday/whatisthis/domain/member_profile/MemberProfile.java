@@ -1,8 +1,11 @@
 package umc.demoday.whatisthis.domain.member_profile;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.*;
+import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.member.Member;
 
 @Entity
@@ -16,7 +19,7 @@ public class MemberProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Member 엔티티와 1:1 관계. 이 프로필의 주인을 명시
+    // Member 엔티티
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;

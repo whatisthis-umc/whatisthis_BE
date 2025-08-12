@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import org.openapitools.db_data.client.ApiException;
 import org.openapitools.db_data.client.model.Hit;
 import org.openapitools.db_data.client.model.SearchRecordsResponse;
+import org.openapitools.db_data.client.model.SearchRecordsVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -105,13 +106,21 @@ public class RecommendationService {
         }
     }
 
-    private List<Integer> getDefaultRecommendations(Integer topK, Category category) {
+    public List<Integer> getDefaultRecommendations(Integer topK, Category category) {
         try {
             List<String> fields = new ArrayList<>();
             fields.add("category");
             fields.add("chunk_text");
             String namespace = category.toString();
-            SearchRecordsResponse response = index.searchRecordsByText("추천하는 생활팁", namespace, fields, topK, null, null);
+
+            String modelName = "models/gemini-embedding-001";
+            EmbeddingRequestDTO.Content content = new EmbeddingRequestDTO.Content(List.of(new EmbeddingRequestDTO.Part("추천하는 생활팁")));
+            EmbeddingRequestDTO request = new EmbeddingRequestDTO(modelName, content);
+            EmbeddingResponseDTO embeddingResult = geminiInterface.embedContent(request);
+            SearchRecordsVector searchRecordsVector = new SearchRecordsVector();
+            searchRecordsVector.setValues(embeddingResult.embedding().values());
+
+            SearchRecordsResponse response = index.searchRecordsByVector(searchRecordsVector, namespace, fields, topK, null, null);
             List<Hit> hits = response.getResult().getHits();
 
             // 문자열 ID에서 숫자 부분만 추출하여 Long 타입의 ID 리스트를 생성합니다.

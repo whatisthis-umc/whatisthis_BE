@@ -11,16 +11,16 @@ import umc.demoday.whatisthis.global.CustomUserDetails;
 import java.util.List;
 
 public interface PostService {
-    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, Member memberDetails);
+    public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, CustomUserDetails customDetails);
 
-    public void scrapPost (Integer postId, Member memberDetails);
+    public void scrapPost (Integer postId, CustomUserDetails customUserDetails);
   
-    public void deleteScrap (Integer scrapId, Member memberDetails);
+    public void deleteScrap (Integer scrapId, CustomUserDetails customUserDetails);
 
     public PostResponseDTO.GgulPostsByCategoryResponseDTO getGgulPostsByCategory(Category category, SortBy sort, Integer page, Integer size);
 
-    PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(Member memberDetails, Integer page, Integer size, Category category);
+    PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(CustomUserDetails customUserDetails, Integer page, Integer size, Category category);
 
-    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, Member memberDetails);
+    public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, CustomUserDetails customUserDetails);
 
 }
