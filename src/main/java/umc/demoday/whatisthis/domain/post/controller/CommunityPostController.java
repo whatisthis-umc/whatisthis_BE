@@ -32,6 +32,7 @@ import umc.demoday.whatisthis.domain.report.converter.ReportConverter;
 import umc.demoday.whatisthis.domain.report.dto.ReportRequestDTO;
 import umc.demoday.whatisthis.domain.report.dto.ReportResponseDTO;
 import umc.demoday.whatisthis.domain.report.service.ReportService;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 import umc.demoday.whatisthis.global.service.S3Service;
@@ -181,7 +182,7 @@ public class CommunityPostController {
     public CustomResponse<PostResponseDTO.NewPostResponseDTO> newPost(
             @RequestPart("request") @Valid PostRequestDTO.NewPostRequestDTO request,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @AuthenticationPrincipal Member loginUser) {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         // S3에 이미지 업로드
         List<String> imageUrls = (images != null && !images.isEmpty())
