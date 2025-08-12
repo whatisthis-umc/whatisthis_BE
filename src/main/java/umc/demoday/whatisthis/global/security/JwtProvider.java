@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtProvider {
@@ -35,11 +36,22 @@ public class JwtProvider {
         claims.put("role", role);
 
         return Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALID_TIME))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String getJti(String token) {
+        return Jwts.parserBuilder().setSigningKey(secretKey).build()
+                .parseClaimsJws(token).getBody().getId();
+    }
+
+    public Date getExpiration(String token) {
+        return Jwts.parserBuilder().setSigningKey(secretKey).build()
+                .parseClaimsJws(token).getBody().getExpiration();
     }
 
     // RefreshToken 생성 (payload 최소화, DB에서 추적)
