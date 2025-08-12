@@ -113,6 +113,7 @@ public class CommunityPostServiceImpl implements CommunityPostService {
                 .member(member)
                 .likeCount(0)
                 .viewCount(0)
+                .scrapCount(0)
                 .build();
 
         // PostImage 리스트 생성 후 Post에 추가
