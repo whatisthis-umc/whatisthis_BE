@@ -24,8 +24,9 @@ public class PostScrapQueryServiceImpl implements PostScrapQueryService {
     private final MyScrapPageConverter myScrapPageConverter;
 
     @Override
-    public MyScrapPageResDTO getMyPostScrapList(Member member, Pageable pageable) {
-        Page<PostScrap> scrapPage = postScrapRepository.findByMember(member, pageable);
+    public MyScrapPageResDTO getMyPostScrapList(Member loginUser, Pageable pageable) {
+        Page<PostScrap> scrapPage = postScrapRepository.findByMemberIdWithPost(loginUser.getId(), pageable);
         return myScrapPageConverter.toMyScrapPageResDTO(scrapPage);
     }
+
 }
