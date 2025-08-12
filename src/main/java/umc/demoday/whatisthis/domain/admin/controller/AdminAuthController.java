@@ -2,6 +2,7 @@ package umc.demoday.whatisthis.domain.admin.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -37,8 +38,9 @@ public class AdminAuthController {
 
     @PostMapping("/logout")
     @Operation(summary = "관리자 로그아웃 API -by 이정준")
-    public CustomResponse<Void> logout(@AuthenticationPrincipal CustomUserDetails admin) {
-        adminAuthService.logout(admin.getId());
+    public CustomResponse<Void> logout(@AuthenticationPrincipal CustomUserDetails admin,
+                                       HttpServletRequest request) {
+        adminAuthService.logout(admin.getId(), request);
         return CustomResponse.ok(null);
     }
 }

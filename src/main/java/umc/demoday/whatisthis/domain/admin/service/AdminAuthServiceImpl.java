@@ -1,6 +1,8 @@
 package umc.demoday.whatisthis.domain.admin.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import umc.demoday.whatisthis.domain.admin.Admin;
@@ -13,6 +15,8 @@ import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.global.security.JwtProvider;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 @RequiredArgsConstructor
 public class AdminAuthServiceImpl implements AdminAuthService {
@@ -21,6 +25,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
     private final AdminRefreshTokenRepository adminRefreshTokenRepository;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public AdminLoginResDTO login(AdminLoginReqDTO request) {
@@ -78,8 +83,19 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     @Override
-    public void logout(Integer adminId) {
-        adminRefreshTokenRepository.deleteById(adminId);
-    }
+    public void logout(Integer adminId, HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        String accessToken = null;
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            accessToken = bearerToken.substring(7);
+        }
 
+        adminRefreshTokenRepository.deleteById(adminId);
+        if (accessToken != null && jwtProvider.validateToken(accessToken)) {
+            String jti = jwtProvider.getJti(accessToken);
+            long ttlSec = Math.max(1,
+                    (jwtProvider.getExpiration(accessToken).getTime() - System.currentTimeMillis()) / 1000);
+            redisTemplate.opsForValue().set("bl:" + jti, "1", ttlSec, TimeUnit.SECONDS);
+        }
+    }
 }
