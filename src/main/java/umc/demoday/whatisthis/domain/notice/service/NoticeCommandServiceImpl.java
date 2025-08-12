@@ -9,6 +9,9 @@ import umc.demoday.whatisthis.domain.notice.converter.NoticeConverter;
 import umc.demoday.whatisthis.domain.notice.dto.reqDTO.NoticeCreateReqDTO;
 import umc.demoday.whatisthis.domain.notice.dto.reqDTO.NoticeUpdateReqDTO;
 import umc.demoday.whatisthis.domain.notice.repository.NoticeRepository;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
+
+import static umc.demoday.whatisthis.domain.notice.code.NoticeErrorCode.NOTICE_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +29,7 @@ public class NoticeCommandServiceImpl implements NoticeCommandService {
     @Override
     public void updateNotice(Integer noticeId, NoticeUpdateReqDTO dto) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new EntityNotFoundException("공지사항을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(NOTICE_NOT_FOUND));
 
         // 필요한 필드만 수정
         notice.update(dto.getTitle(), dto.getContent());
@@ -35,7 +38,7 @@ public class NoticeCommandServiceImpl implements NoticeCommandService {
     @Override
     public void deleteNotice(Integer noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new EntityNotFoundException("공지사항을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(NOTICE_NOT_FOUND));
         noticeRepository.deleteById(notice.getId());
     }
 }

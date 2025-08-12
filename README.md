@@ -5,7 +5,6 @@ Spring Boot 3.4.7 <br>
 Java 17 <br>
 
 ## Link
-Server : http://52.78.98.150:8080<br>
 Swagger : http://52.78.98.150:8080/swagger-ui/index.html
 
 ## Github Convention

@@ -4,6 +4,7 @@ import io.pinecone.clients.Index;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
@@ -42,9 +43,14 @@ public class AdminPostService {
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
         //Post.category 기준으로 DTO category(e. g. 생활 꿀팁) 설정
-        Category category = Category.LIFE_ITEM;
-        if (post.getCategory().name().endsWith("_TIP"))
+        Category category = null;
+        if (post.getCategory().name().endsWith("_TIP")){
             category = Category.LIFE_TIP;
+        }
+        else if (post.getCategory().name().endsWith("_ITEM")) {
+            category = Category.LIFE_ITEM;
+        }
+        else {throw new GeneralException(GeneralErrorCode.COMMUNITY_CATEGORY);}
 
         // 이미지 링크들
         List<String> imageUrls = post.getPostImageList().stream()
@@ -60,7 +66,7 @@ public class AdminPostService {
                 .content(post.getContent())
                 .category(category)
                 .subCategory(post.getCategory())
-                .nickname(post.getMember().getNickname())
+                .adminName(post.getAdmin().getAdminId())
                 .createdAt(post.getCreatedAt())
                 .viewCount(post.getViewCount())
                 .scrapCount(postScrapCount)
@@ -74,10 +80,11 @@ public class AdminPostService {
         Post postToDelete = postRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
+        String category = postToDelete.getCategory().toString().endsWith("_TIP") ? "LIFE_TIP" : "LIFE_ITEM";
         //존재하면 삭제
         postRepository.delete(postToDelete);
         //벡터 DB에서도 삭제
-        index.deleteByIds(List.of(postToDelete.getId().toString()));
+        index.deleteByIds(List.of(postToDelete.getId().toString()), category);
         return postId;
     }
 
@@ -109,7 +116,8 @@ public class AdminPostService {
             postImageRepository.saveAll(newImages);
 
             // Post 엔티티에도 새로운 이미지 목록을 설정하여 상태를 동기화합니다.
-            post.setPostImageList(newImages);
+            post.getPostImageList().clear();
+            post.getPostImageList().addAll(newImages);
         }
         // 업데이트된 이미지 URL 목록을 가져오기
         List<String> updatedImageUrls = post.getPostImageList().stream()
@@ -130,7 +138,8 @@ public class AdminPostService {
             hashtagRepository.saveAll(newHashtags);
 
             // Post 엔티티에도 새로운 해시태그 목록을 설정하여 상태를 동기화합니다.
-            post.setHashtagList(newHashtags);
+            post.getHashtagList().clear();
+            post.getHashtagList().addAll(newHashtags);
         }
 
         // 업데이트된 해시태그 목록을 가져오기
@@ -152,15 +161,7 @@ public class AdminPostService {
 
 
     @Transactional
-    public AdminPostResDTO.createPostResDTO createPost(AdminPostReqDTO.createPostReqDTO request) {
-
-        Post newPost = Post.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .category(request.getSubCategory())
-                .likeCount(0)
-                .viewCount(0)
-                .build();
+    public AdminPostResDTO.createPostResDTO createPost(AdminPostReqDTO.createPostReqDTO request, Admin admin, List<String> imageUrls) {
 
         // 카테고리 지정 잘했는지 확인
         if(request.getSubCategory().toString().endsWith("_TIP") && !request.getCategory().toString().equals("LIFE_TIP"))
@@ -169,9 +170,27 @@ public class AdminPostService {
         if(request.getSubCategory().toString().endsWith("_TEM") && !request.getCategory().toString().equals("LIFE_TEM"))
             throw new IllegalStateException("올바른 카테고리가 아닙니다.");
 
+        Post newPost = Post.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .category(request.getSubCategory())
+                .likeCount(0)
+                .viewCount(0)
+                .admin(admin)
+                .build();
+
+        List<PostImage> postImages = imageUrls.stream()
+                .map(url -> PostImage.builder()
+                        .imageUrl(url)
+                        .post(newPost)  // savedPost가 아니라 post로 세팅! (아직 저장 전이라 post 객체를 그대로 사용)
+                        .build())
+                .toList();
+
+        newPost.getPostImageList().addAll(postImages);
+
         //일단 게시글 생성
         postRepository.save(newPost);
-
+/*
         // ImageUrls -> List<PostImage> 타입으로 변경
         List<PostImage> images = request.getImageUrls().stream()
                 .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(newPost).build())
@@ -179,7 +198,7 @@ public class AdminPostService {
 
         // PostImageList setting
         newPost.setPostImageList(images);
-
+*/
         //response 용 savedImageUrls 생성
         List<String> savedImageUrls = newPost.getPostImageList().stream()
                 .map(PostImage::getImageUrl)
@@ -206,6 +225,7 @@ public class AdminPostService {
                 .subCategory(newPost.getCategory())
                 .imageUrls(savedImageUrls)
                 .hashtags(savedHashtags)
+                .createdAt(newPost.getCreatedAt())
                 .build();
     }
 

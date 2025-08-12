@@ -12,10 +12,13 @@ import umc.demoday.whatisthis.domain.inquiry.enums.InquiryStatus;
 import umc.demoday.whatisthis.domain.inquiry.repository.InquiryRepository;
 import umc.demoday.whatisthis.domain.inquiry.Inquiry;
 import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static umc.demoday.whatisthis.domain.inquiry.code.InquiryErrorCode.INQUIRY_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +56,7 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
     @Override
     public void updateInquiry(Integer inquiryId, InquiryUpdateReqDTO dto) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId)
-                .orElseThrow(() -> new EntityNotFoundException("문의내역을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(INQUIRY_NOT_FOUND));
 
         // 필요한 필드만 수정
         inquiry.update(dto.getTitle(), dto.getContent());
@@ -62,7 +65,7 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
     @Override
     public void deleteInquiry(Integer inquiryId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId)
-                .orElseThrow(() -> new EntityNotFoundException("문의내역을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(INQUIRY_NOT_FOUND));
         inquiryRepository.deleteById(inquiry.getId());
     }
 }

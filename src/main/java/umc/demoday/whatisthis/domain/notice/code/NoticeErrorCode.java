@@ -8,7 +8,7 @@ import umc.demoday.whatisthis.global.apiPayload.code.BaseErrorCode;
 @Getter
 @AllArgsConstructor
 public enum NoticeErrorCode implements BaseErrorCode {
-    NOTICE_NOT_FOUND(HttpStatus.OK,"NOTICE4040", "공지사항을 찾지 못했습니다.")
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND,"NOTICE4040", "공지사항을 찾지 못했습니다.")
     ;
 
     private final HttpStatus httpStatus;
