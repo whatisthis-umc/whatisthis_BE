@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.inquiry.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,6 +26,8 @@ import java.util.List;
 
 import static umc.demoday.whatisthis.domain.inquiry.code.InquirySuccessCode.INQUIRY_OK;
 
+
+@Slf4j
 @RestController
 @RequestMapping("/support/inquiries")
 @RequiredArgsConstructor
@@ -40,6 +43,8 @@ public class InquiryController {
             @RequestPart("request") @Valid InquiryCreateReqDTO dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @AuthenticationPrincipal Member loginUser) {
+
+        log.info("member : {}", loginUser);
 
         // S3에 파일 업로드
         List<String> fileUrls = (files != null && !files.isEmpty())
