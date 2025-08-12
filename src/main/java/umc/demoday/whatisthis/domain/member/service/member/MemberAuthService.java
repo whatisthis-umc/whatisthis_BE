@@ -6,5 +6,5 @@ import umc.demoday.whatisthis.domain.member.dto.login.LoginResDTO;
 public interface MemberAuthService {
     LoginResDTO login(LoginReqDTO request);
     LoginResDTO reissue(String refreshToken);
-
+    void logout(Integer id);
 }

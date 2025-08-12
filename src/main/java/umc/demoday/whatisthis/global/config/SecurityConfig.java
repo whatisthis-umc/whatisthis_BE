@@ -72,6 +72,7 @@ public class SecurityConfig {
                                 "/admin/login",
                                 "/admin/reissue",
                                 "/members/login",
+                                "/members/logout",
                                 "/members/reissue",
                                 "/members/find-id",
                                 "/members/reset-password/send-code",
