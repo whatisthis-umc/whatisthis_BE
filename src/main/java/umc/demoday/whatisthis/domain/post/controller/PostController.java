@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
 import umc.demoday.whatisthis.domain.admin.redis.dto.RedisResponseDTO;
 import umc.demoday.whatisthis.domain.admin.redis.search.SearchService;
 import umc.demoday.whatisthis.domain.member.Member;
@@ -139,9 +140,9 @@ public class PostController {
 
     @GetMapping("/search")
     @Operation(summary = "검색 API")
-    public CustomResponse<RedisResponseDTO> search(@RequestParam("keyword") String keyword, @RequestParam Category category, Pageable pageable){
-        RedisResponseDTO responseDTO = searchService.searchPosts(keyword, List.of(category.toString()), pageable);
-        return
+    public CustomResponse<Page<PostDocument>> search(@RequestParam("keyword") String keyword, @RequestParam Category category, Pageable pageable){
+        Page<PostDocument> postDocuments = searchService.executeSearch(keyword, category, pageable);
+        return CustomResponse.ok(postDocuments);
     }
 
 }
