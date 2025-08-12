@@ -26,9 +26,6 @@ public class PostDocument {
     @Id
     private String id; // Post Entity의 Integer id를 String으로 변환하여 사용
 
-    @Indexed
-    private Integer postId;
-
     // '풀텍스트 검색' 대상 필드 (내용 기반 검색)
     @Searchable(weight = 5.0, nostem = true) // 한국어 검색을 위해 stemming 비활성화
     private String title;
