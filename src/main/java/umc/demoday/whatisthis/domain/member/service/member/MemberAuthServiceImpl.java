@@ -93,4 +93,8 @@ public class MemberAuthServiceImpl implements MemberAuthService {
         return new LoginResDTO(newAccessToken, newRefreshToken);
     }
 
+    @Override
+    public void logout(Integer id) {
+        refreshTokenRepository.deleteById(id);
+    }
 }
