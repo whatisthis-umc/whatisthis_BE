@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.domain.member.dto.member;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -8,6 +9,10 @@ import umc.demoday.whatisthis.domain.member.validation.annotation.PasswordMatche
 @PasswordMatches(first = "newPassword", second = "confirmPassword")
 @Getter
 public class PasswordChangeReqDTO {
+
+    // 배포 서버에서는 필요없음 로컬 테스트용
+    @Schema(hidden = true)
+    private String resetToken;
 
     @NotBlank
     @Pattern(
