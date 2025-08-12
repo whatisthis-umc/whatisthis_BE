@@ -21,6 +21,7 @@ import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
+import umc.demoday.whatisthis.domain.recommendation.RecommendationService;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
@@ -42,6 +43,7 @@ public class AdminPostService {
     private final ApplicationEventPublisher eventPublisher;
 
     private final Index index;
+    private final RecommendationService recommendationService;
 
     public AdminPostResDTO getPost(Integer postId) {
 
@@ -219,6 +221,7 @@ public class AdminPostService {
         List<String> savedHashtags = newPost.getHashtagList().stream()
                 .map(Hashtag::getContent)
                 .toList();
+
 
         //add to redis
         eventPublisher.publishEvent(new PostEvent(newPost.getId(), PostEvent.ActionType.CREATED_OR_UPDATED));

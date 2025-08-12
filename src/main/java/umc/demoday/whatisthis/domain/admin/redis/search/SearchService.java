@@ -36,7 +36,7 @@ public class SearchService {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "likeCount");
 
         List<String> categories = CategoryConverter.getDynamicCategories(category.toString());
-        // 실제 검색 로직 수행
+        // 검색 로직 수행
         Page<PostDocument> posts = searchPosts(keyword, categories, pageable);
 
         // 검색어 카운트 증가
