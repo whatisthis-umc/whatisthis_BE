@@ -7,6 +7,8 @@ import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.dto.AdminLoginReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminLoginResDTO;
 import umc.demoday.whatisthis.domain.admin.repository.AdminRepository;
+import umc.demoday.whatisthis.domain.refresh_token.AdminRefreshToken;
+import umc.demoday.whatisthis.domain.refresh_token.repository.AdminRefreshTokenRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.global.security.JwtProvider;
@@ -18,6 +20,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private final AdminRepository adminRepository;
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
+    private final AdminRefreshTokenRepository adminRefreshTokenRepository;
 
     @Override
     public AdminLoginResDTO login(AdminLoginReqDTO request) {
@@ -30,27 +33,53 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
 
         String accessToken = jwtProvider.createAccessToken(admin.getId(), "ROLE_ADMIN");
-        String refreshToken = jwtProvider.createRefreshToken(admin.getId());
 
-        return AdminLoginResDTO.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        String refreshToken;
+        AdminRefreshToken savedToken = adminRefreshTokenRepository.findById(admin.getId()).orElse(null);
+
+        if (savedToken != null && jwtProvider.validateToken(savedToken.getToken())) {
+            refreshToken = savedToken.getToken();
+        } else {
+            refreshToken = jwtProvider.createRefreshToken(admin.getId());
+            adminRefreshTokenRepository.save(new AdminRefreshToken(admin.getId(), refreshToken));
+        }
+
+        return new AdminLoginResDTO(accessToken, refreshToken);
     }
 
     @Override
     public AdminLoginResDTO reissue(String refreshToken) {
+
+        // 1. 토큰 유효성 검사
         if (!jwtProvider.validateToken(refreshToken)) {
-            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401);
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401); // 만료 등
         }
 
+        // 2. 사용자 ID 추출
         Integer adminId = jwtProvider.getUserIdFromToken(refreshToken);
-        String newAccessToken = jwtProvider.createAccessToken(adminId, "ADMIN");
 
-        return AdminLoginResDTO.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(refreshToken) // 보통 refreshToken은 그대로 유지
-                .build();
+        // 3. DB에 저장된 refreshToken과 비교
+        AdminRefreshToken saved = adminRefreshTokenRepository.findById(adminId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.UNAUTHORIZED_401));
+
+        if (!saved.getToken().equals(refreshToken)) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401); // 위조된 토큰
+        }
+
+        // 4. 새 AccessToken 생성
+        String newAccessToken = jwtProvider.createAccessToken(adminId, "ROLE_ADMIN");
+
+        // (선택) RefreshToken도 새로 발급하여 갱신
+        String newRefreshToken = jwtProvider.createRefreshToken(adminId);
+        saved.updateToken(newRefreshToken);
+        adminRefreshTokenRepository.save(saved);
+
+        return new AdminLoginResDTO(newAccessToken, newRefreshToken);
+    }
+
+    @Override
+    public void logout(Integer adminId) {
+        adminRefreshTokenRepository.deleteById(adminId);
     }
 
 }

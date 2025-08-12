@@ -70,6 +70,7 @@ public class SecurityConfig {
                                 "/members/signup",
                                 "/members/email-auth",
                                 "/admin/login",
+                                "/admin/logout",
                                 "/admin/reissue",
                                 "/members/login",
                                 "/members/logout",
