@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -50,7 +51,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:5173")); // 프론트 로컬 주소
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
@@ -64,39 +65,41 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers(
-                                        "/members/signup",
-                                        "/members/email-auth",
-                                        "/admin/login",
-                                        "/admin/reissue",
-                                        "/members/login",
-                                        "/members/reissue",
-                                        "/members/find-id",
-                                        "/members/reset-password/send-code",
-                                        "/members/reset-password/verify-code",
-                                        "/members/reset-password",
+                        .requestMatchers(
+                                "/members/signup",
+                                "/members/email-auth",
+                                "/admin/login",
+                                "/admin/reissue",
+                                "/members/login",
+                                "/members/reissue",
+                                "/members/find-id",
+                                "/members/reset-password/send-code",
+                                "/members/reset-password/verify-code",
+                                "/members/reset-password",
 
-                                        "/support/notices",
-                                        "/support/notices/*",
-                                        "/support/inquiries",
-                                        "/support/inquiries/*",
+                                "/support/notices",
+                                "/support/notices/*",
+                                "/support/inquiries",
+                                "/support/inquiries/*",
 
-                                        "/swagger-ui/**",
-                                        "/v3/api-docs/**",
-                                        "/swagger-resources/**",
-                                        "/webjars/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**",
 
-//                              "/posts/**",
+                                "/upload" // S3 테스트 용, 추후 삭제(?)
+                        ).permitAll()
 
-                                        "/upload" // S3 테스트 용, 추후 삭제(?)
-                                ).permitAll()
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/members/**").hasRole("USER")
-                                .requestMatchers("/posts/**").hasAnyRole("USER", "ADMIN")
-                                .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.GET,
+                                "/posts",
+                                "/posts/**"
+                        ).permitAll()
+
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/members/**").hasRole("USER")
+                        .requestMatchers("/posts/**").hasAnyRole("USER", "ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .authenticationProvider(daoAuthenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

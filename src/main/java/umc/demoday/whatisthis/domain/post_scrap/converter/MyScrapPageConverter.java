@@ -14,8 +14,7 @@ public class MyScrapPageConverter {
 
     public MyScrapPageResDTO toMyScrapPageResDTO(Page<PostScrap> scrapPage) {
         List<MyScrapSummaryResDTO> dtoList = scrapPage.stream()
-                .map(PostScrap::getPost)
-                .map(MyScrapSummaryResDTO::new)  // Post → DTO 변환
+                .map(MyScrapSummaryResDTO::new)  // PostScrap → DTO 변환
                 .toList();
 
         return new MyScrapPageResDTO(
@@ -28,5 +27,6 @@ public class MyScrapPageConverter {
                 scrapPage.isLast()
         );
     }
+
 }
 

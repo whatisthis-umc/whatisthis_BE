@@ -25,6 +25,5 @@ public interface PostScrapRepository extends JpaRepository<PostScrap, Integer> {
     // 특정 회원이 좋아요한 PostLike 리스트 조회
     Page<PostScrap> findByMember(Member member, Pageable pageable);
 
-
     boolean existsByMemberAndPost(Member member, Post post);
 }

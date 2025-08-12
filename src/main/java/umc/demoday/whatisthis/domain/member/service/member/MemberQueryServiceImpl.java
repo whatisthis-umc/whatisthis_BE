@@ -6,6 +6,7 @@ import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.dto.member.FindIdReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.FindIdResDTO;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
@@ -54,5 +55,16 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
         return memberRepository.findByIdWithProfileImage(member.getId())
                 .orElseThrow(()-> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    @Override
+    public Member findMemberByDetails(CustomUserDetails customUserDetails) {
+
+        if (!customUserDetails.getRole().equals("ROLE_USER")) {
+            throw new GeneralException(GeneralErrorCode.INVALID_ROLE);
+        }
+
+        return memberRepository.findById(customUserDetails.getId())
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
     }
 }
