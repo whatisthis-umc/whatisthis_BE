@@ -60,7 +60,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     public Member findMemberByDetails(CustomUserDetails customUserDetails) {
 
-        if (!customUserDetails.getRole().equals("USER")) {
+        if (!customUserDetails.getRole().equals("ROLE_USER")) {
             throw new GeneralException(GeneralErrorCode.INVALID_ROLE);
         }
 

@@ -219,8 +219,9 @@ public class CommunityPostController {
     @Operation(summary = "자신의 게시물 삭제 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<Void> deleteMyPagePosts
             (@Parameter(description = "삭제할 post id") @PathVariable(name = "post-id") Integer id,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         myPagePostService.deletePost(id, loginUser);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204, null);
@@ -232,8 +233,9 @@ public class CommunityPostController {
             (@Parameter(description = "수정할 post id") @PathVariable(name = "post-id") Integer id,
              @RequestPart("request") @Valid PostRequestDTO.ModifyPostRequestDTO request,
              @RequestPart(value = "images", required = false) List<MultipartFile> images,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         // S3에 이미지 업로드
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "post")
@@ -248,8 +250,9 @@ public class CommunityPostController {
     @Operation(summary = "커뮤니티 게시물 좋아요 등록 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<PostResponseDTO.PostLikeCountDTO> postLike
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Post post = communityPostService.getPost(postId);
         communityPostService.likePost(post, loginUser);
 
@@ -260,8 +263,9 @@ public class CommunityPostController {
     @Operation(summary = "커뮤니티 게시물 좋아요 해제 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<PostResponseDTO.PostLikeCountDTO> postUnLike
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Post post = communityPostService.getPost(postId);
         communityPostService.unLikePost(post, loginUser);
 
@@ -273,8 +277,9 @@ public class CommunityPostController {
     public CustomResponse<CommentResponseDTO.NewCommentResponseDTO> newCommment
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Valid @RequestBody CommentRequestDTO.NewCommentRequestDTO request,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Post post = communityPostService.getPost(postId);
         Comment parent;
 
@@ -292,8 +297,9 @@ public class CommunityPostController {
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
              @Valid @RequestBody CommentRequestDTO.ModifyCommentRequestDTO request,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         commentService.validateCommentByPostId(commentService.getComment(commentId),postId);
         Comment comment = commentService.updateComment(commentId,postId,request.getContent(),loginUser);
 
@@ -305,8 +311,9 @@ public class CommunityPostController {
     public CustomResponse<CommentResponseDTO.DeletedCommentResponseDTO> deleteComment
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         commentService.validateCommentByPostId(commentService.getComment(commentId),postId);
         Comment comment = commentService.deleteComment(commentId, postId, loginUser);
 
@@ -318,8 +325,9 @@ public class CommunityPostController {
     public CustomResponse<CommentResponseDTO.CommentLikeCountDTO> commmentLike
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Comment comment = commentService.getComment(commentId);
         commentService.validateCommentByPostId(comment, postId);
         commentService.likeComment(comment, loginUser);
@@ -332,8 +340,9 @@ public class CommunityPostController {
     public CustomResponse<CommentResponseDTO.CommentLikeCountDTO> commmentUnLike
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Comment comment = commentService.getComment(commentId);
         commentService.validateCommentByPostId(comment, postId);
         commentService.unLikeComment(comment, loginUser);
@@ -346,8 +355,9 @@ public class CommunityPostController {
     public CustomResponse<ReportResponseDTO.ReportPostResponseDTO> postReport
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Valid @RequestBody ReportRequestDTO.NewReportRequestDTO request,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Post post = communityPostService.getPost(postId);
         Report report = reportService.insertNewReport(ReportConverter.toReport(request,loginUser,post,null));
 
@@ -361,8 +371,9 @@ public class CommunityPostController {
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,
              @Valid @RequestBody ReportRequestDTO.NewReportRequestDTO request,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Post post = communityPostService.getPost(postId);
         Comment comment = commentService.getComment(commentId);
         commentService.validateCommentByPostId(comment, postId);

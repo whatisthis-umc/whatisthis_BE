@@ -20,6 +20,7 @@ import umc.demoday.whatisthis.domain.member.service.member.MemberQueryService;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.MyPagePostResponseDTO;
 import umc.demoday.whatisthis.domain.post.service.MyPagePostService;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 import umc.demoday.whatisthis.global.service.S3Service;
@@ -48,8 +49,9 @@ public class MyPageController {
     public CustomResponse<MyPagePostResponseDTO.MyPostPageDTO> getMyPagePosts
             (@Parameter(description = "페이지 번호") @RequestParam Integer page,
              @Parameter(description = "한 페이지 당 게시물 수") @RequestParam Integer size,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Page<Post> postList = myPagePostService.getMyPosts(page-1, size, loginUser);
 
         return CustomResponse.ok(toMyPostPageDTO(postList));
@@ -59,8 +61,9 @@ public class MyPageController {
     @Operation(summary = "마이페이지 나의 작성내역 삭제 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<Void> deleteMyPagePosts
             (@Parameter(description = "삭제 할 post id") @PathVariable(name = "post-id") Integer id,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         myPagePostService.deletePost(id, loginUser);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204, null);
@@ -71,8 +74,9 @@ public class MyPageController {
     public CustomResponse<MyPageInquiryResponseDTO.MyInquiryPageDTO> getMyPageInquiries
             (@Parameter(description = "페이지 번호") @RequestParam Integer page,
              @Parameter(description = "한 페이지 당 문의글 수") @RequestParam Integer size,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Page<Inquiry> inquiryList = myPageInquiryService.getMyInquiries(page-1, size, loginUser);
 
         return CustomResponse.ok(toMyInquiryPageDTO(inquiryList));
@@ -82,8 +86,9 @@ public class MyPageController {
     @Operation(summary = "마이페이지 나의 문의내역 상세조회 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<MyPageInquiryResponseDTO.MyInquiryDetailDTO> getMyInquiryDetail
             (@Parameter(description = "조회 할 inquiry id") @PathVariable(name = "inquiry-id") Integer id,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Inquiry inquiry = myPageInquiryService.getInquiryByIdAndMember(id, loginUser);
 
         return CustomResponse.ok(toMyInquiryDetailDTO(inquiry));
@@ -93,8 +98,9 @@ public class MyPageController {
     @Operation(summary = "마이페이지 나의 문의내역 삭제 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<Void> deleteMyPageInquiries
             (@Parameter(description = "삭제 할 inquiry id") @PathVariable(name = "inquiry-id") Integer id,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         myPageInquiryService.deleteInquiryById(id, loginUser);
 
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204, null);
@@ -102,8 +108,9 @@ public class MyPageController {
 
     @GetMapping("/account")
     @Operation(summary = "마이페이지 계정 관리 페이지 조회 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
-    public CustomResponse<MyPageAccountDTO.MyPageAccountResponseDTO> getMyPageAccount(@AuthenticationPrincipal Member loginUser) {
+    public CustomResponse<MyPageAccountDTO.MyPageAccountResponseDTO> getMyPageAccount(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         Member member = memberQueryService.fetchedMember(loginUser);
 
         return CustomResponse.ok(toMyPageAccountResponseDTO(member));
@@ -114,8 +121,9 @@ public class MyPageController {
     public CustomResponse<MyPageAccountDTO.MyPageAccountModifyDTO> patchMyPageAccount
             (@RequestPart("request") @Valid MyPageAccountDTO.MyPageAccountRequestDTO request,
              @RequestPart(value = "image", required = false) MultipartFile image,
-             @AuthenticationPrincipal Member loginUser) {
+             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Member loginUser = memberQueryService.findMemberByDetails(customUserDetails);
         String imageUrl = s3Service.uploadFile(image,"profileimage");
 
         Member fetchedmember = memberQueryService.fetchedMember(loginUser);
