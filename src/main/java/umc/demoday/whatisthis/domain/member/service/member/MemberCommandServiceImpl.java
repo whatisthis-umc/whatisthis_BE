@@ -77,7 +77,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         // 기본 프로필 이미지 엔티티 생성
         ProfileImage defaultImage = ProfileImage.builder()
-                .imageUrl("https://umc-demo-whatisthis-s3.s3.ap-northeast-2.amazonaws.com/global/base_profile_image/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7+2025-08-12+132603.png")
+                .imageUrl("https://umc-demo-whatisthis-s3.s3.ap-northeast-2.amazonaws.com/global/base_profile_image/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84.jpg")
                 .build();
 
         // 회원에 기본 프로필 이미지 세팅
