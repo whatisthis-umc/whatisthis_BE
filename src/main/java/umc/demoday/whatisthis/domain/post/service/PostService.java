@@ -23,4 +23,5 @@ public interface PostService {
 
     public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, CustomUserDetails customUserDetails);
 
+
 }
