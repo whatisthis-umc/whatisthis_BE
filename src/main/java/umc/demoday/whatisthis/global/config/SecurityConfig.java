@@ -69,8 +69,8 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.GET,
-                                "/posts/communities",
-                                "/posts/communities/**"
+                                "/posts",
+                                "/posts/**"
                         ).permitAll()
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
