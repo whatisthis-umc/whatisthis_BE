@@ -1,6 +1,9 @@
 package umc.demoday.whatisthis.domain.member.service.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import umc.demoday.whatisthis.domain.member.Member;
@@ -9,6 +12,7 @@ import umc.demoday.whatisthis.domain.member.dto.login.LoginResDTO;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 import umc.demoday.whatisthis.domain.refresh_token.RefreshToken;
 import umc.demoday.whatisthis.domain.refresh_token.repository.RefreshTokenRepository;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.global.security.JwtProvider;
@@ -19,42 +23,44 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class MemberAuthServiceImpl implements MemberAuthService {
 
+    private final AuthenticationManager authenticationManager;
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public LoginResDTO login(LoginReqDTO request) {
 
+        // 스프링 표준 인증
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getMemberId(), request.getPassword())
+        );
+
+        // 인증 성공 -> UserDetails 획득
+        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+
         Member member = memberRepository.findByMemberId(request.getMemberId())
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
-
-        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new GeneralException(GeneralErrorCode.INVALID_PASSWORD);
-        }
 
         // 로그인 시점 기록
         member.setLastLoginAt(LocalDateTime.now());
         memberRepository.save(member);
 
-        String accessToken = jwtProvider.createAccessToken(member.getId(), "ROLE_USER");
-        String refreshToken;
+        String role = principal.getRole();
+        String accessToken = jwtProvider.createAccessToken(principal.getId(), role);
 
         // DB에 기존 refreshToken이 있는지 확인
-        RefreshToken savedToken = refreshTokenRepository.findById(member.getId()).orElse(null);
+        String refreshToken;
+        RefreshToken savedToken = refreshTokenRepository.findById(principal.getId()).orElse(null);
 
         if (savedToken != null && jwtProvider.validateToken(savedToken.getToken())) {
-            // 유효하면 기존 refreshToken 재사용
-            refreshToken = savedToken.getToken();
+            refreshToken = savedToken.getToken(); // 유효하면 재사용
         } else {
-            // 없거나 만료됐으면 새로 발급 & 저장
-            refreshToken = jwtProvider.createRefreshToken(member.getId());
-            refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken));
+            refreshToken = jwtProvider.createRefreshToken(principal.getId());
+            refreshTokenRepository.save(new RefreshToken(principal.getId(), refreshToken));
         }
 
         return new LoginResDTO(accessToken, refreshToken);
-
     }
 
     @Override

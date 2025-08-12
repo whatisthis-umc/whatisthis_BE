@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import umc.demoday.whatisthis.domain.member.Member;
-import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post_like.PostLike;
 import umc.demoday.whatisthis.domain.post_scrap.PostScrap;
