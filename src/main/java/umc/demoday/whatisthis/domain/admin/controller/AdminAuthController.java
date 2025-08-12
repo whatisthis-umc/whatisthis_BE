@@ -4,10 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.admin.dto.AdminLoginReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminLoginResDTO;
 import umc.demoday.whatisthis.domain.admin.service.AdminAuthService;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 
 @RestController
@@ -32,4 +35,10 @@ public class AdminAuthController {
         return CustomResponse.ok(response);
     }
 
+    @PostMapping("/logout")
+    @Operation(summary = "관리자 로그아웃 API -by 이정준")
+    public CustomResponse<Void> logout(@AuthenticationPrincipal CustomUserDetails admin) {
+        adminAuthService.logout(admin.getId());
+        return CustomResponse.ok(null);
+    }
 }
