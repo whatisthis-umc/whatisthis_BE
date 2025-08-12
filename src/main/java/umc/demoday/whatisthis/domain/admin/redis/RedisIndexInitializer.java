@@ -33,7 +33,7 @@ public class RedisIndexInitializer implements ApplicationRunner {
                 Schema schema = new Schema()
                         .addTextField("title", 5.0)    // 제목 (가중치 5.0)
                         .addTextField("content", 1.0)  // 내용
-                        .addTagField("author")           // 작성자 (필터링용)
+                        .addTagField("category")           // 작성자 (필터링용)
                         .addNumericField("createdAt");   // 생성일 (정렬용)
 
                 // 4. 인덱스 생성 규칙 정의
