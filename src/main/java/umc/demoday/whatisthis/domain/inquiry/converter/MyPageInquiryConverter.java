@@ -30,7 +30,7 @@ public class MyPageInquiryConverter {
 
         return MyPageInquiryResponseDTO.MyInquiryPageDTO.builder()
                 .nickname(author.getNickname())
-                .profileImageUrl(author.getProfileImage().getImageUrl())
+                .profileImageUrl(profileImageUrl)
                 .email(author.getEmail())
                 .inquiries(myInquiryDTOList)
                 .build();
