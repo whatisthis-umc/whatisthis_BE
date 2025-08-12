@@ -10,10 +10,14 @@ import org.springframework.web.multipart.MultipartFile;
 import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
+import umc.demoday.whatisthis.domain.admin.repository.AdminRepository;
 import umc.demoday.whatisthis.domain.admin.service.AdminPostService;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
+import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.global.service.S3Service;
 
 import java.util.Collections;
@@ -26,6 +30,7 @@ public class AdminPostController {
 
     private final AdminPostService adminPostService;
     private final S3Service s3Service;
+    private final AdminRepository adminRepository;
 
     @GetMapping("/{post-id}")
     @Operation(summary = "개별 게시글 조회 API -by 천성호, 남성현")
@@ -52,8 +57,9 @@ public class AdminPostController {
     @Operation(summary = "게시글 작성 API -by 천성호, 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<AdminPostResDTO.createPostResDTO> createPost(@RequestPart("request") AdminPostReqDTO.createPostReqDTO request,
                                                                        @RequestPart(value = "images", required = false) List<MultipartFile> images,
-                                                                       @AuthenticationPrincipal Admin admin){
+                                                                       @AuthenticationPrincipal CustomUserDetails customUserDetails){
 
+        Admin admin = adminRepository.findById(customUserDetails.getId()).orElseThrow(()->new GeneralException(GeneralErrorCode.NOT_FOUND_404));
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "post")
                 : Collections.emptyList();

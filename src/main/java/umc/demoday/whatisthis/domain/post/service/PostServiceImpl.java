@@ -73,7 +73,7 @@ public class PostServiceImpl implements PostService {
         int postScrapCount = postScrapRepository.countByPostId(postId);
 
         // 최근 조회한 게시글 갱신
-        if (customUserDetails.getRole().equals("ROLE_USER")) //유저면
+        if (customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) //유저면
             memberActivityService.updateLastSeenPost(customUserDetails, postId);
 
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
@@ -87,7 +87,7 @@ public class PostServiceImpl implements PostService {
 
 
         // Member 불러와서 스크랩
-        if(customUserDetails.getRole().equals("ROLE_USER")) {
+        if(customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) {
 
             Member member = memberRepository.findById(customUserDetails.getId())
                     .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
@@ -148,10 +148,10 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(CustomUserDetails customUserDetails, Integer page, Integer size, Category category) {
         List<Integer> allRecommendedList = null;
-        if(customUserDetails.getRole().equals("ROLE_USER")) { // 유저면 맞춤 추천
+        if(customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) { // 유저면 맞춤 추천
             allRecommendedList = recommendationService.findRecommendationsForMember(customUserDetails.getId(), (page + 1) * size, category);
         }
-        else if(customUserDetails.getRole().equals("ROLE_ADMIN")) { // 관리자면 기본 추천
+        else{// 유저 아니면 기본 추천
             allRecommendedList = recommendationService.getDefaultRecommendations((page+1)*size, category);
         }
         //원하는 페이지만큼 짜르기
@@ -200,13 +200,13 @@ public class PostServiceImpl implements PostService {
 
         List<Integer> recommendedPostIds = new ArrayList<>();
         // 4. Ai 추천 페이지 요청(Pageable) 객체 생성
-        if(customUserDetails.getRole().equals("ROLE_USER")) {  //유저면 맞춤 추천
+        if(customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) {  //유저면 맞춤 추천
             Integer memberId = customUserDetails.getId();
             MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
             recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(), size, category);
         }
-        else if(customUserDetails.getRole().equals("ROLE_ADMIN"))
-        { //어드민이면 기본 추천
+        else
+        { // 유저 아니면 기본 추천
             recommendedPostIds = recommendationService.getDefaultRecommendations(size, category);
         }
         // 5. Repository를 통해 데이터베이스에서 데이터 조회
