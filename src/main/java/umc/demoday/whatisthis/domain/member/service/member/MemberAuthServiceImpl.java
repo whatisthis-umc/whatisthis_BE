@@ -25,7 +25,6 @@ public class MemberAuthServiceImpl implements MemberAuthService {
 
     private final AuthenticationManager authenticationManager;
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
