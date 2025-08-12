@@ -1,6 +1,8 @@
 package umc.demoday.whatisthis.domain.member.service.member;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.global.security.JwtProvider;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class MemberAuthServiceImpl implements MemberAuthService {
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public LoginResDTO login(LoginReqDTO request) {
@@ -93,8 +97,21 @@ public class MemberAuthServiceImpl implements MemberAuthService {
         return new LoginResDTO(newAccessToken, newRefreshToken);
     }
 
+    // access 토큰 블랙리스트 (남은 만료시간만큼)
     @Override
-    public void logout(Integer id) {
-        refreshTokenRepository.deleteById(id);
+    public void logout(Integer memberId, HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        String accessToken = null;
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            accessToken = bearerToken.substring(7);
+        }
+
+        refreshTokenRepository.deleteById(memberId);
+        if (accessToken != null && jwtProvider.validateToken(accessToken)) {
+            String jti = jwtProvider.getJti(accessToken);
+            long ttlSec = Math.max(1,
+                    (jwtProvider.getExpiration(accessToken).getTime() - System.currentTimeMillis()) / 1000);
+            redisTemplate.opsForValue().set("bl:" + jti, "1", ttlSec, TimeUnit.SECONDS);
+        }
     }
 }
