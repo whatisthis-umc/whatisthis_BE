@@ -151,7 +151,7 @@ public class PostServiceImpl implements PostService {
         if(customUserDetails.getRole().equals("ROLE_USER")) { // 유저면 맞춤 추천
             allRecommendedList = recommendationService.findRecommendationsForMember(customUserDetails.getId(), (page + 1) * size, category);
         }
-        else if(customUserDetails.getRole().equals("ROLE_ADMIN")) { // 관리자면 기본 추천
+        else{// 유저 아니면 기본 추천
             allRecommendedList = recommendationService.getDefaultRecommendations((page+1)*size, category);
         }
         //원하는 페이지만큼 짜르기
@@ -205,8 +205,8 @@ public class PostServiceImpl implements PostService {
             MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
             recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(), size, category);
         }
-        else if(customUserDetails.getRole().equals("ROLE_ADMIN"))
-        { //어드민이면 기본 추천
+        else
+        { // 유저 아니면 기본 추천
             recommendedPostIds = recommendationService.getDefaultRecommendations(size, category);
         }
         // 5. Repository를 통해 데이터베이스에서 데이터 조회
