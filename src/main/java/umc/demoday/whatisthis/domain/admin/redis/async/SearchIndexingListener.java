@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.domain.admin.redis;
+package umc.demoday.whatisthis.domain.admin.redis.async;
 
 
 import lombok.RequiredArgsConstructor;
@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
+import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
+import umc.demoday.whatisthis.domain.admin.redis.PostMapper;
+import umc.demoday.whatisthis.domain.admin.redis.PostSearchRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 

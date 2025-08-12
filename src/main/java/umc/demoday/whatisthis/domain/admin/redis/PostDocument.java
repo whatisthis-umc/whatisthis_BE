@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.admin.redis;
 import com.redis.om.spring.annotations.Document;
 import com.redis.om.spring.annotations.Indexed;
 import com.redis.om.spring.annotations.Searchable;
+import com.redis.om.spring.annotations.TagIndexed;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,21 +30,21 @@ public class PostDocument {
     private Integer postId;
 
     // '풀텍스트 검색' 대상 필드 (내용 기반 검색)
-    @Searchable(nostem = true) // 한국어 검색을 위해 stemming 비활성화
+    @Searchable(weight = 5.0, nostem = true) // 한국어 검색을 위해 stemming 비활성화
     private String title;
 
-    @Searchable(nostem = true)
+    @Searchable(weight = 1.0, nostem = true)
     private String content;
 
     // '필터링' 및 '정확한 값 매칭' 대상 필드
     @Indexed
-    private String authorName; // 비정규화: Member 객체 대신 이름만 저장
+    private String authorName; // Member or Admin 객체 대신 이름만 저장
 
     // '태그' 기반 필터링 (다중 값 허용, 정확한 값 매칭)
     @Indexed
     private Set<String> hashtags; // 비정규화: Hashtag 객체 리스트 대신 키워드 Set으로 저장
 
-    @Indexed
+    @TagIndexed
     private Category category; // Enum은 String으로 저장되어 필터링에 용이
 
     // '정렬' 및 '범위 검색' 대상 필드

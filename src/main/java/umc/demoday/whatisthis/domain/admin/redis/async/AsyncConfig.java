@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.domain.admin.redis;
+package umc.demoday.whatisthis.domain.admin.redis.async;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

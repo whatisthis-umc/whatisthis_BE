@@ -1,4 +1,4 @@
-package umc.demoday.whatisthis.domain.admin.redis;
+package umc.demoday.whatisthis.domain.admin.redis.async;
 
 public record PostEvent(
         Integer postId,

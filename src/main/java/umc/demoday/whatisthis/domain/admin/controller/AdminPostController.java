@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
+import umc.demoday.whatisthis.domain.admin.redis.async.InitialDataIndexer;
 import umc.demoday.whatisthis.domain.admin.repository.AdminRepository;
 import umc.demoday.whatisthis.domain.admin.service.AdminPostService;
 import umc.demoday.whatisthis.domain.post.enums.Category;
@@ -31,6 +33,7 @@ public class AdminPostController {
     private final AdminPostService adminPostService;
     private final S3Service s3Service;
     private final AdminRepository adminRepository;
+    private final InitialDataIndexer initialDataIndexer;
 
     @GetMapping("/{post-id}")
     @Operation(summary = "개별 게시글 조회 API -by 천성호, 남성현")
@@ -76,5 +79,13 @@ public class AdminPostController {
 
         AdminPostResDTO.allPostResDTO response = adminPostService.getAllPosts(category, page, size);
         return CustomResponse.ok(response);
+    }
+
+    @PostMapping("/reindex")
+    public ResponseEntity<String> reindexAllPosts() {
+        // 비동기 실행을 위해 별도 스레드에서 리인덱싱 작업을 시작
+        new Thread(initialDataIndexer::reindexAllPosts).start();
+        // 사용자에게는 즉시 응답을 반환
+        return ResponseEntity.ok("전체 리인덱싱 작업이 백그라운드에서 시작되었습니다. 서버 로그를 확인하세요.");
     }
 }

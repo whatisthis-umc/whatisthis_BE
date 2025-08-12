@@ -1,28 +1,20 @@
 package umc.demoday.whatisthis.domain.post.controller;
 
-import com.azure.core.annotation.Get;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
-import umc.demoday.whatisthis.domain.admin.redis.dto.RedisResponseDTO;
 import umc.demoday.whatisthis.domain.admin.redis.search.SearchService;
-import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
-import umc.demoday.whatisthis.domain.post.repository.PostRepository;
-import umc.demoday.whatisthis.domain.post.service.PostService;
-import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
-import umc.demoday.whatisthis.domain.recommendation.RecommendationService;
+import umc.demoday.whatisthis.domain.post.service.PostService;;
 import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
@@ -140,9 +132,9 @@ public class PostController {
 
     @GetMapping("/search")
     @Operation(summary = "검색 API")
-    public CustomResponse<Page<PostDocument>> search(@RequestParam("keyword") String keyword, @RequestParam Category category, Pageable pageable){
-        Page<PostDocument> postDocuments = searchService.executeSearch(keyword, category, pageable);
-        return CustomResponse.ok(postDocuments);
+    public CustomResponse<Page<PostDocument>> search(@RequestParam("keyword") String keyword, @RequestParam Category category, @RequestParam Integer page, @RequestParam Integer size){
+        Page<PostDocument> posts = searchService.executeSearch(keyword, category, size, page);
+        return CustomResponse.ok(posts);
     }
 
 }
