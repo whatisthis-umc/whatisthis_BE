@@ -21,6 +21,6 @@ public class RedisConfig {
 
     @Bean
     public JedisPooled jedisPooled() {
-        return new JedisPooled(System.getenv("REDIS_HOST"), 6379);
+        return new JedisPooled(System.getenv("REDIS_HOST"), Integer.parseInt(System.getenv("REDIS_HOST")));
     }
 }

@@ -7,8 +7,17 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.exceptions.JedisDataException;
+import redis.clients.jedis.search.FTCreateParams;
+import redis.clients.jedis.search.IndexDataType;
 import redis.clients.jedis.search.IndexDefinition;
 import redis.clients.jedis.search.Schema;
+import redis.clients.jedis.search.schemafields.NumericField;
+import redis.clients.jedis.search.schemafields.SchemaField;
+import redis.clients.jedis.search.schemafields.TagField;
+import redis.clients.jedis.search.schemafields.TextField;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -30,18 +39,20 @@ public class RedisIndexInitializer implements ApplicationRunner {
                 log.info("RediSearch index '{}' does not exist. Creating new index...", INDEX_NAME);
 
                 // 3. 스키마 정의
-                Schema schema = new Schema()
-                        .addTextField("title", 5.0)    // 제목 (가중치 5.0)
-                        .addTextField("content", 1.0)  // 내용
-                        .addTagField("category")           // 작성자 (필터링용)
-                        .addNumericField("createdAt");   // 생성일 (정렬용)
-
+                List<SchemaField> schemaFields = Arrays.asList(
+                        new TextField("title").weight(5.0),
+                        new TextField("content").weight(1.0),
+                        new TagField("category"),
+                        new NumericField("createdAt")
+                );
                 // 4. 인덱스 생성 규칙 정의
-                IndexDefinition rule = new IndexDefinition(IndexDefinition.Type.HASH)
-                        .setPrefixes("post:"); // "post:"로 시작하는 Hash를 인덱싱
+                FTCreateParams createParams = new FTCreateParams()
+                        .on(IndexDataType.HASH) // new IndexDefinition(Type.HASH)와 동일
+                        .addPrefix("post:");    // .setPrefixes("post:")와 동일
 
                 // 5. 인덱스 생성 명령어 실행
-                jedis.ftCreate(INDEX_NAME, rule, schema);
+                jedis.ftCreate(INDEX_NAME, createParams, schemaFields);
+
                 log.info("RediSearch index '{}' created successfully.", INDEX_NAME);
             }
         }

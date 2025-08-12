@@ -16,6 +16,7 @@ import umc.demoday.whatisthis.domain.admin.redis.PostMapper;
 import umc.demoday.whatisthis.domain.admin.redis.PostSearchRepository;
 import umc.demoday.whatisthis.domain.admin.redis.RedisIndexInitializer;
 import umc.demoday.whatisthis.domain.admin.redis.dto.RedisResponseDTO;
+import umc.demoday.whatisthis.domain.post.converter.CategoryConverter;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.global.config.RedisConfig;
 
@@ -39,8 +40,7 @@ public class SearchService {
     // 검색어가 입력될 때마다 호출되는 메소드
     public Page<PostDocument> executeSearch(String keyword, Category category, Pageable pageable) {
 
-        List<Category> categories = List.of(category);
-        categories.add(0, category);
+        List<String> categories = CategoryConverter.getDynamicCategories(category.toString());
         // 실제 검색 로직 수행
         Page<PostDocument> postDocuments = searchPosts(keyword, categories, pageable);
         // 검색어 카운트 증가
@@ -85,4 +85,6 @@ public class SearchService {
         Set<String> keywords = redisTemplate.opsForZSet().reverseRange(POPULAR_SEARCH_KEY + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE), 0, topN - 1);
         return keywords != null ? new ArrayList<>(keywords) : new ArrayList<>();
     }
+
+
 }
