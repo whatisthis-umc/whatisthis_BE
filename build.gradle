@@ -47,7 +47,8 @@ dependencies {
 
 	// Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
+	implementation 'com.redis.om:redis-om-spring:1.0.0'
+	implementation 'redis.clients:jedis:4.3.1'
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.7.0'

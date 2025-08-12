@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.domain.post.controller;
 
+import com.azure.core.annotation.Get;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import umc.demoday.whatisthis.domain.admin.redis.dto.RedisResponseDTO;
+import umc.demoday.whatisthis.domain.admin.redis.search.SearchService;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -32,8 +35,7 @@ public class PostController {
 
     private final PostService postService;
     private final MemberActivityService memberActivityService;
-    private final RecommendationService recommendationService;
-    private final PostRepository postRepository;
+    private final SearchService searchService;
 
     @GetMapping("/{post-id}")
     @Operation(summary = "생활꿀팁 or 생활꿀팁 페이지 조회 API -by 천성호")
@@ -121,5 +123,25 @@ public class PostController {
         return CustomResponse.ok(null);
     }
 
+    @GetMapping("/popular_keywords")
+    @Operation(summary = "인기 검색어 조회 API - by 천성호")
+    public CustomResponse<List<String>> getPopularKeywords(){
+        List<String> keywords = searchService.getTodayPopularKeywords(10);
+        return CustomResponse.ok(keywords);
+    }
+
+    @PostMapping("/redis/reindex")
+    @Operation(summary = "Redis Reindex API")
+    public CustomResponse<Void> redisReindex(){
+
+        return CustomResponse.ok(null);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "검색 API")
+    public CustomResponse<RedisResponseDTO> search(@RequestParam("keyword") String keyword, @RequestParam Category category, Pageable pageable){
+        RedisResponseDTO responseDTO = searchService.searchPosts(keyword, List.of(category.toString()), pageable);
+        return
+    }
 
 }

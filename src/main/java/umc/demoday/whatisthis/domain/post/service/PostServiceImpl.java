@@ -76,6 +76,9 @@ public class PostServiceImpl implements PostService {
         if (customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) //유저면
             memberActivityService.updateLastSeenPost(customUserDetails, postId);
 
+        // ViewCount 상승
+        post.setViewCount(post.getViewCount() + 1);
+
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
         return PostConverter.toGgulPostResponseDTO(post,category,imageUrls,hashtags,postScrapCount);
     }

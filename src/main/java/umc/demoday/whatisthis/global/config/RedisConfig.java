@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import redis.clients.jedis.JedisPooled;
 
 @Configuration
 public class RedisConfig {
@@ -15,5 +16,11 @@ public class RedisConfig {
         redisTemplate.setKeySerializer(new StringRedisSerializer()); // key를 문자열로 직렬화
         redisTemplate.setValueSerializer(new StringRedisSerializer()); // value를 문자열로 직렬화
         return redisTemplate;
+    }
+
+
+    @Bean
+    public JedisPooled jedisPooled() {
+        return new JedisPooled(System.getenv("REDIS_HOST"), 6379);
     }
 }
