@@ -10,6 +10,7 @@ import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
 import umc.demoday.whatisthis.domain.admin.redis.search.SearchService;
 import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.IntegratedSearchResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
@@ -119,7 +120,7 @@ public class PostController {
     @GetMapping("/popular_keywords")
     @Operation(summary = "인기 검색어 조회 API - by 천성호")
     public CustomResponse<List<String>> getPopularKeywords(){
-        List<String> keywords = searchService.getTodayPopularKeywords(10);
+        List<String> keywords = searchService.getPopularKeywords(10);
         return CustomResponse.ok(keywords);
     }
 
@@ -130,11 +131,25 @@ public class PostController {
         return CustomResponse.ok(null);
     }
 
-    @GetMapping("/search")
-    @Operation(summary = "검색 API")
-    public CustomResponse<Page<PostDocument>> search(@RequestParam("keyword") String keyword, @RequestParam Category category, @RequestParam Integer page, @RequestParam Integer size){
+    @GetMapping("/search/single")
+    @Operation(summary = "단일 검색 API")
+    public CustomResponse<Page<PostDocument>> search(@RequestParam("keyword") String keyword, @RequestParam(defaultValue = "TIP") Category category, @RequestParam Integer page, @RequestParam Integer size){
         Page<PostDocument> posts = searchService.executeSearch(keyword, category, size, page);
         return CustomResponse.ok(posts);
     }
 
+    @GetMapping("/search")
+    @Operation(summary = "통합 검색 API")
+    public CustomResponse<IntegratedSearchResponseDTO> integratedSearch(@RequestParam("keyword") String keyword)
+    {
+        Page<PostDocument> tipSearch = searchService.executeSearch(keyword, Category.LIFE_TIP, 1, 5);
+        Page<PostDocument> itemSearch = searchService.executeSearch(keyword, Category.LIFE_ITEM, 1, 5);
+        Page<PostDocument> communitySearch = searchService.executeSearch(keyword, Category.ITEM, 1, 5);
+        IntegratedSearchResponseDTO integratedSearchResponseDTO = IntegratedSearchResponseDTO.toIntegratedSearchResponseDTO(
+                tipSearch,
+                itemSearch,
+                communitySearch
+        );
+        return CustomResponse.ok(integratedSearchResponseDTO);
+    }
 }

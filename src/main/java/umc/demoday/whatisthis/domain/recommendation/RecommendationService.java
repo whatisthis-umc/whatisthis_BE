@@ -113,12 +113,8 @@ public class RecommendationService {
             fields.add("chunk_text");
             String namespace = category.toString();
 
-            String modelName = "models/gemini-embedding-001";
-            EmbeddingRequestDTO.Content content = new EmbeddingRequestDTO.Content(List.of(new EmbeddingRequestDTO.Part("추천하는 생활팁")));
-            EmbeddingRequestDTO request = new EmbeddingRequestDTO(modelName, content);
-            EmbeddingResponseDTO embeddingResult = geminiInterface.embedContent(request);
             SearchRecordsVector searchRecordsVector = new SearchRecordsVector();
-            searchRecordsVector.setValues(embeddingResult.embedding().values());
+            searchRecordsVector.setValues(textEmbedding("추천하는 생활꿀팁"));
 
             SearchRecordsResponse response = index.searchRecordsByVector(searchRecordsVector, namespace, fields, topK, null, null);
             List<Hit> hits = response.getResult().getHits();
@@ -133,5 +129,13 @@ public class RecommendationService {
             log.error("Default 벡터 검색 중 API 에러 발생", e);
             return Collections.emptyList();
         }
+    }
+    public List<Float> textEmbedding(String text)
+    {
+        String modelName = "models/gemini-embedding-001";
+        EmbeddingRequestDTO.Content content = new EmbeddingRequestDTO.Content(List.of(new EmbeddingRequestDTO.Part(text)));
+        EmbeddingRequestDTO request = new EmbeddingRequestDTO(modelName, content);
+        EmbeddingResponseDTO embeddingResult = geminiInterface.embedContent(request);
+        return embeddingResult.embedding().values();
     }
 }

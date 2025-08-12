@@ -37,7 +37,7 @@ public class CategoryConverter {
                     .collect(Collectors.toList());
         }
 
-        // 3. 어느 조건에도 해당하지 않으면, 원래 카테고리만 리스트에 담아 반환
-        return Collections.singletonList(upperCaseCategory);
+        // 3. 어느 조건에도 해당하지 않으면, 커뮤니티 게시물이므로 커뮤니티에 해당하는 카테고리 반환
+        return Arrays.asList(Category.ITEM.name(),Category.TIP.name(), Category.CURIOUS.name());
     }
 }

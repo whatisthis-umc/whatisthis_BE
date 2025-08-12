@@ -33,7 +33,7 @@ public class SearchService {
     // 검색어가 입력될 때마다 호출되는 메소드
     public Page<PostDocument> executeSearch(String keyword, Category category, Integer page, Integer size) {
 
-        Pageable pageable = PageRequest.of(size, page, Sort.Direction.DESC, "likeCount");
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "likeCount");
 
         List<String> categories = CategoryConverter.getDynamicCategories(category.toString());
         // 실제 검색 로직 수행
@@ -43,24 +43,25 @@ public class SearchService {
         if (keyword != null && !keyword.isBlank()) {
             redisTemplate.opsForZSet().incrementScore(POPULAR_SEARCH_KEY, keyword.trim(), 1);
         }
+
         return posts;
     }
     // 검색
-    public Page<PostDocument> searchPosts(String title, List<String> categories, Pageable pageable) {
+    public Page<PostDocument> searchPosts(String text, List<String> categories, Pageable pageable) {
 
-        if (!categories.isEmpty() && StringUtils.isNotBlank(title)) {
-            return postSearchRepository.findByCategoryInAndTitleContaining(categories, title, pageable);
+        if(!categories.isEmpty() && StringUtils.isNotBlank(text)) {
+            return postSearchRepository.findByCategoryInAndTitleContaining(categories, text, pageable); //카테고리와 제목  으로
         } else if (!categories.isEmpty()) {
-            return postSearchRepository.findByCategoryIn(categories, pageable);
-        } else if (StringUtils.isNotBlank(title)) {
-            return postSearchRepository.findByTitleContaining(title, pageable);
+            return postSearchRepository.findByCategoryIn(categories, pageable); // 카테고리로
+        } else if (StringUtils.isNotBlank(text)) {
+            return postSearchRepository.findByTitleContaining(text, pageable); // 제목으로
         } else {
-            return Page.empty(); // 나중에 AI 유사도 검색으로 변형.
+            return postSearchRepository.findAll(pageable);
         }
     }
     // 상위 N개의 인기 검색어 조회
-    public List<String> getTodayPopularKeywords(Integer topN) {
-        Set<String> keywords = redisTemplate.opsForZSet().reverseRange(POPULAR_SEARCH_KEY + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE), 0, topN - 1);
+    public List<String> getPopularKeywords(Integer topN) {
+        Set<String> keywords = redisTemplate.opsForZSet().reverseRange(POPULAR_SEARCH_KEY, 0, topN - 1);
         return keywords != null ? new ArrayList<>(keywords) : new ArrayList<>();
     }
 

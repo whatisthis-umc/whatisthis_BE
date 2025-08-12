@@ -1,6 +1,8 @@
 package umc.demoday.whatisthis.domain.admin.redis;
 
+import com.redis.om.spring.annotations.Query;
 import com.redis.om.spring.repository.RedisDocumentRepository;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -17,6 +19,8 @@ public interface PostSearchRepository extends RedisDocumentRepository<PostDocume
 
     // 제목만으로 검색
     Page<PostDocument> findByTitleContaining(String title, Pageable pageable);
-
-
+//
+//    @Query("@category:{$categories} (@title:($keyword) | @content:($keyword))")
+//    Page<PostDocument> searchByCategoriesAndTitleOrContent(@Param("keyword") String keyword, @Param("categories") List<String> categories, Pageable pageable);
+//
 }

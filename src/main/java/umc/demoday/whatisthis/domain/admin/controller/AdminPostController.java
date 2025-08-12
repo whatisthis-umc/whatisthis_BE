@@ -89,4 +89,6 @@ public class AdminPostController {
         // 사용자에게는 즉시 응답을 반환
         return ResponseEntity.ok("전체 리인덱싱 작업이 백그라운드에서 시작되었습니다. 서버 로그를 확인하세요.");
     }
+
+
 }
