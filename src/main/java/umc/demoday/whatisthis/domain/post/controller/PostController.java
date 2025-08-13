@@ -7,12 +7,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
+import umc.demoday.whatisthis.domain.admin.redis.async.InitialDataIndexer;
 import umc.demoday.whatisthis.domain.admin.redis.search.SearchService;
 import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.IntegratedSearchResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
+import umc.demoday.whatisthis.domain.post.dto.SingleSearchDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.domain.post.service.PostService;;
@@ -30,6 +32,7 @@ public class PostController {
     private final PostService postService;
     private final MemberActivityService memberActivityService;
     private final SearchService searchService;
+    private final InitialDataIndexer initialDataIndexer;
 
     @GetMapping("/{post-id}")
     @Operation(summary = "생활꿀팁 or 생활꿀팁 페이지 조회 API -by 천성호")
@@ -124,18 +127,12 @@ public class PostController {
         return CustomResponse.ok(keywords);
     }
 
-    @PostMapping("/redis/reindex")
-    @Operation(summary = "Redis Reindex API")
-    public CustomResponse<Void> redisReindex(){
-
-        return CustomResponse.ok(null);
-    }
-
     @GetMapping("/search/single")
-    @Operation(summary = "단일 검색 API")
-    public CustomResponse<Page<PostDocument>> search(@RequestParam("keyword") String keyword, @RequestParam(defaultValue = "TIP") Category category, @RequestParam Integer page, @RequestParam Integer size){
-        Page<PostDocument> posts = searchService.executeSearch(keyword, category, size, page);
-        return CustomResponse.ok(posts);
+    @Operation(summary = "단일 카테고리 검색 API")
+    public CustomResponse<SingleSearchDTO> search(@RequestParam("keyword") String keyword, @RequestParam(defaultValue = "TIP") Category category, @RequestParam Integer page, @RequestParam Integer size){
+        Page<PostDocument> posts = searchService.executeSearch(keyword, category, page+1, size);
+        List<SingleSearchDTO.SummaryDTO> postList = posts.stream().map(SingleSearchDTO::toSummaryDTO).toList();
+        return CustomResponse.ok(SingleSearchDTO.builder().results(postList).build());
     }
 
     @GetMapping("/search")
