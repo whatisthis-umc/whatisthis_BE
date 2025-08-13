@@ -53,7 +53,8 @@ public class SecurityConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
                 "http://localhost:8080",
-                "https://api.whatisthis.co.kr"
+                "https://api.whatisthis.co.kr",
+                "https://whatisthis-fe.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
@@ -101,6 +102,8 @@ public class SecurityConfig {
                                 "/posts",
                                 "/posts/**"
                         ).permitAll()
+
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/members/**").hasRole("USER")
