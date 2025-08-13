@@ -101,7 +101,7 @@ public class SecurityConfig {
 
                                 "/upload" // S3 테스트 용, 추후 삭제(?)
                         ).permitAll()
-
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/posts",
                                 "/posts/**"
