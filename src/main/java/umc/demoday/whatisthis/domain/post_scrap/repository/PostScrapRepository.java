@@ -31,4 +31,5 @@ public interface PostScrapRepository extends JpaRepository<PostScrap, Integer> {
             countQuery = "select count(ps) from PostScrap ps where ps.member.id = :memberId")
     Page<PostScrap> findByMemberIdWithPost(@Param("memberId") Integer memberId, Pageable pageable);
 
+    void deleteByPost(Post post);
 }
