@@ -32,7 +32,7 @@ public class SearchService {
     private final PostSearchRepository postSearchRepository;
     // 검색어가 입력될 때마다 호출되는 메소드
     public Page<PostDocument> executeSearch(String keyword, Category category, Integer page, Integer size) {
-
+        
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "likeCount");
 
         List<String> categories = CategoryConverter.getDynamicCategories(category.toString());

@@ -128,7 +128,7 @@ public class PostController {
     }
 
     @GetMapping("/search/single")
-    @Operation(summary = "단일 카테고리 검색 API")
+    @Operation(summary = "단일 카테고리 검색 API -by 천성호")
     public CustomResponse<SingleSearchDTO> search(@RequestParam("keyword") String keyword, @RequestParam(defaultValue = "TIP") Category category, @RequestParam Integer page, @RequestParam Integer size){
         Page<PostDocument> posts = searchService.executeSearch(keyword, category, page+1, size);
         List<SingleSearchDTO.SummaryDTO> postList = posts.stream().map(SingleSearchDTO::toSummaryDTO).toList();
@@ -136,7 +136,7 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "통합 검색 API")
+    @Operation(summary = "통합 검색 API -by 천성호")
     public CustomResponse<IntegratedSearchResponseDTO> integratedSearch(@RequestParam("keyword") String keyword)
     {
         Page<PostDocument> tipSearch = searchService.executeSearch(keyword, Category.LIFE_TIP, 1, 5);
