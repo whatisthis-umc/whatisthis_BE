@@ -100,7 +100,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET,
                                 "/posts",
-                                "/posts/**"
+                                "/posts/**",
+                                "/support/**"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
