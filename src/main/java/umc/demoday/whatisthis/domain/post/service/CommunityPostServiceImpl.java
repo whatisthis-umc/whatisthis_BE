@@ -1,14 +1,12 @@
 package umc.demoday.whatisthis.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.demoday.whatisthis.domain.admin.redis.async.PostEvent;
 import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.comment.repository.CommentRepository;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
@@ -42,9 +40,6 @@ public class CommunityPostServiceImpl implements CommunityPostService {
     private final PostLikeRepository postLikeRepository;
     private final HashtagRepository hashtagRepository;
     private final PostImageRepository postImageRepository;
-
-    // 이벤트 컨트롤을 위한 도입
-    private final ApplicationEventPublisher eventPublisher;
 
     private void checkPageAndSize(Integer page, Integer size) {
         if (page < 0 || size <= 0) {
@@ -143,9 +138,6 @@ public class CommunityPostServiceImpl implements CommunityPostService {
 
         post.getPostImageList().addAll(postImages);
 
-        //redis에  게시글 저장
-        eventPublisher.publishEvent(new PostEvent(post.getId(), PostEvent.ActionType.CREATED_OR_UPDATED));
-
         // Post 저장 시 cascade 옵션으로 PostImage도 함께 저장됨
         return postRepository.save(post);
     }
@@ -182,9 +174,6 @@ public class CommunityPostServiceImpl implements CommunityPostService {
                     .toList();
             post.getHashtagList().addAll(hashtags);
         }
-
-        //redis 에 저장
-        eventPublisher.publishEvent(new PostEvent(post.getId(), PostEvent.ActionType.CREATED_OR_UPDATED));
 
         return postRepository.save(post);
     }
