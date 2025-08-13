@@ -187,8 +187,9 @@ public class AdminPostService {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .category(request.getSubCategory())
-                .likeCount(0)
+                .scrapCount(0)
                 .viewCount(0)
+                .likeCount(0)
                 .admin(admin)
                 .build();
 

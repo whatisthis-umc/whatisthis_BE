@@ -26,4 +26,9 @@ public interface PostScrapRepository extends JpaRepository<PostScrap, Integer> {
     Page<PostScrap> findByMember(Member member, Pageable pageable);
 
     boolean existsByMemberAndPost(Member member, Post post);
+
+    @Query(value = "select ps from PostScrap ps join fetch ps.post where ps.member.id = :memberId",
+            countQuery = "select count(ps) from PostScrap ps where ps.member.id = :memberId")
+    Page<PostScrap> findByMemberIdWithPost(@Param("memberId") Integer memberId, Pageable pageable);
+
 }

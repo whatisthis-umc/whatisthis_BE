@@ -351,7 +351,15 @@ public class CommunityPostController {
     }
 
     @PostMapping("/{post-id}/reports")
-    @Operation(summary = "게시글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    @Operation(summary = "게시글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"),
+            description = "ABUSIVE_LANGUAGE - 욕설 및 비하 표현<br>" +
+                    "SEXUAL_CONTENT -  음란성/선정적 내용<br>" +
+                    "ADVERTISEMENT - 광고/홍보성 게시물<br>" +
+                    "DUPLICATE_CONTENT -  도배 또는 중복 게시물<br>" +
+                    "FALSE_INFORMATION - 잘못된 정보/허위 사실<br>" +
+                    "ETC_CONTENT - 기타 (직접 입력)<br>" +
+                    "(신고 사유가 ETC_CONTENT인 경우, description 작성 필수)<br>" +
+                    "(신고 사유가 ETC가 아닌 경우, description null로 입력 필수)")
     public CustomResponse<ReportResponseDTO.ReportPostResponseDTO> postReport
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Valid @RequestBody ReportRequestDTO.NewReportRequestDTO request,
@@ -366,7 +374,15 @@ public class CommunityPostController {
 
 
     @PostMapping("/{post-id}/comments/{comment-id}/reports")
-    @Operation(summary = "댓글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
+    @Operation(summary = "댓글 신고 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"),
+            description = "ABUSIVE_LANGUAGE - 욕설 및 비하 표현<br>" +
+                    "SEXUAL_CONTENT -  음란성/선정적 내용<br>" +
+                    "ADVERTISEMENT - 광고/홍보성 게시물<br>" +
+                    "DUPLICATE_CONTENT -  도배 또는 중복 게시물<br>" +
+                    "FALSE_INFORMATION - 잘못된 정보/허위 사실<br>" +
+                    "ETC_CONTENT - 기타 (직접 입력)<br>" +
+                    "(신고 사유가 ETC_CONTENT인 경우, description 작성 필수)<br>" +
+                    "(신고 사유가 ETC가 아닌 경우, description null로 입력 필수)")
     public CustomResponse<ReportResponseDTO.ReportCommentResponseDTO> commentReport
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
              @Parameter(description = "댓글 id") @PathVariable(name = "comment-id") Integer commentId,

@@ -50,13 +50,18 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // 프론트 로컬 주소
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",
+                "http://localhost:8080",
+                "https://api.whatisthis.co.kr",
+                "https://whatisthis-fe.vercel.app"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config); // 모든 경로에 대해 적용
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 
@@ -70,8 +75,10 @@ public class SecurityConfig {
                                 "/members/signup",
                                 "/members/email-auth",
                                 "/admin/login",
+                                "/admin/logout",
                                 "/admin/reissue",
                                 "/members/login",
+                                "/members/logout",
                                 "/members/reissue",
                                 "/members/find-id",
                                 "/members/reset-password/send-code",
@@ -95,6 +102,8 @@ public class SecurityConfig {
                                 "/posts",
                                 "/posts/**"
                         ).permitAll()
+
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/members/**").hasRole("USER")

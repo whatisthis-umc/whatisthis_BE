@@ -76,7 +76,7 @@ public class PostServiceImpl implements PostService {
         if (customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) //유저면
             memberActivityService.updateLastSeenPost(customUserDetails, postId);
 
-        // ViewCount 상승
+        //viewcount 증가
         post.setViewCount(post.getViewCount() + 1);
 
         // 3. 모든 데이터를 조합하여 최종 DTO 생성 후 반환
@@ -205,8 +205,13 @@ public class PostServiceImpl implements PostService {
         // 4. Ai 추천 페이지 요청(Pageable) 객체 생성
         if(customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) {  //유저면 맞춤 추천
             Integer memberId = customUserDetails.getId();
-            MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElseThrow();
-            recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(), size, category);
+            MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElse(null);
+            if(memberProfile != null) {
+                recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(), size, category);
+            }
+            else{ // USER 여도 이전에 본 게시물이 없다면 디폴트 추천
+                recommendedPostIds = recommendationService.getDefaultRecommendations(size, category);
+            }
         }
         else
         { // 유저 아니면 기본 추천
