@@ -11,6 +11,8 @@ import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.comment.repository.CommentRepository;
 import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
+import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
+import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
 import umc.demoday.whatisthis.domain.report.Report;
 import umc.demoday.whatisthis.domain.report.code.ReportErrorCode;
 import umc.demoday.whatisthis.domain.report.enums.ReportStatus;
@@ -29,6 +31,8 @@ public class AdminReportServiceImpl implements AdminReportService {
     private final ReportRepository reportRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final PostScrapRepository postScrapRepository;
+    private final PostLikeRepository postLikeRepository;
 
     @Override
     public Page<Report> reportList(Integer page, RequestReportStatus status, String keyword) {
@@ -80,6 +84,9 @@ public class AdminReportServiceImpl implements AdminReportService {
             else if (report.getPost() != null && report.getComment() == null){
 
                 Post post = report.getPost();
+
+                postScrapRepository.deleteByPost(post);
+                postLikeRepository.deleteByPost(post);
 
                 reportRepository.detachAllByPostId(post.getId());
                 reportRepository.flush();
