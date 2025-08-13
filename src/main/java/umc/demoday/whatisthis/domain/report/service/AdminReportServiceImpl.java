@@ -20,6 +20,7 @@ import umc.demoday.whatisthis.domain.report.enums.RequestReportStatus;
 import umc.demoday.whatisthis.domain.report.repository.ReportRepository;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
+import static umc.demoday.whatisthis.domain.report.code.ReportErrorCode.ALREADY_DELETED;
 import static umc.demoday.whatisthis.domain.report.code.ReportErrorCode.ALREADY_PROCESSED_REPORT;
 import static umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode.BAD_REQUEST_400;
 
@@ -101,7 +102,7 @@ public class AdminReportServiceImpl implements AdminReportService {
                 if (report.getStatus() == ReportStatus.PROCESSED){
                     throw new GeneralException(ALREADY_PROCESSED_REPORT);
                 }
-                else {throw new GeneralException(BAD_REQUEST_400);}
+                else {throw new GeneralException(ALREADY_DELETED);}
 
             }
 
