@@ -66,17 +66,49 @@ public class MemberFindController {
                 .body(CustomResponse.onSuccess(GeneralSuccessCode.EMAIL_AUTH_MATCHED, null));
     }
 
+    // 배포 서버에서는 이거 주석 풀어서 사용
+//    @PostMapping("/reset-password")
+//    @Operation(summary = "비밀번호 재설정 API -by 이정준")
+//    public CustomResponse<Void> resetPassword(
+//            @CookieValue(value = "resetToken", required = false) String resetToken,
+//            @RequestBody @Valid PasswordChangeReqDTO request) {
+//
+//        if (resetToken == null || resetToken.isBlank()) {
+//            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401);
+//        }
+//
+//        passwordResetService.resetPassword(resetToken, request);
+//        return CustomResponse.onSuccess(GeneralSuccessCode.PASSWORD_CHANGED, null);
+//    }
+
     @PostMapping("/reset-password")
     @Operation(summary = "비밀번호 재설정 API -by 이정준")
     public CustomResponse<Void> resetPassword(
-            @CookieValue(value = "resetToken", required = false) String resetToken,
+            @CookieValue(value = "resetToken", required = false) String cookieToken,
+            @RequestHeader(value = "X-Reset-Token", required = false) String headerToken,
+            @RequestParam(value = "resetToken", required = false) String paramToken,
             @RequestBody @Valid PasswordChangeReqDTO request) {
+
+        // Body에도 resetToken 필드를 추가 (선택값)
+        String bodyToken = request.getResetToken();
+
+        // 1) 쿠키 → 2) 헤더 → 3) 쿼리 → 4) 바디 순서로 토큰 찾기
+        String resetToken = firstNonBlank(cookieToken, headerToken, paramToken, bodyToken);
 
         if (resetToken == null || resetToken.isBlank()) {
             throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401);
         }
 
+        // 서비스 로직 호출 (기존과 동일)
         passwordResetService.resetPassword(resetToken, request);
+
         return CustomResponse.onSuccess(GeneralSuccessCode.PASSWORD_CHANGED, null);
+    }
+
+    private String firstNonBlank(String... vals) {
+        for (String v : vals) {
+            if (v != null && !v.isBlank()) return v;
+        }
+        return null;
     }
 }
