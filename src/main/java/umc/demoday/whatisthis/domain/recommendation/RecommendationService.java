@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.recommendation;
 
 import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
+import io.pinecone.proto.ListItem;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.openapitools.db_data.client.ApiException;
@@ -113,14 +114,14 @@ public class RecommendationService {
             fields.add("chunk_text");
             String namespace = category.toString();
 
-            String modelName = "models/gemini-embedding-001";
-            EmbeddingRequestDTO.Content content = new EmbeddingRequestDTO.Content(List.of(new EmbeddingRequestDTO.Part("추천하는 생활팁")));
-            EmbeddingRequestDTO request = new EmbeddingRequestDTO(modelName, content);
-            EmbeddingResponseDTO embeddingResult = geminiInterface.embedContent(request);
-            SearchRecordsVector searchRecordsVector = new SearchRecordsVector();
-            searchRecordsVector.setValues(embeddingResult.embedding().values());
-
-            SearchRecordsResponse response = index.searchRecordsByVector(searchRecordsVector, namespace, fields, topK, null, null);
+//            String modelName = "models/gemini-embedding-001";
+//            EmbeddingRequestDTO.Content content = new EmbeddingRequestDTO.Content(List.of(new EmbeddingRequestDTO.Part("추천하는 생활팁"))); <- 이거 미리 올려놓자.
+//            EmbeddingRequestDTO request = new EmbeddingRequestDTO(modelName, content);
+//            EmbeddingResponseDTO embeddingResult = geminiInterface.embedContent(request);
+//           SearchRecordsVector searchRecordsVector = new SearchRecordsVector();
+//            searchRecordsVector.setValues(embeddingResult.embedding().values());
+            SearchRecordsResponse response = index.searchRecordsById("205", namespace, fields, topK, null, null);
+//            SearchRecordsResponse response = index.searchRecordsByVector(searchRecordsVector, namespace, fields, topK, null, null);
             List<Hit> hits = response.getResult().getHits();
 
             // 문자열 ID에서 숫자 부분만 추출하여 Long 타입의 ID 리스트를 생성합니다.
