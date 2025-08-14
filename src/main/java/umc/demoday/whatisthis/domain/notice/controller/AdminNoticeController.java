@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.notice.dto.reqDTO.NoticeCreateReqDTO;
 import umc.demoday.whatisthis.domain.notice.dto.reqDTO.NoticeUpdateReqDTO;
@@ -12,6 +13,7 @@ import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticePageResDTO;
 import umc.demoday.whatisthis.domain.notice.dto.resDTO.NoticeResDTO;
 import umc.demoday.whatisthis.domain.notice.service.NoticeCommandService;
 import umc.demoday.whatisthis.domain.notice.service.NoticeQueryService;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 
 import static umc.demoday.whatisthis.domain.notice.code.NoticeSuccessCode.*;
@@ -26,8 +28,10 @@ public class AdminNoticeController {
 
     @PostMapping
     @Operation(summary = "공지사항 작성 api -by 윤영석")
-    public CustomResponse<Void> createNotice(@RequestBody NoticeCreateReqDTO dto) {
-        noticeCommandService.createNotice(dto);
+    public CustomResponse<Void> createNotice(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestBody NoticeCreateReqDTO dto) {
+        noticeCommandService.createNotice(dto, principal.getId());
         return CustomResponse.onSuccess(NOTICE_CREATE_OK, null);
     }
 
