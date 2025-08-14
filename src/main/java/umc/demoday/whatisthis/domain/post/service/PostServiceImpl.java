@@ -228,11 +228,11 @@ public class PostServiceImpl implements PostService {
     public List<PostResponseDTO.GgulPostSummaryDTO> getSimilarPost(Integer postId, Integer size){
         Post postForRecommendation = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
-        String namespace = "LIFE_ITEM";
-        if(postForRecommendation.getCategory() == Category.LIFE_TIP)
-            namespace = "LIFE_TIP";
+        Category category = Category.LIFE_ITEM;
+        if(postForRecommendation.getCategory().toString().endsWith("_TIP") )
+            category = Category.LIFE_TIP;
 
-        List<Integer> allRecommendedList = recommendationService.getSimilarPost(postId, namespace, size);
+        List<Integer> allRecommendedList = recommendationService.findSimilarPostsInVectorDB(postId, size, category);
 
         List<Post> posts = postRepository.findAllById(allRecommendedList);
 
