@@ -30,6 +30,5 @@ public class ProfileImage {
     private String imageUrl;
 
     @OneToOne(mappedBy = "profileImage")
-    @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member member;
 }
