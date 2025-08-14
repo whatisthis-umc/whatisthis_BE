@@ -7,7 +7,7 @@ import umc.demoday.whatisthis.domain.qna.dto.reqDTO.QnaCreateReqDTO;
 import umc.demoday.whatisthis.domain.qna.dto.reqDTO.QnaUpdateReqDTO;
 
 public interface QnaCommandService {
-    void createQna(QnaCreateReqDTO dto);
+    void createQna(QnaCreateReqDTO dto, Integer adminId);
     void updateQna(Integer qnaId, QnaUpdateReqDTO dto);
     void deleteQna(Integer qnaId);
 }

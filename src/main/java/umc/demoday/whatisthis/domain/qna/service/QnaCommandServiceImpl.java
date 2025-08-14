@@ -4,6 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.demoday.whatisthis.domain.admin.Admin;
+import umc.demoday.whatisthis.domain.admin.repository.AdminRepository;
 import umc.demoday.whatisthis.domain.qna.Qna;
 import umc.demoday.whatisthis.domain.qna.converter.QnaConverter;
 import umc.demoday.whatisthis.domain.qna.dto.reqDTO.QnaCreateReqDTO;
@@ -14,11 +16,16 @@ import umc.demoday.whatisthis.domain.qna.repository.QnaRepository;
 @RequiredArgsConstructor
 @Transactional
 public class QnaCommandServiceImpl implements QnaCommandService {
+
     private final QnaRepository qnaRepository;
+    private final AdminRepository adminRepository;
 
     @Override
-    public void createQna(QnaCreateReqDTO dto) {
+    public void createQna(QnaCreateReqDTO dto, Integer adminId) {
+        Admin admin = adminRepository.findById(adminId)
+                .orElseThrow(() -> new EntityNotFoundException("Admin not found: " + adminId));
         Qna qna = QnaConverter.toEntity(dto);
+        qna.setAdmin(admin);
         qnaRepository.save(qna);
     }
 
