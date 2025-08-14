@@ -70,6 +70,15 @@ jobs:
               -e BASE_URL="${{ secrets.BASE_URL }}" \
               -e PINECONE_API_KEY="${{ secrets.PINECONE_API_KEY }}" \
               -e GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+              -e KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
+              -e KAKAO_REDIRECT_URI="${{ secrets.KAKAO_REDIRECT_URI }}" \
+              -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+              -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+              -e GOOGLE_REDIRECT_URI="${{ secrets.GOOGLE_REDIRECT_URI }}" \
+              -e NAVER_CLIENT_ID="${{ secrets.NAVER_CLIENT_ID }}" \
+              -e NAVER_CLIENT_SECRET="${{ secrets.NAVER_CLIENT_SECRET }}" \
+              -e NAVER_REDIRECT_URI="${{ secrets.NAVER_REDIRECT_URI }}" \
+              -e FRONT_BASE_URL="${{ secrets.FRONT_BASE_URL }}" \
               ysys1226/what-is-this-docker:latest
 
 

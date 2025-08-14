@@ -106,6 +106,9 @@ public class PostConverter {
                                         ? comment.getMember().getProfileImage().getImageUrl()
                                         : null
                         )
+                        .parentId(
+                                comment.getParent() != null ? comment.getParent().getId() : null
+                        )
                         .createdAt(comment.getCreatedAt())
                         .build())
                 .toList();

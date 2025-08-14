@@ -11,6 +11,8 @@ import umc.demoday.whatisthis.domain.member.converter.MemberConverter;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.SocialLinkReqDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.SocialSignupReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MyPageAccountDTO;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
@@ -91,6 +93,35 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
 
     @Override
+    public MemberResDTO.JoinResponseDTO signUpSocial(SocialSignupReqDTO dto) {
+
+        if (memberRepository.existsByNickname(dto.getNickname())) {
+            throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_NICKNAME);
+        }
+
+        if (!Boolean.TRUE.equals(dto.getServiceAgreed())) {
+            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
+        }
+
+        if (!Boolean.TRUE.equals(dto.getPrivacyAgreed())) {
+            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
+        }
+
+        Member newMember = Member.builder()
+                .email(dto.getEmail())
+                .nickname(dto.getNickname())
+                .provider(dto.getProvider())
+                .providerId(dto.getProviderId())
+                .serviceAgreed(dto.getServiceAgreed())
+                .privacyAgreed(dto.getPrivacyAgreed())
+                .build();
+
+        memberRepository.save(newMember);
+        return new MemberResDTO.JoinResponseDTO(newMember.getNickname());
+    }
+
+
+    @Override
     public void evaluateIsBest(Member member) {
         Integer memberId = member.getId();
         LocalDateTime createdAt = member.getCreatedAt();
@@ -117,6 +148,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 member.setIsBest(true);
             }
         }
+    }
+
+    public void linkSocial(SocialLinkReqDTO dto) {
+        Member member = memberRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getProvider() != null) {
+            throw new GeneralException(GeneralErrorCode.ALREADY_SOCIAL_LINKED);
+        }
+
+        member.linkSocial(dto.getProvider(), dto.getProviderId());
+        memberRepository.save(member);
     }
 
     @Override

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.member.dto.email.EmailAuthReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.SocialLinkReqDTO;
+import umc.demoday.whatisthis.domain.member.dto.member.SocialSignupReqDTO;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 import umc.demoday.whatisthis.domain.member.service.email.EmailAuthService;
@@ -31,6 +33,16 @@ public class MemberController {
         return CustomResponse.created(response);
     }
 
+    @PostMapping("/signup/social")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "소셜 로그인 회원가입 API - by 이정준")
+    public CustomResponse<MemberResDTO.JoinResponseDTO> socialSignup(
+            @RequestBody @Valid SocialSignupReqDTO request
+    ) {
+        MemberResDTO.JoinResponseDTO response = memberCommandService.signUpSocial(request);
+        return CustomResponse.created(response);
+    }
+
     @PostMapping("/email-auth")
     @Operation(summary = "이메일 인증 코드 전송 API -by 이정준")
     public CustomResponse<Void> sendEmailAuthCode(
@@ -38,5 +50,14 @@ public class MemberController {
     ) {
         emailAuthService.sendAuthCode(request.getEmail());
         return CustomResponse.onSuccess(GeneralSuccessCode.EMAIL_AUTH_SENT, null);
+    }
+
+    @PostMapping("/link-social")
+    @Operation(summary = "기존 계정과 연동 API -by 이정준")
+    public CustomResponse<Void> linkSocial(
+            @RequestBody @Valid SocialLinkReqDTO request
+    ) {
+        memberCommandService.linkSocial(request);
+        return CustomResponse.onSuccess(GeneralSuccessCode.SOCIAL_LINKED, null);
     }
 }

@@ -18,4 +18,6 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Integer> {
 
     // 특정 회원이 좋아요한 PostLike 리스트 조회
     Page<PostLike> findByMember(Member member, Pageable pageable);
+
+    void deleteByPost(Post post);
 }

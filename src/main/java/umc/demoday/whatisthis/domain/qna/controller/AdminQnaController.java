@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.qna.dto.reqDTO.QnaCreateReqDTO;
 import umc.demoday.whatisthis.domain.qna.dto.reqDTO.QnaUpdateReqDTO;
@@ -12,6 +13,7 @@ import umc.demoday.whatisthis.domain.qna.dto.resDTO.QnaPageResDTO;
 import umc.demoday.whatisthis.domain.qna.dto.resDTO.QnaResDTO;
 import umc.demoday.whatisthis.domain.qna.service.QnaCommandService;
 import umc.demoday.whatisthis.domain.qna.service.QnaQueryService;
+import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 
 import static umc.demoday.whatisthis.domain.qna.code.QnaSuccessCode.*;
@@ -27,8 +29,10 @@ public class AdminQnaController {
 
     @PostMapping
     @Operation(summary = "qna 작성 api -by 윤영석")
-    public CustomResponse<Void> createQna(@RequestBody QnaCreateReqDTO dto) {
-        qnaCommandService.createQna(dto);
+    public CustomResponse<Void> createQna(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestBody QnaCreateReqDTO dto) {
+        qnaCommandService.createQna(dto, principal.getId());
         return CustomResponse.onSuccess(QNA_CREATE_OK, null);
     }
 

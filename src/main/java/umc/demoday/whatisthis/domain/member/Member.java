@@ -24,16 +24,16 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "member_id", nullable = false, length = 20)
+    @Column(name = "member_id", length = 20)
     private String memberId; // 사용자가 입력한 아이디
 
     @Column(nullable = false, length = 50)
     private String email;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     private String password;
 
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String nickname;
 
     @CreatedDate
@@ -59,6 +59,12 @@ public class Member {
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
+    @Column(name = "provider")
+    private String provider; // kakao, google, naver
+
+    @Column(name = "provider_id")
+    private String providerId;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "profile_image_id", referencedColumnName = "id")
     private ProfileImage profileImage;
@@ -81,5 +87,10 @@ public class Member {
 
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
+    }
+
+    public void linkSocial(String provider, String providerId) {
+        this.provider = provider;
+        this.providerId = providerId;
     }
 }

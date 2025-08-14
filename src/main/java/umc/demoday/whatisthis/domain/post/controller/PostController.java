@@ -1,23 +1,24 @@
 package umc.demoday.whatisthis.domain.post.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
-import umc.demoday.whatisthis.domain.admin.redis.async.InitialDataIndexer;
-import umc.demoday.whatisthis.domain.admin.redis.search.SearchService;
+import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.post.Post;
-import umc.demoday.whatisthis.domain.post.dto.IntegratedSearchResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
-import umc.demoday.whatisthis.domain.post.dto.SingleSearchDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
-import umc.demoday.whatisthis.domain.post.service.PostService;;
+import umc.demoday.whatisthis.domain.post.repository.PostRepository;
+import umc.demoday.whatisthis.domain.post.service.PostService;
+import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
+import umc.demoday.whatisthis.domain.recommendation.RecommendationService;
 import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
@@ -31,8 +32,8 @@ public class PostController {
 
     private final PostService postService;
     private final MemberActivityService memberActivityService;
-    private final SearchService searchService;
-    private final InitialDataIndexer initialDataIndexer;
+    private final RecommendationService recommendationService;
+    private final PostRepository postRepository;
 
     @GetMapping("/{post-id}")
     @Operation(summary = "생활꿀팁 or 생활꿀팁 페이지 조회 API -by 천성호")
@@ -118,21 +119,6 @@ public class PostController {
         // JWT에서 사용자 ID 추출
         memberActivityService.updateLastSeenPost(customUserDetails, postId);
         return CustomResponse.ok(null);
-    }
-
-    @GetMapping("/popular_keywords")
-    @Operation(summary = "인기 검색어 조회 API - by 천성호")
-    public CustomResponse<List<String>> getPopularKeywords(){
-        List<String> keywords = searchService.getPopularKeywords(10);
-        return CustomResponse.ok(keywords);
-    }
-
-    @GetMapping("/search/single")
-    @Operation(summary = "단일 카테고리 검색 API -by 천성호")
-    public CustomResponse<SingleSearchDTO> search(@RequestParam("keyword") String keyword, @RequestParam(defaultValue = "TIP") Category category, @RequestParam Integer page, @RequestParam Integer size){
-        Page<PostDocument> posts = searchService.executeSearch(keyword, category, page+1, size);
-        List<SingleSearchDTO.SummaryDTO> postList = posts.stream().map(SingleSearchDTO::toSummaryDTO).toList();
-        return CustomResponse.ok(SingleSearchDTO.builder().results(postList).build());
     }
 
     @GetMapping("/search")
