@@ -2,7 +2,6 @@ package umc.demoday.whatisthis.domain.post.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
 
@@ -177,7 +176,7 @@ public class PostResponseDTO {
         Integer size;
         Long totalElements;
         Integer totalPages;
-        List<PostResponseDTO.GgulPostSummaryDTO> posts;
+        List<PostSummaryDTO> posts;
     }
 
     @Getter
@@ -190,7 +189,7 @@ public class PostResponseDTO {
         Integer size;
         Long totalElements;
         Integer totalPages;
-        List<PostResponseDTO.GgulPostSummaryDTO> posts;
+        List<PostSummaryDTO> posts;
     }
 
 
@@ -199,7 +198,7 @@ public class PostResponseDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class GgulPostSummaryDTO {
+    public static class PostSummaryDTO {
         Integer postId;
         String thumnailUrl;
         Category category;

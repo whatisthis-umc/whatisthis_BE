@@ -10,7 +10,6 @@ import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
 import umc.demoday.whatisthis.domain.admin.redis.async.InitialDataIndexer;
 import umc.demoday.whatisthis.domain.admin.redis.search.SearchService;
 import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
-import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.IntegratedSearchResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
@@ -152,9 +151,9 @@ public class PostController {
 
     @GetMapping("/{postId}/similar")
     @Operation(summary = "관련 포스트 추천 API -by 천성호")
-    public CustomResponse<List<PostResponseDTO.GgulPostSummaryDTO>> getSimilarPost(@PathVariable Integer postId, @RequestParam Integer size)
+    public CustomResponse<List<PostResponseDTO.PostSummaryDTO>> getSimilarPost(@PathVariable Integer postId, @RequestParam Integer size)
     {
-        List<PostResponseDTO.GgulPostSummaryDTO> response = postService.getSimilarPost(postId, size);
+        List<PostResponseDTO.PostSummaryDTO> response = postService.getSimilarPost(postId, size);
         return CustomResponse.ok(response);
     }
 }

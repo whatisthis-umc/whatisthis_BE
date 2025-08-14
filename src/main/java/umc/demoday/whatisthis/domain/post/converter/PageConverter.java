@@ -15,7 +15,6 @@ import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,7 +53,7 @@ public class PageConverter {
         Map<Integer, Integer> scrapCountsMap = getScrapCountMap(postIds);
 
         // 3. DTO 리스트 생성 (DB 추가 조회 없음)
-        List<PostResponseDTO.GgulPostSummaryDTO> summaryDTOList = posts.stream()
+        List<PostResponseDTO.PostSummaryDTO> summaryDTOList = posts.stream()
                 .map(post -> toGgulPostSummaryDTO(
                         post,
                         thumbnailsMap.get(post.getId()),
@@ -100,21 +99,21 @@ public class PageConverter {
         Map<Integer, Integer> scrapCountsMap = getScrapCountMap(uniquePostIds);
 
         // summaryDTO 생성
-        List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList = bestPosts.stream()
+        List<PostResponseDTO.PostSummaryDTO> bestPostSummaryDTOList = bestPosts.stream()
                 .map(post -> toGgulPostSummaryDTO(
                         post,
                         thumbnailsMap.get(post.getId()),
                         hashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
                         scrapCountsMap.getOrDefault(post.getId(), 0)
                 )).toList();
-        List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList = latestPosts.stream()
+        List<PostResponseDTO.PostSummaryDTO> latestPostSummaryDTOList = latestPosts.stream()
                 .map(post -> toGgulPostSummaryDTO(
                         post,
                         thumbnailsMap.get(post.getId()),
                         hashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
                         scrapCountsMap.getOrDefault(post.getId(), 0)
                 )).toList();
-        List<PostResponseDTO.GgulPostSummaryDTO> aiPostSummaryDTOList = recommendedPosts.stream()
+        List<PostResponseDTO.PostSummaryDTO> aiPostSummaryDTOList = recommendedPosts.stream()
                 .map(post -> toGgulPostSummaryDTO(
                         post,
                         thumbnailsMap.get(post.getId()),
@@ -130,7 +129,7 @@ public class PageConverter {
         );
     }
 
-    private List<MainPageResponseDTO.SectionDTO> getSectionDTOS(List<PostResponseDTO.GgulPostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> latestPostSummaryDTOList, List<PostResponseDTO.GgulPostSummaryDTO> aiPostSummaryDTOList, Category category) {
+    private List<MainPageResponseDTO.SectionDTO> getSectionDTOS(List<PostResponseDTO.PostSummaryDTO> bestPostSummaryDTOList, List<PostResponseDTO.PostSummaryDTO> latestPostSummaryDTOList, List<PostResponseDTO.PostSummaryDTO> aiPostSummaryDTOList, Category category) {
         String url = category.name().endsWith("_TIP") ? "LIFE_TIPS" : "LIFE_ITEMS";
         MainPageResponseDTO.SectionDTO bestPostSectionDTO = new MainPageResponseDTO.SectionDTO(
                 "인기 게시물",
@@ -156,7 +155,7 @@ public class PageConverter {
     }
 
     // Post 엔티티를 GgulPostSummaryDTO로 변환
-    public PostResponseDTO.GgulPostSummaryDTO toGgulPostSummaryDTO(Post post, String thumbnailUrl, List<Hashtag> hashtags, Integer scrapCount) {
+    public static PostResponseDTO.PostSummaryDTO toGgulPostSummaryDTO(Post post, String thumbnailUrl, List<Hashtag> hashtags, Integer scrapCount) {
         String summary = post.getContent();
         // 내용이 30자 이상일 경우 자르기 (Null-safe)
         if (summary != null && summary.length() > 30) {
@@ -164,7 +163,7 @@ public class PageConverter {
         }
         List<String> hashtagList = hashtags.stream().map(Hashtag::getContent).toList();
 
-        return new PostResponseDTO.GgulPostSummaryDTO(
+        return new PostResponseDTO.PostSummaryDTO(
                 post.getId(),
                 thumbnailUrl, // 조회된 썸네일 URL
                 post.getCategory().toString().endsWith("_TIP") ? Category.LIFE_TIP : Category.LIFE_ITEM,
