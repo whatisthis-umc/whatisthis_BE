@@ -5,10 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPooled;
 
 @Configuration
@@ -24,11 +26,28 @@ public class RedisConfig {
         return redisTemplate;
     }
     // JedisConnectionFactory Bean 등록
+//    @Bean
+//    JedisConnectionFactory jedisConnectionFactory() {
+//        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(System.getenv("REDIS_HOST"), 6379);
+//        return new JedisConnectionFactory(config);
+//    }
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(System.getenv("REDIS_HOST"), 6379);
-        return new JedisConnectionFactory(config);
-    }
+        // 1. Redis 서버 정보 설정
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(System.getenv("REDIS_HOST"), 6379);
 
+        // 2. Jedis Pool 설정 (JMX 비활성화)
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setJmxEnabled(false);
+
+        // 3. Jedis Client 설정에 Pool 설정을 적용
+        JedisClientConfiguration jedisClientConfiguration = JedisClientConfiguration.builder()
+                .usePooling()
+                .poolConfig(poolConfig)
+                .build();
+
+        // 4. Redis 서버 정보와 Client 설정을 함께 사용하여 Factory 생성
+        return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration);
+    }
 
 }
