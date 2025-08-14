@@ -29,9 +29,9 @@ public class AdminInquiryController {
     @GetMapping
     @Operation(summary = "관리자 페이지 문의내역 목록조회 api -by 윤영석")
     public CustomResponse<InquiryAdminPageResDTO> getAdminInquiryList(
-            @RequestParam(defaultValue = "ALL") String statusStr,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(name = "statusStr", defaultValue = "ALL") String statusStr,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size) {
 
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
