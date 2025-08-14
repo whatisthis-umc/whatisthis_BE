@@ -272,7 +272,7 @@ public class CommunityPostController {
         return CustomResponse.onSuccess(GeneralSuccessCode.NO_CONTENT_204,toPostLikeCountDTO(post));
     }
 
-    @PostMapping("/{post-id}/comments/{comment-id}")
+    @PostMapping("/{post-id}/comments")
     @Operation(summary = "커뮤니티 댓글 작성 API -by 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<CommentResponseDTO.NewCommentResponseDTO> newCommment
             (@Parameter(description = "게시물 id") @PathVariable(name = "post-id") Integer postId,
