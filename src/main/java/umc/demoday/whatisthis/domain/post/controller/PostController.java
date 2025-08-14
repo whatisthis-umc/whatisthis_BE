@@ -121,5 +121,19 @@ public class PostController {
         return CustomResponse.ok(null);
     }
 
+    @GetMapping("/search")
+    @Operation(summary = "통합 검색 API -by 천성호")
+    public CustomResponse<IntegratedSearchResponseDTO> integratedSearch(@RequestParam("keyword") String keyword)
+    {
+        Page<PostDocument> tipSearch = searchService.executeSearch(keyword, Category.LIFE_TIP, 1, 5);
+        Page<PostDocument> itemSearch = searchService.executeSearch(keyword, Category.LIFE_ITEM, 1, 5);
+        Page<PostDocument> communitySearch = searchService.executeSearch(keyword, Category.ITEM, 1, 5);
+        IntegratedSearchResponseDTO integratedSearchResponseDTO = IntegratedSearchResponseDTO.toIntegratedSearchResponseDTO(
+                tipSearch,
+                itemSearch,
+                communitySearch
+        );
+        return CustomResponse.ok(integratedSearchResponseDTO);
+    }
 
 }
