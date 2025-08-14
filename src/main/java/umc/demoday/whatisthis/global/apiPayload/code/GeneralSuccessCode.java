@@ -17,6 +17,8 @@ public enum GeneralSuccessCode implements BaseSuccessCode {
     EMAIL_AUTH_MATCHED(HttpStatus.OK, "EMAIL2000", "인증 코드 번호가 일치합니다."),
     EMAIL_AUTH_SENT(HttpStatus.OK, "EMAIL2001", "입력하신 이메일로 인증 코드가 발송되었습니다."),
 
+    SOCIAL_LINKED(HttpStatus.OK, "SOCIAL2000", "연동되었습니다."),
+
     NOTICE_OK(HttpStatus.OK,"NOTICE2000", "공지사항을 성공적으로 처리했습니다.")
     ;
 

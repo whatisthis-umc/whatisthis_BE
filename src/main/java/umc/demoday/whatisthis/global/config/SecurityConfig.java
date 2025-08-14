@@ -16,7 +16,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import umc.demoday.whatisthis.global.OAuth2SuccessHandler;
 import umc.demoday.whatisthis.global.security.JwtAuthenticationFilter;
+import umc.demoday.whatisthis.global.service.CustomOauth2UserService;
 import umc.demoday.whatisthis.global.service.CustomUserDetailsService;
 
 import java.util.List;
@@ -27,6 +29,8 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomOauth2UserService customOauth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     // PasswordEncoder Bean 등록
     @Bean
@@ -97,7 +101,7 @@ public class SecurityConfig {
 
                                 "/upload" // S3 테스트 용, 추후 삭제(?)
                         ).permitAll()
-
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/posts",
                                 "/posts/**",
@@ -112,6 +116,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(daoAuthenticationProvider())
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
+                        .successHandler(oAuth2SuccessHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

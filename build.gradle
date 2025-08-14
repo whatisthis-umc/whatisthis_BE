@@ -55,6 +55,9 @@ dependencies {
 	// AWS S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
+	// Social Login
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
 	// vectorDB
 	implementation "io.pinecone:pinecone-client:5.0.0" // Pinecone용
 	//protobuf 버전 강제
