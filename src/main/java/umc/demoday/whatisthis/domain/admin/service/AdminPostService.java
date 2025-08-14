@@ -2,11 +2,13 @@ package umc.demoday.whatisthis.domain.admin.service;
 
 import io.pinecone.clients.Index;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostReqDTO;
 import umc.demoday.whatisthis.domain.admin.dto.AdminPostResDTO;
+import umc.demoday.whatisthis.domain.admin.redis.async.PostEvent;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
 import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -19,6 +21,7 @@ import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
 import umc.demoday.whatisthis.domain.post_image.PostImage;
 import umc.demoday.whatisthis.domain.post_image.repository.PostImageRepository;
 import umc.demoday.whatisthis.domain.post_scrap.repository.PostScrapRepository;
+import umc.demoday.whatisthis.domain.recommendation.RecommendationService;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
@@ -36,7 +39,11 @@ public class AdminPostService {
     private final HashtagRepository hashtagRepository;
     private final PostService postService;
 
+    // 이벤트 컨트롤을 위한 도입
+    private final ApplicationEventPublisher eventPublisher;
+
     private final Index index;
+    private final RecommendationService recommendationService;
 
     public AdminPostResDTO getPost(Integer postId) {
 
@@ -85,6 +92,9 @@ public class AdminPostService {
         postRepository.delete(postToDelete);
         //벡터 DB에서도 삭제
         index.deleteByIds(List.of(postToDelete.getId().toString()), category);
+
+        //Redis 에서 삭제
+        eventPublisher.publishEvent(new PostEvent(postToDelete.getId(), PostEvent.ActionType.DELETED));
         return postId;
     }
 
@@ -147,6 +157,9 @@ public class AdminPostService {
                 .map(Hashtag::getContent)
                 .toList();
 
+        //update Redis
+        eventPublisher.publishEvent(new PostEvent(post.getId(), PostEvent.ActionType.CREATED_OR_UPDATED));
+
         // 모든 필드를 채워서 반환
         return AdminPostResDTO.updatePostResDTO.builder()
                 .postId(post.getId())
@@ -191,15 +204,7 @@ public class AdminPostService {
 
         //일단 게시글 생성
         postRepository.save(newPost);
-/*
-        // ImageUrls -> List<PostImage> 타입으로 변경
-        List<PostImage> images = request.getImageUrls().stream()
-                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(newPost).build())
-                .toList();
 
-        // PostImageList setting
-        newPost.setPostImageList(images);
-*/
         //response 용 savedImageUrls 생성
         List<String> savedImageUrls = newPost.getPostImageList().stream()
                 .map(PostImage::getImageUrl)
@@ -217,6 +222,10 @@ public class AdminPostService {
         List<String> savedHashtags = newPost.getHashtagList().stream()
                 .map(Hashtag::getContent)
                 .toList();
+
+
+        //add to redis
+        eventPublisher.publishEvent(new PostEvent(newPost.getId(), PostEvent.ActionType.CREATED_OR_UPDATED));
 
         return AdminPostResDTO.createPostResDTO.builder()
                 .postId(newPost.getId())

@@ -1,7 +1,10 @@
 package umc.demoday.whatisthis.domain.post.service;
 
+import com.redis.om.spring.annotations.Query;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
@@ -9,6 +12,7 @@ import umc.demoday.whatisthis.domain.post.enums.SortBy;
 import umc.demoday.whatisthis.global.CustomUserDetails;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PostService {
     public PostResponseDTO.GgulPostResponseDTO getGgulPost(Integer postId, CustomUserDetails customDetails);
@@ -22,6 +26,5 @@ public interface PostService {
     PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(CustomUserDetails customUserDetails, Integer page, Integer size, Category category);
 
     public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, CustomUserDetails customUserDetails);
-
 
 }
