@@ -35,6 +35,6 @@ public class Answer {
     private Admin admin;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inquiry_id")
+    @JoinColumn(name = "inquiry_id", unique = true, nullable = false)
     private Inquiry inquiry;
 }
