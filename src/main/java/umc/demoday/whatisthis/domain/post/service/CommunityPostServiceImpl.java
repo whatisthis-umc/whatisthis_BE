@@ -109,6 +109,7 @@ public class CommunityPostServiceImpl implements CommunityPostService {
     }
 
     @Override
+    @Transactional
     public Post insertNewPost(PostRequestDTO.NewPostRequestDTO request, List<String> imageUrls, Member member) {
 
         Post post = Post.builder()
@@ -151,6 +152,7 @@ public class CommunityPostServiceImpl implements CommunityPostService {
     }
 
     @Override
+    @Transactional
     public Post updatePost(Integer postId,PostRequestDTO.ModifyPostRequestDTO request, List<String> imageUrls, Member member) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(PostErrorCode.POST_NOT_FOUND));

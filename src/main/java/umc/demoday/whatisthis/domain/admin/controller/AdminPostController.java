@@ -80,6 +80,15 @@ public class AdminPostController {
         AdminPostResDTO.allPostResDTO response = adminPostService.getAllPosts(category, page, size);
         return CustomResponse.ok(response);
     }
+    @GetMapping("/list")
+    @Operation(summary = "게시물 목록 조회(복제) API -by 천성호")
+    public CustomResponse<AdminPostResDTO.allPostResDTO> getAllPosts2(@RequestParam(name = "category", required = false) Category category,
+                                                                     @RequestParam("page") Integer page,
+                                                                     @RequestParam("size") Integer size){
+
+        AdminPostResDTO.allPostResDTO response = adminPostService.getAllPosts(category, page, size);
+        return CustomResponse.ok(response);
+    }
 
     @PostMapping("/reindex")
     @Operation(summary = "Redis Reindexing API")

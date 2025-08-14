@@ -149,4 +149,12 @@ public class PostController {
         );
         return CustomResponse.ok(integratedSearchResponseDTO);
     }
+
+    @GetMapping("/{postId}/similar")
+    @Operation(summary = "관련 포스트 추천 API -by 천성호")
+    public CustomResponse<List<PostResponseDTO.GgulPostSummaryDTO>> getSimilarPost(@PathVariable Integer postId, @RequestParam Integer size)
+    {
+        List<PostResponseDTO.GgulPostSummaryDTO> response = postService.getSimilarPost(postId, size);
+        return CustomResponse.ok(response);
+    }
 }

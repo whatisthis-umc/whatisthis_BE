@@ -2,9 +2,6 @@ package umc.demoday.whatisthis.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
@@ -15,6 +12,7 @@ import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.member_profile.MemberProfile;
 import umc.demoday.whatisthis.domain.member_profile.MemberProfileRepository;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.converter.CategoryConverter;
 import umc.demoday.whatisthis.domain.post.converter.PageConverter;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
@@ -226,6 +224,32 @@ public class PostServiceImpl implements PostService {
 
     }
 
+    @Override
+    public List<PostResponseDTO.GgulPostSummaryDTO> getSimilarPost(Integer postId, Integer size){
+        Post postForRecommendation = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+
+        Category category = Category.LIFE_ITEM;
+        if(postForRecommendation.getCategory().toString().endsWith("_TIP") )
+            category = Category.LIFE_TIP;
+
+        List<Integer> allRecommendedList = recommendationService.findSimilarPostsInVectorDB(postId, size, category);
+
+        List<Post> posts = postRepository.findAllById(allRecommendedList);
+
+        Map<Integer, String> aiPostThumbnailsMap = pageConverter.findThumbnails(allRecommendedList);
+        Map<Integer, List<Hashtag>> aiPostHashtagsMap = pageConverter.findHashtags(allRecommendedList);
+        Map<Integer, Integer> aiPostScrapCountsMap = pageConverter.getScrapCountMap(allRecommendedList);
+
+        List<PostResponseDTO.GgulPostSummaryDTO> summaryDTOS = posts.stream().map(post -> pageConverter.toGgulPostSummaryDTO(
+                        post,
+                        aiPostThumbnailsMap.get(post.getId()),
+                        aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        aiPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                ))
+                .toList();
+
+        return summaryDTOS;
+    }
 
 }
 

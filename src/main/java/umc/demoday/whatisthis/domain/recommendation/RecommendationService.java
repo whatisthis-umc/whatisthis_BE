@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.recommendation;
 
 import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
+import io.pinecone.unsigned_indices_model.QueryResponseWithUnsignedIndices;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.openapitools.db_data.client.ApiException;
@@ -46,11 +47,7 @@ public class RecommendationService {
                 return;
             }
             // 요청 DTO 생성
-            String modelName = "models/gemini-embedding-001";
-            EmbeddingRequestDTO.Content content = new EmbeddingRequestDTO.Content(List.of(new EmbeddingRequestDTO.Part(post.getContent())));
-            EmbeddingRequestDTO request = new EmbeddingRequestDTO(modelName, content);
-
-            EmbeddingResponseDTO response = geminiInterface.embedContent(request);
+            EmbeddingResponseDTO response = textEmbedding(post.getContent());
 
             if (response == null) {
                 log.error("Post ID {} 처리 중 Gemini로부터 null 응답을 받았습니다.", post.getId());
@@ -83,59 +80,39 @@ public class RecommendationService {
                 // 3. orElseGet에도 람다를 사용해 topK를 전달합니다.
                 .orElseGet(() -> getDefaultRecommendations(topK, category));
     }
-    private List<Integer> findSimilarPostsInVectorDB(Integer postId, Integer topK, Category category) {
-        try {
-            // 이 메소드 안에서 Pinecone 벡터 검색 로직을 수행합니다.
-            //  벡터와 유사한 벡터들을 Pinecone에서 검색하여 Post 목록을 반환합니다.
-            String namespace = category.toString();
-            List<String> fields = new ArrayList<>();
-            fields.add("category");
-            fields.add("chunk_text");
-            SearchRecordsResponse response = index.searchRecordsById(postId.toString(), namespace, fields, topK, null, null);
-            List<Hit> hits = response.getResult().getHits();
+    public List<Integer> findSimilarPostsInVectorDB(Integer postId, Integer topK, Category category) {
+        // 이 메소드 안에서 Pinecone 벡터 검색 로직을 수행합니다.
+        //  벡터와 유사한 벡터들을 Pinecone에서 검색하여 Post 목록을 반환합니다.
+        String namespace = category.toString();
+        List<String> fields = new ArrayList<>();
+        fields.add("category");
+        fields.add("chunk_text");
+        QueryResponseWithUnsignedIndices response = index.queryByVectorId(topK+1,postId.toString(),namespace);
+        return response.getMatchesList().stream()
+                .map(hit -> Integer.parseInt(hit.getId()))
+                .toList();
 
-            // 문자열 ID에서 숫자 부분만 추출하여 Long 타입의 ID 리스트를 생성합니다.
-            List<Integer> postIds = hits.stream()
-                    .map(hit -> Integer.parseInt(hit.getId()))
-                    .toList();
-            return postIds;
-        }
-        catch (ApiException e) {
-            log.error("Post ID {} 기반 벡터 검색 중 API 에러 발생", postId, e);
-            return Collections.emptyList();
-        }
     }
 
     public List<Integer> getDefaultRecommendations(Integer topK, Category category) {
-        try {
-            List<String> fields = new ArrayList<>();
-            fields.add("category");
-            fields.add("chunk_text");
-            String namespace = category.toString();
+        List<String> fields = new ArrayList<>();
+        fields.add("category");
+        fields.add("chunk_text");
+        String namespace = category.toString();
 
-            SearchRecordsVector searchRecordsVector = new SearchRecordsVector();
-            searchRecordsVector.setValues(textEmbedding("추천하는 생활꿀팁"));
+        QueryResponseWithUnsignedIndices response = index.queryByVectorId(topK+1,"205",namespace);
+        return response.getMatchesList().stream()
+                .map(hit -> Integer.parseInt(hit.getId()))
+                .toList();
 
-            SearchRecordsResponse response = index.searchRecordsByVector(searchRecordsVector, namespace, fields, topK, null, null);
-            List<Hit> hits = response.getResult().getHits();
-
-            // 문자열 ID에서 숫자 부분만 추출하여 Long 타입의 ID 리스트를 생성합니다.
-            return hits.stream()
-                    .map(hit -> Integer.parseInt(hit.getId()))
-                    .toList();
-
-        }
-        catch (ApiException e) {
-            log.error("Default 벡터 검색 중 API 에러 발생", e);
-            return Collections.emptyList();
-        }
     }
-    public List<Float> textEmbedding(String text)
+    public EmbeddingResponseDTO textEmbedding(String text)
     {
         String modelName = "models/gemini-embedding-001";
         EmbeddingRequestDTO.Content content = new EmbeddingRequestDTO.Content(List.of(new EmbeddingRequestDTO.Part(text)));
         EmbeddingRequestDTO request = new EmbeddingRequestDTO(modelName, content);
-        EmbeddingResponseDTO embeddingResult = geminiInterface.embedContent(request);
-        return embeddingResult.embedding().values();
+        return geminiInterface.embedContent(request);
     }
+
+
 }
