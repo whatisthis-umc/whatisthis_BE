@@ -32,6 +32,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static umc.demoday.whatisthis.domain.post.enums.Category.*;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -66,10 +68,10 @@ public class CommunityPostServiceImpl implements CommunityPostService {
         }
 
         List<Category> allowedCategories = List.of(
-                Category.TIP,
-                Category.ITEM,
-                Category.SHOULD_I_BUY,
-                Category.CURIOUS
+                TIP,
+                ITEM,
+                SHOULD_I_BUY,
+                CURIOUS
         );
 
         return postRepository.findByCategoryIn(allowedCategories, pageable);
@@ -84,10 +86,10 @@ public class CommunityPostServiceImpl implements CommunityPostService {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
 
         List<Category> allowedCategories = List.of(
-                Category.TIP,
-                Category.ITEM,
-                Category.SHOULD_I_BUY,
-                Category.CURIOUS
+                TIP,
+                ITEM,
+                SHOULD_I_BUY,
+                CURIOUS
         );
 
         return postRepository.findByCreatedAtAfterAndCategoryIn(oneWeekAgo, allowedCategories, pageable);
@@ -156,6 +158,12 @@ public class CommunityPostServiceImpl implements CommunityPostService {
     public Post updatePost(Integer postId,PostRequestDTO.ModifyPostRequestDTO request, List<String> imageUrls, Member member) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(PostErrorCode.POST_NOT_FOUND));
+
+        List<Category> allowedCategories = List.of(TIP, ITEM, SHOULD_I_BUY, CURIOUS);
+
+        if (!allowedCategories.contains(post.getCategory())) {
+            throw new GeneralException(PostErrorCode.NOT_COMMUNITY);
+        }
 
         if (!post.getMember().getId().equals(member.getId())) {
             throw new GeneralException(GeneralErrorCode.FORBIDDEN_403);
