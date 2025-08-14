@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -30,7 +32,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Value("${app.front-base-url}")
     private String frontBase;
 
-    @Value("${app.cross-site:true}")
+    @Value("${app.cross-site:false}")
     private boolean crossSite; // vercel은 true, 같은 사이트(whatisthis.co.kr)로 바뀌면 false로
 
     @Override
@@ -91,22 +93,17 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private void addHttpOnlyCookie(HttpServletResponse response, String name, String value, int maxAge, boolean crossSite) {
-        // 프론트 도메인으로 변경 시 이거 사용
-//        Cookie cookie = new Cookie(name, value);
-//        cookie.setHttpOnly(true);
-//        cookie.setSecure(true); // 로컬 개발 시 false, 배포 시 true (https)
-//        cookie.setPath("/");
-//        cookie.setMaxAge(maxAge);
-//        cookie.setDomain("api.whatisthis.co.kr");
-//        response.addCookie(cookie);
+        String sameSite = crossSite ? "None" : "Lax";
 
-        // SameSite 설정은 수동 헤더로 (Servlet API 한계)
-        String sameSite = crossSite ? "None" : "Lax";  // vercel → None, 같은 사이트로 바뀌면 Lax
-        String setCookie = String.format(
-                "%s=%s; Max-Age=%d; Path=/; Domain=api.whatisthis.co.kr; HttpOnly; Secure; SameSite=%s",
-                name, value, maxAge, sameSite
-        );
-        response.addHeader("Set-Cookie", setCookie);
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(true)                 // 배포(HTTPS)에서 필수. SameSite=None이면 Secure 필수
+                .path("/")
+                .maxAge(maxAge)
+                .sameSite(sameSite)           // "None" or "Lax"
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
 
