@@ -50,10 +50,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         Member member = memberRepository.findByEmail(email).orElse(null);
 
+        final String cb = frontBase + "/oauth-callback"; // 프론트 콜백 고정
+
         if (member != null) {
             if (member.getProvider() == null) {
                 // 기존 계정은 있지만 소셜 미연동 → 연동 여부 물어보도록 안내
-                response.sendRedirect(frontBase
+                response.sendRedirect(cb
                         + "?conflict=true"
                         + "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8)
                         + "&provider=" + URLEncoder.encode(provider, StandardCharsets.UTF_8)
@@ -71,17 +73,17 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 addHttpOnlyCookie(response, "accessToken", accessToken, 60 * 60, crossSite); // 1시간
                 addHttpOnlyCookie(response, "refreshToken", refreshToken, 60 * 60 * 24 * 7, crossSite); // 7일
 
-                response.sendRedirect(frontBase + "/oauth-callback?isNew=false");
+                response.sendRedirect(cb + "?isNew=false");
                 return;
             } else {
                 // 이메일은 같지만 다른 provider에 연동되어 있음
-                response.sendRedirect(frontBase + "/oauth-callback?error=conflict-provider");
+                response.sendRedirect(cb + "?error=conflict-provider");
                 return;
             }
         }
 
         // 신규 유저 → 회원가입 유도
-        response.sendRedirect(frontBase
+        response.sendRedirect(cb
                 + "?isNew=true"
                 + "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8)
                 + "&provider=" + URLEncoder.encode(provider, StandardCharsets.UTF_8)

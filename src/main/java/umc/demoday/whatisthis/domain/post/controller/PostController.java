@@ -1,24 +1,23 @@
 package umc.demoday.whatisthis.domain.post.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import umc.demoday.whatisthis.domain.member.Member;
+import umc.demoday.whatisthis.domain.admin.redis.PostDocument;
+import umc.demoday.whatisthis.domain.admin.redis.async.InitialDataIndexer;
+import umc.demoday.whatisthis.domain.admin.redis.search.SearchService;
 import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.dto.IntegratedSearchResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
+import umc.demoday.whatisthis.domain.post.dto.SingleSearchDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.enums.SortBy;
-import umc.demoday.whatisthis.domain.post.repository.PostRepository;
-import umc.demoday.whatisthis.domain.post.service.PostService;
-import umc.demoday.whatisthis.domain.post.service.PostServiceImpl;
-import umc.demoday.whatisthis.domain.recommendation.RecommendationService;
+import umc.demoday.whatisthis.domain.post.service.PostService;;
 import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
@@ -32,8 +31,8 @@ public class PostController {
 
     private final PostService postService;
     private final MemberActivityService memberActivityService;
-    private final RecommendationService recommendationService;
-    private final PostRepository postRepository;
+    private final SearchService searchService;
+    private final InitialDataIndexer initialDataIndexer;
 
     @GetMapping("/{post-id}")
     @Operation(summary = "생활꿀팁 or 생활꿀팁 페이지 조회 API -by 천성호")
@@ -121,14 +120,41 @@ public class PostController {
         return CustomResponse.ok(null);
     }
 
-
-    // 관련 게시물 추천  API
-    @GetMapping("/{postId}/recommend")
-    @Operation(summary = "주어진 Post Id와 관련된 게시물 추천 API -by 천성호")
-    public CustomResponse<PostResponseDTO.GgulPostSummaryDTO> similarPost (@PathVariable Integer postId, @PathVariable Integer size)
-    {
-        PostResponseDTO.GgulPostSummaryDTO response = postService.getSimilarPost(postId,size);
-        return CustomResponse.onSuccess(GeneralSuccessCode.OK, response);
+    @GetMapping("/popular_keywords")
+    @Operation(summary = "인기 검색어 조회 API - by 천성호")
+    public CustomResponse<List<String>> getPopularKeywords(){
+        List<String> keywords = searchService.getPopularKeywords(10);
+        return CustomResponse.ok(keywords);
     }
 
+    @GetMapping("/search/single")
+    @Operation(summary = "단일 카테고리 검색 API -by 천성호")
+    public CustomResponse<SingleSearchDTO> search(@RequestParam("keyword") String keyword, @RequestParam(defaultValue = "TIP") Category category, @RequestParam Integer page, @RequestParam Integer size){
+        Page<PostDocument> posts = searchService.executeSearch(keyword, category, page+1, size);
+        List<SingleSearchDTO.SummaryDTO> postList = posts.stream().map(SingleSearchDTO::toSummaryDTO).toList();
+        return CustomResponse.ok(SingleSearchDTO.builder().results(postList).build());
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "통합 검색 API -by 천성호")
+    public CustomResponse<IntegratedSearchResponseDTO> integratedSearch(@RequestParam("keyword") String keyword)
+    {
+        Page<PostDocument> tipSearch = searchService.executeSearch(keyword, Category.LIFE_TIP, 1, 5);
+        Page<PostDocument> itemSearch = searchService.executeSearch(keyword, Category.LIFE_ITEM, 1, 5);
+        Page<PostDocument> communitySearch = searchService.executeSearch(keyword, Category.ITEM, 1, 5);
+        IntegratedSearchResponseDTO integratedSearchResponseDTO = IntegratedSearchResponseDTO.toIntegratedSearchResponseDTO(
+                tipSearch,
+                itemSearch,
+                communitySearch
+        );
+        return CustomResponse.ok(integratedSearchResponseDTO);
+    }
+
+    @GetMapping("/{postId}/similar")
+    @Operation(summary = "관련 포스트 추천 API -by 천성호")
+    public CustomResponse<List<PostResponseDTO.GgulPostSummaryDTO>> getSimilarPost(@PathVariable Integer postId, @RequestParam Integer size)
+    {
+        List<PostResponseDTO.GgulPostSummaryDTO> response = postService.getSimilarPost(postId, size);
+        return CustomResponse.ok(response);
+    }
 }

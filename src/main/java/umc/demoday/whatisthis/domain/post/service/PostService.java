@@ -23,5 +23,5 @@ public interface PostService {
 
     public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, CustomUserDetails customUserDetails);
 
-    List<PostResponseDTO.GgulPostSummaryDTO> getSimilarPost(Integer postId, Category category, Integer size);
+    List<PostResponseDTO.GgulPostSummaryDTO> getSimilarPost(Integer postId, Integer size);
 }

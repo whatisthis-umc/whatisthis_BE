@@ -58,7 +58,9 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:8080",
                 "https://api.whatisthis.co.kr",
-                "https://whatisthis-fe.vercel.app"
+                "https://whatisthis-fe.vercel.app",
+                "https://whatisthis.co.kr",
+                "https://www.whatisthis.co.kr"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));

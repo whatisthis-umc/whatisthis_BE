@@ -12,6 +12,7 @@ import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
 import umc.demoday.whatisthis.domain.member_profile.MemberProfile;
 import umc.demoday.whatisthis.domain.member_profile.MemberProfileRepository;
 import umc.demoday.whatisthis.domain.post.Post;
+import umc.demoday.whatisthis.domain.post.converter.CategoryConverter;
 import umc.demoday.whatisthis.domain.post.converter.PageConverter;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
@@ -225,9 +226,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostResponseDTO.GgulPostSummaryDTO> getSimilarPost(Integer postId, Integer size){
-        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+        Post postForRecommendation = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
-        List<Integer> allRecommendedList = recommendationService.getSimilarPost(postId, category, size);
+        String namespace = "LIFE_ITEM";
+        if(postForRecommendation.getCategory() == Category.LIFE_TIP)
+            namespace = "LIFE_TIP";
+
+        List<Integer> allRecommendedList = recommendationService.getSimilarPost(postId, namespace, size);
 
         List<Post> posts = postRepository.findAllById(allRecommendedList);
 
