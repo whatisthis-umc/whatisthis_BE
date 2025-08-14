@@ -35,7 +35,7 @@ public class RedisConfig {
     JedisConnectionFactory jedisConnectionFactory() {
         // 1. Redis 서버 정보 설정
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(System.getenv("REDIS_HOST"), 6379);
-
+        redisStandaloneConfiguration.setPassword(System.getenv("REDIS_PASSWORD"));
         // 2. Jedis Pool 설정 (JMX 비활성화)
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setJmxEnabled(false);
