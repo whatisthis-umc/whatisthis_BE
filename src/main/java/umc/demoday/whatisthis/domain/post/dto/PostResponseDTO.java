@@ -130,6 +130,7 @@ public class PostResponseDTO {
         String nickname;
         String profileimageUrl;
         LocalDateTime createdAt;
+        Integer parentId;
     }
 
     @Builder
