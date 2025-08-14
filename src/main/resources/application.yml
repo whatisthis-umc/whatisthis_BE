@@ -52,7 +52,7 @@ spring:
             redirect-uri: ${GOOGLE_REDIRECT_URI}
             scope:
               - email
-              - profile
+              - openid
 
           naver:
             client-id: ${NAVER_CLIENT_ID}
@@ -60,7 +60,6 @@ spring:
             redirect-uri: ${NAVER_REDIRECT_URI}
             authorization-grant-type: authorization_code
             scope:
-              - name
               - email
             client-name: Naver
 
@@ -79,7 +78,7 @@ spring:
 
 app:
   front-base-url: ${FRONT_BASE_URL}   # 나중에 도메인으로 바꿀 때 이 값만 수정
-  cross-site: true
+  cross-site: false
 
 jwt:
   secret: ${JWT_SECRET}

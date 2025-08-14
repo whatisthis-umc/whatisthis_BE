@@ -6,6 +6,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -25,63 +26,84 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         // registrationId: 어떤 소셜인지 구분 (kakao, google, naver 등)
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        String nameAttributeKey = userRequest.getClientRegistration()
+                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName(); // kakao:id, google:sub, naver:id
 
         // OAuth 제공자로부터 받은 정보
         Map<String, Object> attributes = oauth2User.getAttributes();
         Map<String, Object> customAttributes = new HashMap<>(attributes);
 
-        // 카카오일 경우
-        if ("kakao".equals(registrationId)) {
-            Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-            String email = (String) kakaoAccount.get("email");
+        String email = null;
+        String providerId = null;
 
-            if (email == null) {
-                throw new OAuth2AuthenticationException("이메일 제공에 동의하지 않았습니다.");
+        switch (registrationId) {
+            case "kakao": {
+                Object accObj = attributes.get("kakao_account");
+                if (!(accObj instanceof Map)) {
+                    throw oauthError("kakao_account 정보가 없습니다.");
+                }
+                Map<String, Object> kakaoAccount = (Map<String, Object>) accObj;
+                email = (String) kakaoAccount.get("email"); // 동의/검수 안되면 null 가능
+                if (email == null) {
+                    throw oauthError("이메일 제공에 동의하지 않았습니다.");
+                }
+                Object idObj = attributes.get("id");
+                if (idObj == null) {
+                    throw oauthError("Kakao id를 확인할 수 없습니다.");
+                }
+                providerId = String.valueOf(idObj);
+                break;
             }
 
-            String providerId = attributes.get("id").toString();
-
-            customAttributes.put("email", email);
-            customAttributes.put("provider", registrationId);
-            customAttributes.put("providerId", providerId);
-        }
-
-        // 구글일 경우
-        if ("google".equals(registrationId)) {
-            String email = (String) attributes.get("email");
-            String providerId = (String) attributes.get("sub"); // 구글은 "sub"이 고유 ID
-
-            if (email == null) {
-                throw new OAuth2AuthenticationException("이메일 제공에 동의하지 않았습니다.");
+            case "google": {
+                email = (String) attributes.get("email");
+                if (email == null) {
+                    throw oauthError("이메일 제공에 동의하지 않았습니다.");
+                }
+                providerId = (String) attributes.get("sub"); // 구글 고유 ID
+                if (providerId == null) {
+                    throw oauthError("Google sub를 확인할 수 없습니다.");
+                }
+                break;
             }
 
-            customAttributes.put("email", email);
-            customAttributes.put("provider", registrationId);
-            customAttributes.put("providerId", providerId);
-        }
-
-        // 네이버일 경우
-        else if ("naver".equals(registrationId)) {
-            // 네이버는 response 내부에 유저 정보가 들어 있음
-            Map<String, Object> response = (Map<String, Object>) attributes.get("response");
-            String email = (String) response.get("email");
-            String providerId = (String) response.get("id");
-
-            if (email == null) {
-                throw new OAuth2AuthenticationException("이메일 제공에 동의하지 않았습니다.");
+            case "naver": {
+                Object respObj = attributes.get("response");
+                if (!(respObj instanceof Map)) {
+                    throw oauthError("네이버 response 정보가 없습니다.");
+                }
+                Map<String, Object> response = (Map<String, Object>) respObj;
+                email = (String) response.get("email");
+                if (email == null) {
+                    throw oauthError("이메일 제공에 동의하지 않았습니다.");
+                }
+                Object idObj = response.get("id");
+                if (idObj == null) {
+                    throw oauthError("Naver id를 확인할 수 없습니다.");
+                }
+                providerId = String.valueOf(idObj);
+                break;
             }
 
-            customAttributes.put("email", email);
-            customAttributes.put("provider", registrationId);
-            customAttributes.put("providerId", providerId);
+            default:
+                throw oauthError("지원하지 않는 provider: " + registrationId);
         }
 
+        // 표준 키 주입
+        customAttributes.put("email", email);
+        customAttributes.put("provider", registrationId);
+        customAttributes.put("providerId", providerId);
 
-        // 기본적으로 ROLE_USER로 부여
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 customAttributes,
-                "email"  // attributes에서 username으로 쓸 키
+                nameAttributeKey // 표준 name attribute 사용(보통 id/sub)
         );
+    }
+
+    private OAuth2AuthenticationException oauthError(String message) {
+        // error code는 팀 규칙에 맞게 지정 가능
+        OAuth2Error error = new OAuth2Error("oauth2_validation_error", message, null);
+        return new OAuth2AuthenticationException(error, message);
     }
 }
