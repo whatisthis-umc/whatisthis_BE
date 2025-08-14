@@ -32,7 +32,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Value("${app.front-base-url}")
     private String frontBase;
 
-    @Value("${app.cross-site:false}")
+    @Value("${app.cross-site}")
     private boolean crossSite; // vercel은 true, 같은 사이트(whatisthis.co.kr)로 바뀌면 false로
 
     @Override
