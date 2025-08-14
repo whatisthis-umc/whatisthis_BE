@@ -149,4 +149,5 @@ public class PostController {
         );
         return CustomResponse.ok(integratedSearchResponseDTO);
     }
+
 }
