@@ -18,6 +18,7 @@ public class InquiryAdminResDTO {
     private String content;
     private InquiryStatus status;
     private LocalDateTime createdAt;
+    private String answerContent;
 
     public static InquiryAdminResDTO from(Inquiry inquiry) {
         return InquiryAdminResDTO.builder()
@@ -26,6 +27,7 @@ public class InquiryAdminResDTO {
                 .content(inquiry.getContent())
                 .status(inquiry.getStatus())
                 .createdAt(inquiry.getCreatedAt())
+                .answerContent(inquiry.getAnswer() != null ? inquiry.getAnswer().getContent() : null)
                 .build();
     }
 }

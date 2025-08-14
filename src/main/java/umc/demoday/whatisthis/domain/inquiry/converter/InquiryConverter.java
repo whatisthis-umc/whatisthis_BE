@@ -34,7 +34,8 @@ public class InquiryConverter {
                 inquiry.getTitle(),
                 inquiry.getContent(),
                 inquiry.getStatus(),
-                inquiry.getCreatedAt()
+                inquiry.getCreatedAt(),
+                inquiry.getAnswer() != null ? inquiry.getAnswer().getContent() : null
         );
     }
 
