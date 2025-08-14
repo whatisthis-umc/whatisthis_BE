@@ -135,4 +135,22 @@ public class RecommendationService {
             return Collections.emptyList();
         }
     }
+
+    public List<Integer> getSimilarPost(Integer postId, Category category, Integer topK) {
+        try {
+            List<String> fields = new ArrayList<>();
+            fields.add("category");
+            fields.add("chunk_text");
+            SearchRecordsResponse response = index.searchRecordsById(postId.toString(), category.name(), fields, topK, null, null);
+            List<Hit> hits = response.getResult().getHits();
+
+            return hits.stream()
+                    .map(hit -> Integer.parseInt(hit.getId()))
+                    .toList();
+        }
+        catch (ApiException e) {
+                log.error("Default 벡터 검색 중 API 에러 발생", e);
+                return Collections.emptyList();
+        }
+    }
 }

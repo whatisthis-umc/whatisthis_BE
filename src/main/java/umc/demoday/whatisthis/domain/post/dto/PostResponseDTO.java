@@ -196,6 +196,7 @@ public class PostResponseDTO {
 
     @Getter
     @Setter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class GgulPostSummaryDTO {

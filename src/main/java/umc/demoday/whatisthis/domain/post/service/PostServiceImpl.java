@@ -2,9 +2,6 @@ package umc.demoday.whatisthis.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.demoday.whatisthis.domain.hashtag.Hashtag;
@@ -226,6 +223,28 @@ public class PostServiceImpl implements PostService {
 
     }
 
+    @Override
+    public List<PostResponseDTO.GgulPostSummaryDTO> getSimilarPost(Integer postId, Integer size){
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+
+        List<Integer> allRecommendedList = recommendationService.getSimilarPost(postId, category, size);
+
+        List<Post> posts = postRepository.findAllById(allRecommendedList);
+
+        Map<Integer, String> aiPostThumbnailsMap = pageConverter.findThumbnails(allRecommendedList);
+        Map<Integer, List<Hashtag>> aiPostHashtagsMap = pageConverter.findHashtags(allRecommendedList);
+        Map<Integer, Integer> aiPostScrapCountsMap = pageConverter.getScrapCountMap(allRecommendedList);
+
+        List<PostResponseDTO.GgulPostSummaryDTO> summaryDTOS = posts.stream().map(post -> pageConverter.toGgulPostSummaryDTO(
+                        post,
+                        aiPostThumbnailsMap.get(post.getId()),
+                        aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
+                        aiPostScrapCountsMap.getOrDefault(post.getId(), 0)
+                ))
+                .toList();
+
+        return summaryDTOS;
+    }
 
 }
 

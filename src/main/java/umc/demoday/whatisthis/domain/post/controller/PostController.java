@@ -122,4 +122,13 @@ public class PostController {
     }
 
 
+    // 관련 게시물 추천  API
+    @GetMapping("/{postId}/recommend")
+    @Operation(summary = "주어진 Post Id와 관련된 게시물 추천 API -by 천성호")
+    public CustomResponse<PostResponseDTO.GgulPostSummaryDTO> similarPost (@PathVariable Integer postId, @PathVariable Integer size)
+    {
+        PostResponseDTO.GgulPostSummaryDTO response = postService.getSimilarPost(postId,size);
+        return CustomResponse.onSuccess(GeneralSuccessCode.OK, response);
+    }
+
 }
