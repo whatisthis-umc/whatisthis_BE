@@ -147,14 +147,26 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(CustomUserDetails customUserDetails, Integer page, Integer size, Category category) {
         List<Integer> allRecommendedList = recommendationService.findRecommendationsForMember(customUserDetails,size,category);
-
         //원하는 페이지만큼 짜르기
-        List<Post> posts = postRepository.findAllById(allRecommendedList.subList(page * size, (page + 1) * size));
+        int fromIndex = page * size;
+        // toIndex가 리스트의 실제 크기를 넘지 않도록 Math.min으로 안전하게 계산
+        int toIndex = Math.min((page + 1) * size, allRecommendedList.size());
+        // fromIndex가 toIndex보다 크거나 리스트 범위를 벗어나는 경우에 대한 방어 코드 추가
+        if (fromIndex >= toIndex) {
+            // 요청한 페이지에 데이터가 없는 경우이므로 빈 리스트를 반환하거나 적절히 처리
+            return new PostResponseDTO.GgulPostsByAiResponseDTO(
+                    SortBy.AI, page, size, 0L, page, Collections.emptyList()
+            );
+        }
+
+        List<Integer> pagedIds = allRecommendedList.subList(fromIndex, toIndex);
+        List<Post> posts = postRepository.findAllById(pagedIds);
+
         Map<Integer, String> aiPostThumbnailsMap = pageConverter.findThumbnails(allRecommendedList);
         Map<Integer, List<Hashtag>> aiPostHashtagsMap = pageConverter.findHashtags(allRecommendedList);
         Map<Integer, Integer> aiPostScrapCountsMap = pageConverter.getScrapCountMap(allRecommendedList);
 
-        List<PostResponseDTO.PostSummaryDTO> summaryDTOS = posts.stream().map(post -> pageConverter.toGgulPostSummaryDTO(
+        List<PostResponseDTO.PostSummaryDTO> summaryDTOS = posts.stream().map(post -> PageConverter.toGgulPostSummaryDTO(
                 post,
                 aiPostThumbnailsMap.get(post.getId()),
                 aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
@@ -220,7 +232,7 @@ public class PostServiceImpl implements PostService {
         Map<Integer, List<Hashtag>> aiPostHashtagsMap = pageConverter.findHashtags(allRecommendedList);
         Map<Integer, Integer> aiPostScrapCountsMap = pageConverter.getScrapCountMap(allRecommendedList);
 
-        return posts.stream().map(post -> pageConverter.toGgulPostSummaryDTO(
+        return posts.stream().map(post -> PageConverter.toGgulPostSummaryDTO(
                         post,
                         aiPostThumbnailsMap.get(post.getId()),
                         aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),

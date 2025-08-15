@@ -38,10 +38,9 @@ public class RecommendationService {
     private final GeminiInterface geminiInterface;
     private final Index index;
     private final MemberProfileRepository memberProfileRepository;
-    private final PostRepository postRepository;
 
-    private final String defaultSeedPostId = "205";
-
+    private final String defaultSeedTipPostId = "203";
+    private final String defaultSeedItemPostId = "216";
     public void savePostToVectorDB(Post post) {
         try{
             // 입력값 유효성 검사
@@ -66,7 +65,7 @@ public class RecommendationService {
                 }
                 return;
             }
-            String namespace = post.getCategory().name().endsWith("_TIP") ? "LIFE_TIP" : "LIFE_ITEM" ;
+            String namespace = getNamespaceForCategory(post.getCategory());
             index.upsert(post.getId().toString(), response.embedding().values(),namespace);
             log.info("Post ID {} 벡터 DB 저장 성공", post.getId());
             } catch (Exception e) {
@@ -78,17 +77,18 @@ public class RecommendationService {
     @Transactional(readOnly = true)
     public List<Integer> findRecommendationsForMember(CustomUserDetails customUserDetails, Integer topK, Category category) {
         String seedPostId;
+        String namespace = getNamespaceForCategory(category);
         // 1. 사용자의 역할을 먼저 확인합니다.
         if (customUserDetails == null || customUserDetails.getRole().equals("ROLE_ADMIN")) {
             // ADMIN 역할일 경우, 항상 기본 추천 ID를 사용합니다.
-            seedPostId = defaultSeedPostId;
+            seedPostId = namespace.equals(Category.LIFE_TIP.name()) ? defaultSeedTipPostId : defaultSeedItemPostId;
             log.info("기본 추천(Seed: {})을 제공합니다.", seedPostId);
         } else {
             // 그 외 사용자(USER 등)는 기존 로직을 따릅니다.
             // 마지막으로 본 게시글이 있으면 그것을, 없으면 기본 추천 ID를 사용합니다.
             seedPostId = memberProfileRepository.findByMember_Id(customUserDetails.getId())
                     .map(profile -> profile.getLastSeenPostId().toString())
-                    .orElse(defaultSeedPostId);
+                    .orElse(namespace.equals(Category.LIFE_TIP.name()) ? defaultSeedTipPostId : defaultSeedItemPostId);
             log.info("Member(ID: {}) 추천 생성. 기준 Post ID: {}, 카테고리: {}", customUserDetails.getId(), seedPostId, category.name());
         }
 
@@ -120,9 +120,9 @@ public class RecommendationService {
 
     private String getNamespaceForCategory(Category category) {
         if (category.name().endsWith("_TIP")) {
-            return "LIFE_TIP";
+            return Category.LIFE_TIP.name();
         } else if (category.name().endsWith("_ITEM")) {
-            return "LIFE_ITEM";
+            return Category.LIFE_ITEM.name();
         }
         return "COMMUNITY";
     }
