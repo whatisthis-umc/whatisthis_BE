@@ -6,6 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.demoday.whatisthis.domain.comment.repository.CommentRepository;
+import umc.demoday.whatisthis.domain.comment_like.repository.CommentLikeRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 import umc.demoday.whatisthis.domain.post.Post;
@@ -13,6 +15,8 @@ import umc.demoday.whatisthis.domain.post.code.PostErrorCode;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
+
+import java.util.List;
 
 import static umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode.MEMBER_NOT_FOUND;
 
@@ -23,6 +27,8 @@ public class MyPagePostServiceImpl implements MyPagePostService {
 
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     @Override
     public Page<Post> getMyPosts(Integer page, Integer size, Member member) {
@@ -52,6 +58,13 @@ public class MyPagePostServiceImpl implements MyPagePostService {
         if (!post.getMember().getId().equals(member.getId())) {
             throw new GeneralException(GeneralErrorCode.FORBIDDEN_403);
         }
+
+        List<Integer> commentIds = commentRepository.findIdsByPostId(postId); // 커스텀 쿼리
+        if (!commentIds.isEmpty()) {
+            commentLikeRepository.deleteByCommentIds(commentIds);  // 좋아요 선삭제
+            commentRepository.deleteByIds(commentIds);             // 댓글 하드 삭제
+        }
+
         postRepository.delete(post);
     }
 

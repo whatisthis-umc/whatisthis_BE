@@ -10,6 +10,7 @@ import umc.demoday.whatisthis.domain.comment.Comment;
 import umc.demoday.whatisthis.domain.post.Post;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
@@ -25,4 +26,11 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     @Modifying
     @Query("UPDATE Comment c SET c.likeCount = c.likeCount - 1 WHERE c.id = :commentId")
     void decreaseLikeCount(@Param("commentId") Integer commentId);
+
+    @Query("select c.id from Comment c where c.post.id = :postId")
+    List<Integer> findIdsByPostId(@Param("postId") Integer postId);
+
+    @Modifying
+    @Query("delete from Comment c where c.id in :ids")
+    void deleteByIds(@Param("ids") List<Integer> ids);
 }
