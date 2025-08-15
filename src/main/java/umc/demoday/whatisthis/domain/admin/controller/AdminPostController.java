@@ -56,7 +56,7 @@ public class AdminPostController {
         return CustomResponse.ok(response);
     }
 
-    @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 작성 API -by 천성호, 남성현", security = @SecurityRequirement(name = "JWT TOKEN"))
     public CustomResponse<AdminPostResDTO.createPostResDTO> createPost(@RequestPart("request") AdminPostReqDTO.createPostReqDTO request,
                                                                        @RequestPart(value = "images", required = false) List<MultipartFile> images,
@@ -71,20 +71,11 @@ public class AdminPostController {
         return CustomResponse.ok(response);
     }
 
-    @GetMapping("/")
+    @GetMapping("/list")
     @Operation(summary = "게시물 목록 조회 API -by 천성호")
     public CustomResponse<AdminPostResDTO.allPostResDTO> getAllPosts(@RequestParam(name = "category", required = false) Category category,
                                                                               @RequestParam("page") Integer page,
                                                                               @RequestParam("size") Integer size){
-
-        AdminPostResDTO.allPostResDTO response = adminPostService.getAllPosts(category, page, size);
-        return CustomResponse.ok(response);
-    }
-    @GetMapping("/list")
-    @Operation(summary = "게시물 목록 조회(복제) API -by 천성호")
-    public CustomResponse<AdminPostResDTO.allPostResDTO> getAllPosts2(@RequestParam(name = "category", required = false) Category category,
-                                                                     @RequestParam("page") Integer page,
-                                                                     @RequestParam("size") Integer size){
 
         AdminPostResDTO.allPostResDTO response = adminPostService.getAllPosts(category, page, size);
         return CustomResponse.ok(response);
