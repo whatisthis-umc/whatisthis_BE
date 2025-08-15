@@ -2,7 +2,7 @@
 
 ## 서비스 소개
 생활 속 헷갈리는 사용법과 도움이 되는 제품들을 소개하는 웹사이트입니다 <br>
-[서비스 바로가기]([https://api.whatisthis.co.kr/swagger-ui/index.html](https://whatisthis-fe.vercel.app/))
+[서비스 바로가기](https://whatisthis-fe.vercel.app/)
 
 ## 팀원 소개
 | 윤영석 | 천성호 | 이정준 | 남성현 |
