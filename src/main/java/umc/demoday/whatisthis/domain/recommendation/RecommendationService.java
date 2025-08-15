@@ -23,6 +23,8 @@ import umc.demoday.whatisthis.domain.post.Post;
 import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.global.CustomUserDetails;
+import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,8 +41,10 @@ public class RecommendationService {
     private final Index index;
     private final MemberProfileRepository memberProfileRepository;
 
-    private final String defaultSeedTipPostId = "203";
+    private final String defaultSeedTipPostId = "205";
     private final String defaultSeedItemPostId = "216";
+    private final PostRepository postRepository;
+
     public void savePostToVectorDB(Post post) {
         try{
             // 입력값 유효성 검사
@@ -89,6 +93,11 @@ public class RecommendationService {
             seedPostId = memberProfileRepository.findByMember_Id(customUserDetails.getId())
                     .map(profile -> profile.getLastSeenPostId().toString())
                     .orElse(namespace.equals(Category.LIFE_TIP.name()) ? defaultSeedTipPostId : defaultSeedItemPostId);
+
+            Post seedPost = postRepository.findById(Integer.parseInt(seedPostId)).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
+            if(!seedPost.getCategory().equals(category)) {
+                seedPostId = seedPost.getCategory().equals(Category.LIFE_TIP) ? defaultSeedItemPostId : defaultSeedTipPostId;
+            }
             log.info("Member(ID: {}) 추천 생성. 기준 Post ID: {}, 카테고리: {}", customUserDetails.getId(), seedPostId, category.name());
         }
 
