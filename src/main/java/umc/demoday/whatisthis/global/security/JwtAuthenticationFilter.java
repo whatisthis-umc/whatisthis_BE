@@ -2,9 +2,11 @@ package umc.demoday.whatisthis.global.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +22,7 @@ import umc.demoday.whatisthis.global.CustomUserDetails;
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -39,28 +42,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = null;
+        String token = resolveToken(request);
 
-        // 1. Authorization 헤더에서 Bearer 토큰 추출
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            token = bearerToken.substring(7);
-        } else {
-            // 2. 쿠키에서 accessToken 확인
-            if (request.getCookies() != null) {
-                for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
-                    if ("accessToken".equals(cookie.getName())) {
-                        token = cookie.getValue();
-                        break;
-                    }
-                }
-            }
-        }
-
-            // 2. 토큰 유효성 검사
-            if (jwtProvider.validateToken(token)) {
+        try {
+            if (token != null && jwtProvider.validateToken(token)) {
                 Integer id = jwtProvider.getUserIdFromToken(token);
-                String roleFromToken = jwtProvider.getRoleFromToken(token); // 토큰에서 역할 추출
+                String roleFromToken = jwtProvider.getRoleFromToken(token);
 
                 CustomUserDetails userDetails = null;
 
@@ -71,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 member.getId(),
                                 member.getMemberId(),
                                 "",
-                                "ROLE_USER", // 역할 명시
+                                "ROLE_USER",
                                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
                         );
                     }
@@ -82,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 admin.getId(),
                                 admin.getAdminId(),
                                 "",
-                                "ROLE_ADMIN", // 역할 명시
+                                "ROLE_ADMIN",
                                 List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
                         );
                     }
@@ -95,7 +82,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-        // 6. 다음 필터로 넘김
+        } catch (Exception e) {
+            log.warn("JWT filter error: {}", e.getMessage(), e);
+            // 토큰 문제로 전체 요청을 막지 않음 → 다음 체인으로
+        }
+
         filterChain.doFilter(request, response);
+    }
+
+    /** Authorization: Bearer ... → 없으면 accessToken 쿠키에서 */
+    private String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("accessToken".equals(c.getName())) {
+                    return c.getValue();
+                }
+            }
+        }
+        return null;
     }
 }
