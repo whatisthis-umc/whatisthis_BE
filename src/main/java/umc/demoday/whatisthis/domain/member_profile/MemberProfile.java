@@ -24,10 +24,15 @@ public class MemberProfile {
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
 
-    // 마지막으로 본 게시물의 ID
-    private Integer lastSeenPostId;
+    // 마지막으로 본 꿀팁 게시물의 ID
+    private Integer lastSeenTipPostId;
 
-    public void updateLastSeenPost(Integer postId) {
-        this.lastSeenPostId = postId;
+    // 마지막으로 본 꿀템 게시물의 ID
+    private Integer lastSeenItemPostId;
+
+    public void updateLastSeenTipPost(Integer postId) {
+        this.lastSeenTipPostId = postId;
     }
+    public void updateLastSeenItemPost(Integer postId) { this.lastSeenItemPostId = postId; }
+
 }

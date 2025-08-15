@@ -110,14 +110,14 @@ public class PostController {
     }
 
     // 사용자가 게시물을 조회했음을 기록하는 API
-    @PostMapping("/{postId}/view-history")
-    @Operation(summary = "최근 조회한 게시물로 기록하는 API - by 천성호")
-    public CustomResponse<Void> recordPostView(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails customUserDetails)
-    {
-        // JWT에서 사용자 ID 추출
-        memberActivityService.updateLastSeenPost(customUserDetails, postId);
-        return CustomResponse.ok(null);
-    }
+//    @PostMapping("/{postId}/view-history")
+//    @Operation(summary = "최근 조회한 게시물로 기록하는 API - by 천성호")
+//    public CustomResponse<Void> recordPostView(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails customUserDetails)
+//    {
+//        // JWT에서 사용자 ID 추출
+//        memberActivityService.updateLastSeenPost(customUserDetails, postId);
+//        return CustomResponse.ok(null);
+//    }
 
     @GetMapping("/popular_keywords")
     @Operation(summary = "인기 검색어 조회 API - by 천성호")

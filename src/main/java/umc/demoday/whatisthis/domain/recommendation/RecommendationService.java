@@ -88,19 +88,21 @@ public class RecommendationService {
             seedPostId = namespace.equals(Category.LIFE_TIP.name()) ? defaultSeedTipPostId : defaultSeedItemPostId;
             log.info("기본 추천(Seed: {})을 제공합니다.", seedPostId);
         } else {
-            // 그 외 사용자(USER 등)는 기존 로직을 따릅니다.
-            // 마지막으로 본 게시글이 있으면 그것을, 없으면 기본 추천 ID를 사용합니다.
-            seedPostId = memberProfileRepository.findByMember_Id(customUserDetails.getId())
-                    .map(profile -> profile.getLastSeenPostId().toString())
-                    .orElse(namespace.equals(Category.LIFE_TIP.name()) ? defaultSeedTipPostId : defaultSeedItemPostId);
-
-            Post seedPost = postRepository.findById(Integer.parseInt(seedPostId)).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
-            if(!seedPost.getCategory().equals(category)) {
-                seedPostId = seedPost.getCategory().equals(Category.LIFE_TIP) ? defaultSeedItemPostId : defaultSeedTipPostId;
+            MemberProfile profile = memberProfileRepository.findByMember_Id(customUserDetails.getId()).orElse(null);
+            // 프로파일이 없다면 디폴트 추천
+            if (profile == null) {
+                seedPostId = namespace.equals(Category.LIFE_TIP.name())? defaultSeedTipPostId : defaultSeedTipPostId;
             }
-            log.info("Member(ID: {}) 추천 생성. 기준 Post ID: {}, 카테고리: {}", customUserDetails.getId(), seedPostId, category.name());
+            else{
+                // 마지막으로 본 카테고리에 적합한 게시글이 있으면 그것을, 없으면 기본 추천 ID를 사용합니다.
+                if(namespace.equals(Category.LIFE_TIP.name())){
+                    seedPostId = profile.getLastSeenTipPostId() == null ? defaultSeedTipPostId : profile.getLastSeenTipPostId().toString();
+                }
+                else {
+                    seedPostId = profile.getLastSeenItemPostId() == null ? defaultSeedItemPostId : profile.getLastSeenItemPostId().toString();
+                }
+            }
         }
-
         // 2. 결정된 seedPostId를 기반으로 유사한 게시물을 검색합니다.
         return findSimilarPostsInVectorDB(seedPostId, topK, category);
     }
@@ -135,4 +137,5 @@ public class RecommendationService {
         }
         return "COMMUNITY";
     }
+
 }

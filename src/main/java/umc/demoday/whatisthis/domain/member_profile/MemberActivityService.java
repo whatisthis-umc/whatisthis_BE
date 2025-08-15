@@ -8,6 +8,7 @@ import umc.demoday.whatisthis.domain.admin.Admin;
 import umc.demoday.whatisthis.domain.admin.repository.AdminRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.domain.post.enums.Category;
 import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
@@ -21,7 +22,7 @@ public class MemberActivityService {
     private final MemberRepository memberRepository;
     private final AdminRepository adminRepository;
 
-    public void updateLastSeenPost(CustomUserDetails customUserDetails, Integer postId) {
+    public void updateLastSeenPost(CustomUserDetails customUserDetails, Integer postId, Category category) {
 
         if(customUserDetails.getRole().equals("ROLE_USER")) {
             Integer memberId = customUserDetails.getId();
@@ -34,7 +35,11 @@ public class MemberActivityService {
                         return MemberProfile.builder().member(member).build();
                     });
             // 마지막으로 본 게시물 ID를 업데이트하고 저장합니다.
-            memberProfile.updateLastSeenPost(postId);
+            if(category.toString().endsWith("_TIP"))
+                memberProfile.updateLastSeenTipPost(postId);
+            else
+                memberProfile.updateLastSeenItemPost(postId);
+
             memberProfileRepository.save(memberProfile);
         }
         else throw new GeneralException(GeneralErrorCode.FORBIDDEN_403, "허용되지 않은 접근입니다.");

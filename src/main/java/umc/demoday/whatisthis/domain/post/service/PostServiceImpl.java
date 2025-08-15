@@ -70,7 +70,7 @@ public class PostServiceImpl implements PostService {
 
         // 최근 조회한 게시글 갱신
         if (customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) //유저면
-            memberActivityService.updateLastSeenPost(customUserDetails, postId);
+            memberActivityService.updateLastSeenPost(customUserDetails, postId, post.getCategory());
 
         //viewcount 증가
         post.setViewCount(post.getViewCount() + 1);
