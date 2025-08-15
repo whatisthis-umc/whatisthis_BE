@@ -27,7 +27,6 @@ public class MemberProfile {
     // 마지막으로 본 게시물의 ID
     private Integer lastSeenPostId;
 
-
     public void updateLastSeenPost(Integer postId) {
         this.lastSeenPostId = postId;
     }

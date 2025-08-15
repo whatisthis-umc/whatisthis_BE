@@ -1,7 +1,5 @@
 package umc.demoday.whatisthis.domain.post.service;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
 import umc.demoday.whatisthis.domain.post.dto.PostResponseDTO;
 import umc.demoday.whatisthis.domain.post.enums.Category;
@@ -23,5 +21,5 @@ public interface PostService {
 
     public MainPageResponseDTO getAllGgulPosts(Category category, Integer page, Integer size, CustomUserDetails customUserDetails);
 
-    List<PostResponseDTO.GgulPostSummaryDTO> getSimilarPost(Integer postId, Integer size);
+    List<PostResponseDTO.PostSummaryDTO> getSimilarPost(Integer postId, Integer size);
 }

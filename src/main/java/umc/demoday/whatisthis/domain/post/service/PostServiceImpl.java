@@ -9,10 +9,8 @@ import umc.demoday.whatisthis.domain.hashtag.repository.HashtagRepository;
 import umc.demoday.whatisthis.domain.member.Member;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
 import umc.demoday.whatisthis.domain.member_profile.MemberActivityService;
-import umc.demoday.whatisthis.domain.member_profile.MemberProfile;
 import umc.demoday.whatisthis.domain.member_profile.MemberProfileRepository;
 import umc.demoday.whatisthis.domain.post.Post;
-import umc.demoday.whatisthis.domain.post.converter.CategoryConverter;
 import umc.demoday.whatisthis.domain.post.converter.PageConverter;
 import umc.demoday.whatisthis.domain.post.converter.PostConverter;
 import umc.demoday.whatisthis.domain.post.dto.MainPageResponseDTO;
@@ -148,20 +146,27 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponseDTO.GgulPostsByAiResponseDTO  getPostsByAiRecommendation(CustomUserDetails customUserDetails, Integer page, Integer size, Category category) {
-        List<Integer> allRecommendedList = null;
-        if(customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) { // 유저면 맞춤 추천
-            allRecommendedList = recommendationService.findRecommendationsForMember(customUserDetails.getId(), (page + 1) * size, category);
-        }
-        else{// 유저 아니면 기본 추천
-            allRecommendedList = recommendationService.getDefaultRecommendations((page+1)*size, category);
-        }
+        List<Integer> allRecommendedList = recommendationService.findRecommendationsForMember(customUserDetails,size,category);
         //원하는 페이지만큼 짜르기
-        List<Post> posts = postRepository.findAllById(allRecommendedList.subList(page * size, (page + 1) * size));
+        int fromIndex = page * size;
+        // toIndex가 리스트의 실제 크기를 넘지 않도록 Math.min으로 안전하게 계산
+        int toIndex = Math.min((page + 1) * size, allRecommendedList.size());
+        // fromIndex가 toIndex보다 크거나 리스트 범위를 벗어나는 경우에 대한 방어 코드 추가
+        if (fromIndex >= toIndex) {
+            // 요청한 페이지에 데이터가 없는 경우이므로 빈 리스트를 반환하거나 적절히 처리
+            return new PostResponseDTO.GgulPostsByAiResponseDTO(
+                    SortBy.AI, page, size, 0L, page, Collections.emptyList()
+            );
+        }
+
+        List<Integer> pagedIds = allRecommendedList.subList(fromIndex, toIndex);
+        List<Post> posts = postRepository.findAllById(pagedIds);
+
         Map<Integer, String> aiPostThumbnailsMap = pageConverter.findThumbnails(allRecommendedList);
         Map<Integer, List<Hashtag>> aiPostHashtagsMap = pageConverter.findHashtags(allRecommendedList);
         Map<Integer, Integer> aiPostScrapCountsMap = pageConverter.getScrapCountMap(allRecommendedList);
 
-        List<PostResponseDTO.GgulPostSummaryDTO> summaryDTOS = posts.stream().map(post -> pageConverter.toGgulPostSummaryDTO(
+        List<PostResponseDTO.PostSummaryDTO> summaryDTOS = posts.stream().map(post -> PageConverter.toGgulPostSummaryDTO(
                 post,
                 aiPostThumbnailsMap.get(post.getId()),
                 aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
@@ -199,22 +204,9 @@ public class PostServiceImpl implements PostService {
         // 3. Latest 정렬 페이지 요청(Pageable) 객체 생성
         Pageable pageableLatest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        List<Integer> recommendedPostIds = new ArrayList<>();
-        // 4. Ai 추천 페이지 요청(Pageable) 객체 생성
-        if(customUserDetails != null && customUserDetails.getRole().equals("ROLE_USER")) {  //유저면 맞춤 추천
-            Integer memberId = customUserDetails.getId();
-            MemberProfile memberProfile = memberProfileRepository.findByMember_Id(memberId).orElse(null);
-            if(memberProfile != null) {
-                recommendedPostIds = recommendationService.findRecommendationsForMember(memberProfile.getMember().getId(), size, category);
-            }
-            else{ // USER 여도 이전에 본 게시물이 없다면 디폴트 추천
-                recommendedPostIds = recommendationService.getDefaultRecommendations(size, category);
-            }
-        }
-        else
-        { // 유저 아니면 기본 추천
-            recommendedPostIds = recommendationService.getDefaultRecommendations(size, category);
-        }
+        // 4. 추천 게시물 리스트
+        List<Integer> recommendedPostIds = recommendationService.findRecommendationsForMember(customUserDetails,size,category);
+
         // 5. Repository를 통해 데이터베이스에서 데이터 조회
         Page<Post> bestPostPage = postRepository.findByCategoryIn(categoryList, pageableBest);
         Page<Post> latestPostPage = postRepository.findByCategoryIn(categoryList, pageableLatest);
@@ -225,14 +217,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDTO.GgulPostSummaryDTO> getSimilarPost(Integer postId, Integer size){
+    public List<PostResponseDTO.PostSummaryDTO> getSimilarPost(Integer postId, Integer size){
         Post postForRecommendation = postRepository.findById(postId).orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND_404));
 
         Category category = Category.LIFE_ITEM;
         if(postForRecommendation.getCategory().toString().endsWith("_TIP") )
             category = Category.LIFE_TIP;
 
-        List<Integer> allRecommendedList = recommendationService.findSimilarPostsInVectorDB(postId, size, category);
+        List<Integer> allRecommendedList = recommendationService.findSimilarPostsInVectorDB(postId.toString(), size, category);
 
         List<Post> posts = postRepository.findAllById(allRecommendedList);
 
@@ -240,15 +232,13 @@ public class PostServiceImpl implements PostService {
         Map<Integer, List<Hashtag>> aiPostHashtagsMap = pageConverter.findHashtags(allRecommendedList);
         Map<Integer, Integer> aiPostScrapCountsMap = pageConverter.getScrapCountMap(allRecommendedList);
 
-        List<PostResponseDTO.GgulPostSummaryDTO> summaryDTOS = posts.stream().map(post -> pageConverter.toGgulPostSummaryDTO(
+        return posts.stream().map(post -> PageConverter.toGgulPostSummaryDTO(
                         post,
                         aiPostThumbnailsMap.get(post.getId()),
                         aiPostHashtagsMap.getOrDefault(post.getId(), Collections.emptyList()),
                         aiPostScrapCountsMap.getOrDefault(post.getId(), 0)
                 ))
                 .toList();
-
-        return summaryDTOS;
     }
 
 }

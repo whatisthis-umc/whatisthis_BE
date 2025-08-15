@@ -25,7 +25,7 @@ public class MainPageResponseDTO {
     @AllArgsConstructor
     public static class SectionDTO {
         private String sectionName;
-        private List<PostResponseDTO.GgulPostSummaryDTO> posts;
+        private List<PostResponseDTO.PostSummaryDTO> posts;
         private String more;
     }
 
