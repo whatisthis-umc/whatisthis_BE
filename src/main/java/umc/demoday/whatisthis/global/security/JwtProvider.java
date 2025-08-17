@@ -1,15 +1,14 @@
 package umc.demoday.whatisthis.global.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
@@ -18,7 +17,10 @@ public class JwtProvider {
 
     @Value("${jwt.secret}")
     private String secretKeyString;
+    @Value("${JWT_LINK_SECRET}")
+    private String linkSecretString;
 
+    private Key linkKey;
     private Key secretKey;
 
     private final long ACCESS_TOKEN_VALID_TIME = 1000L * 60 * 30;     // 30분
@@ -27,6 +29,7 @@ public class JwtProvider {
     @PostConstruct
     protected void init() {
         this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
+        this.linkKey   = Keys.hmacShaKeyFor(linkSecretString.getBytes());
     }
 
     // AccessToken 생성
@@ -95,5 +98,32 @@ public class JwtProvider {
 
         return claims.get("role", String.class);
     }
+
+    public String createLinkToken(String email, String provider, String providerId, Duration ttl) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .claim("typ", "link")
+                .claim("email", email)
+                .claim("provider", provider)
+                .claim("providerId", providerId)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plus(ttl)))
+                .signWith(linkKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public LinkClaims verifyLinkToken(String token) {
+        Jws<Claims> jws = Jwts.parserBuilder().setSigningKey(linkKey).build().parseClaimsJws(token);
+        Claims c = jws.getBody();
+        if (!"link".equals(c.get("typ"))) throw new IllegalArgumentException("Invalid token type");
+        return new LinkClaims(
+                c.get("email", String.class),
+                c.get("provider", String.class),
+                c.get("providerId", String.class)
+        );
+    }
+
+    public record LinkClaims(String email, String provider, String providerId) {}
+
 }
 

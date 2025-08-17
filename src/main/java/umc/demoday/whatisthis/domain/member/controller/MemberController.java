@@ -1,6 +1,7 @@
 package umc.demoday.whatisthis.domain.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -60,12 +61,43 @@ public class MemberController {
     }
 
     @PostMapping("/link-social")
-    @Operation(summary = "기존 계정과 연동 API -by 이정준")
+    @Operation(summary = "기존 계정과 연동 API - by 이정준 (linkToken 쿠키 기반, 최소 변경)")
     public CustomResponse<Void> linkSocial(
-            @RequestBody @Valid SocialLinkReqDTO request
+            @CookieValue(value = "linkToken", required = false) String linkToken,
+            HttpServletResponse res
     ) {
-        memberCommandService.linkSocial(request);
+        if (linkToken == null || linkToken.isBlank()) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401);
+        }
+
+        // 서비스에 토큰 처리 전부 위임 → access/refresh만 받아옴
+        MemberResDTO.IssuedTokens tokens = memberCommandService.linkSocialByCookieToken(linkToken);
+
+        // HttpOnly/SameSite=None/secure 쿠키로 내려줌 (문자열로 간단히)
+        setCookie(res, "accessToken",  tokens.accessToken(),  60 * 60);          // 1시간
+        setCookie(res, "refreshToken", tokens.refreshToken(), 60 * 60 * 24 * 7); // 7일
+
+        // 1회용 linkToken 삭제
+        clearCookie(res, "linkToken");
+
         return CustomResponse.onSuccess(GeneralSuccessCode.SOCIAL_LINKED, null);
+    }
+
+    // ====== 헬퍼: ResponseCookie 안 쓰고 문자열로 ======
+    private void setCookie(HttpServletResponse res, String name, String value, int maxAgeSeconds) {
+        String cookie = name + "=" + value
+                + "; Path=/"
+                + "; Domain=.whatisthis.co.kr"
+                + "; Max-Age=" + maxAgeSeconds
+                + "; HttpOnly"
+                + "; Secure"
+                + "; SameSite=None";
+        res.addHeader("Set-Cookie", cookie);
+    }
+
+    private void clearCookie(HttpServletResponse res, String name) {
+        String cookie = name + "=; Path=/; Domain=.whatisthis.co.kr; Max-Age=0; HttpOnly; Secure; SameSite=None";
+        res.addHeader("Set-Cookie", cookie);
     }
 
     @GetMapping("/me")

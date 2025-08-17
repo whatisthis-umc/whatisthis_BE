@@ -12,5 +12,5 @@ public interface MemberCommandService {
     MemberResDTO.JoinResponseDTO signUpSocial(SocialSignupReqDTO dto);
     void evaluateIsBest(Member member);
     Member updateMember(MyPageAccountDTO.MyPageAccountRequestDTO request, Member member, String url);
-    void linkSocial(SocialLinkReqDTO dto);
+    MemberResDTO.IssuedTokens linkSocialByCookieToken(String linkToken);
 }
