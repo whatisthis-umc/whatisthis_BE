@@ -1,6 +1,5 @@
 package umc.demoday.whatisthis.global;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -119,7 +118,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 .sameSite(sameSite)    // cross-site면 None
                 .path("/")
                 .maxAge(maxAge)
-                // .domain("whatisthis.co.kr") // 정말 필요할 때만 사용 (대부분 불필요)
+                .domain(".whatisthis.co.kr")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
