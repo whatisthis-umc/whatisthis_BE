@@ -18,10 +18,13 @@ import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
 import umc.demoday.whatisthis.domain.profile_image.ProfileImage;
 import umc.demoday.whatisthis.domain.profile_image.repository.ProfileImageRepository;
+import umc.demoday.whatisthis.domain.refresh_token.RefreshToken;
+import umc.demoday.whatisthis.domain.refresh_token.repository.RefreshTokenRepository;
 import umc.demoday.whatisthis.domain.report.repository.ReportRepository;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.global.security.JwtProvider;
 
 import java.lang.module.FindException;
 import java.time.LocalDateTime;
@@ -42,6 +45,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final CommentLikeRepository commentLikeRepository;
     private final ReportRepository reportRepository;
     private final ProfileImageRepository profileImageRepository;
+    private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public MemberResDTO.JoinResponseDTO signUp(MemberReqDTO.JoinRequestDTO dto) {
@@ -150,16 +155,33 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         }
     }
 
-    public void linkSocial(SocialLinkReqDTO dto) {
-        Member member = memberRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+    @Override
+    public MemberResDTO.IssuedTokens linkSocialByCookieToken(String linkToken) {
+        var claims = jwtProvider.verifyLinkToken(linkToken); // email, provider, providerId
 
-        if (member.getProvider() != null) {
+        Member m = memberRepository.findByEmail(claims.email())
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+        if (m.getProvider() != null) {
             throw new GeneralException(GeneralErrorCode.ALREADY_SOCIAL_LINKED);
         }
 
-        member.linkSocial(dto.getProvider(), dto.getProviderId());
-        memberRepository.save(member);
+        // 연동 저장
+        m.setProvider(claims.provider());
+        m.setProviderId(claims.providerId());
+        // JPA면 @Transactional 하에 save 생략 가능(변경감지)
+
+        // 토큰 발급
+        String access  = jwtProvider.createAccessToken(m.getId(), "ROLE_USER");
+        String refresh = jwtProvider.createRefreshToken(m.getId());
+
+        // refresh upsert (네 로직 그대로)
+        refreshTokenRepository.findById(m.getId())
+                .ifPresentOrElse(
+                        ex -> { ex.setToken(refresh); },
+                        () -> refreshTokenRepository.save(new RefreshToken(m.getId(), refresh))
+                );
+
+        return new MemberResDTO.IssuedTokens(access, refresh);
     }
 
     @Override

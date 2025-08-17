@@ -63,13 +63,23 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         if (opt.isPresent()) {
             Member member = opt.get();
 
-            // 기존 계정인데 소셜 미연동
+            // 기존 계정인데 소셜 미연동 → linkToken 쿠키 심고 conflict 화면으로
             if (member.getProvider() == null) {
-                response.sendRedirect(cb
-                        + "?conflict=true"
-                        + "&email=" + enc(su.email)
-                        + "&provider=" + enc(su.provider)
-                        + "&providerId=" + enc(su.providerId));
+                String linkToken = jwtProvider.createLinkToken(
+                        su.email, su.provider, su.providerId, Duration.ofMinutes(10));
+
+                // cross-site면 SameSite=None, HTTPS 필수
+                ResponseCookie cookie = ResponseCookie.from("linkToken", linkToken)
+                        .httpOnly(true)
+                        .secure(true)
+                        .sameSite("None")            // crossSite=true 환경
+                        .path("/")
+                        .domain(".whatisthis.co.kr") // 프론트/백 공통 상위 도메인
+                        .maxAge(Duration.ofMinutes(10))
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+                response.sendRedirect(cb + "?conflict=true");
                 return;
             }
 

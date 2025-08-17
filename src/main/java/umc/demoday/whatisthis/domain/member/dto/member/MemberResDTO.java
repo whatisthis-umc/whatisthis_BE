@@ -5,4 +5,5 @@ public class MemberResDTO {
     public record JoinResponseDTO(
             String nickname
     ) {}
+    public static record IssuedTokens(String accessToken, String refreshToken) {}
 }
