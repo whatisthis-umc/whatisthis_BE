@@ -79,6 +79,7 @@ jobs:
               -e NAVER_CLIENT_SECRET="${{ secrets.NAVER_CLIENT_SECRET }}" \
               -e NAVER_REDIRECT_URI="${{ secrets.NAVER_REDIRECT_URI }}" \
               -e FRONT_BASE_URL="${{ secrets.FRONT_BASE_URL }}" \
+              -e JWT_LINK_SECRET="${{ secrets.JWT_LINK_SECRET }}" \
               ysys1226/what-is-this-docker:latest
 
 
