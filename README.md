@@ -27,6 +27,10 @@
 ## 아키텍처 다이어그램
 <img src="https://github.com/user-attachments/assets/f1f0d9f6-82af-41e0-831f-8ec0296dd6a0" width="580" />
 
+## ERD
+<img width="2847" height="1753" alt="erd" src="https://github.com/user-attachments/assets/8ae377d5-eae9-4269-b2f7-92b14bfdfd8f" />
+
+
 ## API 문서 (Swagger)
 [Swagger 바로가기](https://api.whatisthis.co.kr/swagger-ui/index.html)
 
