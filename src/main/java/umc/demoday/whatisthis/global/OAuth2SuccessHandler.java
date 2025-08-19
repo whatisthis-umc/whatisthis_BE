@@ -102,12 +102,14 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
 
         // 신규 유저 → 프론트에서 회원가입 플로우로
-        response.sendRedirect(cb
-                + "?isNew=true"
-                + "&email=" + enc(su.email)
-                + "&provider=" + enc(su.provider)
-                + "&providerId=" + enc(su.providerId)
-                + "&name=" + enc(su.name));
+        String signupToken = jwtProvider.createSignupToken(su.email, su.provider, su.providerId, Duration.ofMinutes(10));
+        ResponseCookie cookie = ResponseCookie.from("signupToken", signupToken)
+                .httpOnly(true).secure(true).sameSite("None")
+                .path("/").maxAge(Duration.ofMinutes(10))
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        response.sendRedirect(cb + "?isNew=true");
     }
 
     /* ===== helpers ===== */

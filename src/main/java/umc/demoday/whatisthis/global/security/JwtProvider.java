@@ -72,6 +72,20 @@ public class JwtProvider {
                 .compact();
     }
 
+    // 회원가입용 토큰 생성 (typ=signup)
+    public String createSignupToken(String email, String provider, String providerId, Duration ttl) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .claim("typ", "signup")
+                .claim("email", email)
+                .claim("provider", provider)
+                .claim("providerId", providerId)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plus(ttl)))
+                .signWith(linkKey, SignatureAlgorithm.HS256) // linkToken과 동일 키 사용
+                .compact();
+    }
+
     // 토큰 검증
     public boolean validateToken(String token) {
         try {
@@ -80,6 +94,18 @@ public class JwtProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    // 회원가입용 토큰 검증/파싱 (typ=signup 확인)
+    public SignupClaims verifySignupToken(String token) {
+        Jws<Claims> jws = Jwts.parserBuilder().setSigningKey(linkKey).build().parseClaimsJws(token);
+        Claims c = jws.getBody();
+        if (!"signup".equals(c.get("typ"))) throw new IllegalArgumentException("Invalid token type");
+        return new SignupClaims(
+                c.get("email", String.class),
+                c.get("provider", String.class),
+                c.get("providerId", String.class)
+        );
     }
 
     public String getJti(String token) {
@@ -140,5 +166,6 @@ public class JwtProvider {
     }
 
     public record LinkClaims(String email, String provider, String providerId) {}
+    public record SignupClaims(String email, String provider, String providerId) {}
 }
 
