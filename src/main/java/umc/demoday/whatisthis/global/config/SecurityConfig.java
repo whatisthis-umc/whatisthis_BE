@@ -112,6 +112,7 @@ public class SecurityConfig {
                                 "/members/reset-password/verify-code",
                                 "/members/reset-password",
                                 "/members/link-social",
+                                "/members/signup/social",
 
                                 "/support/notices",
                                 "/support/notices/*",
