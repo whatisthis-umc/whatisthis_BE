@@ -68,16 +68,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 String linkToken = jwtProvider.createLinkToken(
                         su.email, su.provider, su.providerId, Duration.ofMinutes(10));
 
-                // cross-site면 SameSite=None, HTTPS 필수
-                ResponseCookie cookie = ResponseCookie.from("linkToken", linkToken)
-                        .httpOnly(true)
-                        .secure(true)
-                        .sameSite("None")            // crossSite=true 환경
-                        .path("/")
-                        .domain(".whatisthis.co.kr") // 프론트/백 공통 상위 도메인
-                        .maxAge(Duration.ofMinutes(10))
-                        .build();
-                response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+                addCookie(response, "linkToken", linkToken, Duration.ofMinutes(10), true); // HttpOnly
 
                 response.sendRedirect(cb + "?conflict=true");
                 return;
@@ -97,8 +88,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                         .orElse(new RefreshToken(member.getId(), refreshToken));
                 refreshTokenRepository.save(rt);
 
-                addHttpOnlyCookie(response, "accessToken", accessToken, Duration.ofHours(1));
-                addHttpOnlyCookie(response, "refreshToken", refreshToken, Duration.ofDays(7));
+                addCookie(response, "refreshToken", refreshToken, Duration.ofDays(7), true);
+                // accessToken 쿠키는 선택(프론트는 bootstrap 후 바디 토큰을 씀)
+                addCookie(response, "accessToken", accessToken, Duration.ofHours(1), true);
 
                 response.sendRedirect(cb + "?isNew=false");
                 return;
@@ -120,18 +112,19 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     /* ===== helpers ===== */
 
-    private void addHttpOnlyCookie(HttpServletResponse response, String name, String value, Duration maxAge) {
+    private void addCookie(HttpServletResponse response, String name, String value, Duration maxAge, boolean httpOnly) {
         String sameSite = crossSite ? "None" : "Lax";
         ResponseCookie cookie = ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(true)          // HTTPS 필수
-                .sameSite(sameSite)    // cross-site면 None
+                .httpOnly(httpOnly)         // refresh/access는 true 권장
+                .secure(true)               // HTTPS 필수
+                .sameSite(sameSite)         // cross-site면 None
                 .path("/")
                 .maxAge(maxAge)
                 .domain(".whatisthis.co.kr")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
+
 
     private static String enc(String s) {
         return (s == null) ? "" : URLEncoder.encode(s, StandardCharsets.UTF_8);
