@@ -5,6 +5,8 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
+import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
 import java.security.Key;
 import java.time.Duration;
@@ -47,16 +49,6 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String getJti(String token) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build()
-                .parseClaimsJws(token).getBody().getId();
-    }
-
-    public Date getExpiration(String token) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build()
-                .parseClaimsJws(token).getBody().getExpiration();
-    }
-
     // RefreshToken 생성 (payload 최소화, DB에서 추적)
     public String createRefreshToken(Integer memberId) {
         return Jwts.builder()
@@ -65,38 +57,6 @@ public class JwtProvider {
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_VALID_TIME))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    // 토큰 검증
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    // 토큰에서 사용자 ID 추출
-    public Integer getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return Integer.parseInt(claims.getSubject());
-    }
-
-    // 토큰에서 Role 추출
-    public String getRoleFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.get("role", String.class);
     }
 
     public String createLinkToken(String email, String provider, String providerId, Duration ttl) {
@@ -112,6 +72,47 @@ public class JwtProvider {
                 .compact();
     }
 
+    // 토큰 검증
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public String getJti(String token) {
+        return Jwts.parserBuilder().setSigningKey(secretKey).build()
+                .parseClaimsJws(token).getBody().getId();
+    }
+
+    public Date getExpiration(String token) {
+        return Jwts.parserBuilder().setSigningKey(secretKey).build()
+                .parseClaimsJws(token).getBody().getExpiration();
+    }
+
+    // 토큰에서 사용자 ID 추출
+    public Integer getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return Integer.parseInt(claims.getSubject());
+    }
+
+    // 토큰에서 Role 추출
+    public String getRoleFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("role", String.class);
+    }
+
     public LinkClaims verifyLinkToken(String token) {
         Jws<Claims> jws = Jwts.parserBuilder().setSigningKey(linkKey).build().parseClaimsJws(token);
         Claims c = jws.getBody();
@@ -123,7 +124,21 @@ public class JwtProvider {
         );
     }
 
-    public record LinkClaims(String email, String provider, String providerId) {}
+    public Integer validateAndGetMemberIdFromRefresh(String refreshToken) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey) // refresh 전용 secret key
+                    .build()
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
 
+            // 만료 자동 체크됨 (exp claim)
+            return Integer.valueOf(claims.getSubject()); // sub에 memberId 저장했다고 가정
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401, e.getMessage());
+        }
+    }
+
+    public record LinkClaims(String email, String provider, String providerId) {}
 }
 
