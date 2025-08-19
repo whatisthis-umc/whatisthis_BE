@@ -99,19 +99,4 @@ public class MemberController {
         String cookie = name + "=; Path=/; Domain=.whatisthis.co.kr; Max-Age=0; HttpOnly; Secure; SameSite=None";
         res.addHeader("Set-Cookie", cookie);
     }
-
-    @GetMapping("/me")
-    @Operation(summary = "현재 로그인 상태 확인 API -by 이정준")
-    public CustomResponse<MemberMeRes> me(@AuthenticationPrincipal CustomUserDetails principal) {
-        if (principal == null) {
-            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401); // or 401 반환
-        }
-        Member m = memberRepository.findById(principal.getId()).orElse(null);
-        MemberMeRes res = (m == null)
-                ? new MemberMeRes(principal.getId(), principal.getUsername(), null, null, principal.getRole())
-                : new MemberMeRes(m.getId(), m.getMemberId(), m.getEmail(), m.getNickname(), "ROLE_USER");
-        return CustomResponse.onSuccess(GeneralSuccessCode.OK, res);
-    }
-
-    public record MemberMeRes(Integer id, String memberId, String email, String nickname, String role) {}
 }

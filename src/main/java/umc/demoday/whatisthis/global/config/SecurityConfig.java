@@ -124,7 +124,9 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
 
-                                "/upload" // S3 테스트 용, 추후 삭제(?)
+                                "/upload", // S3 테스트 용, 추후 삭제(?)
+
+                                "/auth/bootstrap"
                         ).permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET,

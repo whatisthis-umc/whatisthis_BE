@@ -1,8 +1,11 @@
 package umc.demoday.whatisthis.domain.member.service.member;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -99,19 +102,33 @@ public class MemberAuthServiceImpl implements MemberAuthService {
 
     // access 토큰 블랙리스트 (남은 만료시간만큼)
     @Override
-    public void logout(Integer memberId, HttpServletRequest request) {
+    public void logout(Integer memberId, HttpServletRequest request, HttpServletResponse response) {
         String bearerToken = request.getHeader("Authorization");
-        String accessToken = null;
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            accessToken = bearerToken.substring(7);
-        }
+        String accessToken = (bearerToken != null && bearerToken.startsWith("Bearer ")) ? bearerToken.substring(7) : null;
 
         refreshTokenRepository.deleteById(memberId);
+
         if (accessToken != null && jwtProvider.validateToken(accessToken)) {
             String jti = jwtProvider.getJti(accessToken);
             long ttlSec = Math.max(1,
                     (jwtProvider.getExpiration(accessToken).getTime() - System.currentTimeMillis()) / 1000);
             redisTemplate.opsForValue().set("bl:" + jti, "1", ttlSec, TimeUnit.SECONDS);
         }
+
+        deleteCookie(response, "accessToken");
+        deleteCookie(response, "refreshToken");
+        deleteCookie(response, "linkToken");
+    }
+
+    private void deleteCookie(HttpServletResponse response, String name) {
+        ResponseCookie del = ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")             // FE와 BE가 크로스사이트면 None
+                .domain(".whatisthis.co.kr")
+                .path("/")
+                .maxAge(0)                    // 즉시 만료
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, del.toString());
     }
 }

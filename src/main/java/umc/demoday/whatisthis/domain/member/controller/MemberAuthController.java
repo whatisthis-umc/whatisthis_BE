@@ -3,6 +3,7 @@ package umc.demoday.whatisthis.domain.member.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,8 +41,9 @@ public class MemberAuthController {
 
     @PostMapping("/logout")
     public CustomResponse<Void> logout(@AuthenticationPrincipal CustomUserDetails user,
-                                       HttpServletRequest request) {
-        memberAuthService.logout(user.getId(), request);
+                                       HttpServletRequest request,
+                                       HttpServletResponse response) {
+        memberAuthService.logout(user.getId(), request, response);
         return CustomResponse.ok(null);
     }
 }
