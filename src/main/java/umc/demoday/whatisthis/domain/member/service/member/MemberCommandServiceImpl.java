@@ -98,33 +98,31 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
 
     @Override
-    public MemberResDTO.JoinResponseDTO signUpSocial(SocialSignupReqDTO dto) {
+    public MemberResDTO.JoinResponseDTO signUpSocialByCookieToken(String signupToken, SocialSignupReqDTO req) {
+        // 1) 토큰 파싱/검증 (JwtProvider에 방금 추가한 메서드 사용)
+        var sc = jwtProvider.verifySignupToken(signupToken); // email, provider, providerId
 
-        if (memberRepository.existsByNickname(dto.getNickname())) {
+        // 2) 비즈니스 검증
+        if (!Boolean.TRUE.equals(req.getServiceAgreed()) || !Boolean.TRUE.equals(req.getPrivacyAgreed())) {
+            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
+        }
+        if (memberRepository.existsByNickname(req.getNickname())) {
             throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_NICKNAME);
         }
 
-        if (!Boolean.TRUE.equals(dto.getServiceAgreed())) {
-            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
-        }
-
-        if (!Boolean.TRUE.equals(dto.getPrivacyAgreed())) {
-            throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
-        }
-
-        Member newMember = Member.builder()
-                .email(dto.getEmail())
-                .nickname(dto.getNickname())
-                .provider(dto.getProvider())
-                .providerId(dto.getProviderId())
-                .serviceAgreed(dto.getServiceAgreed())
-                .privacyAgreed(dto.getPrivacyAgreed())
+        // 3) 가입
+        Member m = Member.builder()
+                .email(sc.email())
+                .provider(sc.provider())
+                .providerId(sc.providerId())
+                .nickname(req.getNickname())
+                .serviceAgreed(true)
+                .privacyAgreed(true)
                 .build();
+        memberRepository.save(m);
 
-        memberRepository.save(newMember);
-        return new MemberResDTO.JoinResponseDTO(newMember.getNickname());
+        return new MemberResDTO.JoinResponseDTO(m.getNickname());
     }
-
 
     @Override
     public void evaluateIsBest(Member member) {

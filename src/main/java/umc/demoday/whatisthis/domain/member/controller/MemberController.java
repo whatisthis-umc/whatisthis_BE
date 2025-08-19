@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import umc.demoday.whatisthis.domain.member.Member;
@@ -45,10 +47,26 @@ public class MemberController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "소셜 로그인 회원가입 API - by 이정준")
     public CustomResponse<MemberResDTO.JoinResponseDTO> socialSignup(
-            @RequestBody @Valid SocialSignupReqDTO request
+            @CookieValue(value = "signupToken", required = false) String signupToken,
+            @RequestBody @Valid SocialSignupReqDTO request,
+            HttpServletResponse response
     ) {
-        MemberResDTO.JoinResponseDTO response = memberCommandService.signUpSocial(request);
-        return CustomResponse.created(response);
+        if (signupToken == null || signupToken.isBlank()) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED_401);
+        }
+        MemberResDTO.JoinResponseDTO out = memberCommandService.signUpSocialByCookieToken(signupToken, request);
+
+        // 1회용 토큰 삭제
+        ResponseCookie delete = ResponseCookie.from("signupToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+
+        return CustomResponse.created(out);
     }
 
     @PostMapping("/email-auth")
