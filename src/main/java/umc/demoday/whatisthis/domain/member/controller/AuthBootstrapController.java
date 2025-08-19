@@ -1,5 +1,6 @@
 package umc.demoday.whatisthis.domain.member.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ public class AuthBootstrapController {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @PostMapping("/bootstrap")
+    @Operation(summary = "로그인 처리 API -by 이정준")
     public CustomResponse<Map<String, String>> bootstrap(
             @CookieValue(value = "refreshToken", required = false) String refreshToken) {
 
