@@ -82,8 +82,11 @@ public class InquiryController {
             @PathVariable int inquiryId,
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        Member loginUser = memberRepository.findById(user.getId())
-                .orElseThrow(() -> new GeneralException(MEMBER_NOT_FOUND));
+        Member loginUser = null;
+        if (user != null) {
+            loginUser = memberRepository.findById(user.getId())
+                    .orElseThrow(() -> new GeneralException(MEMBER_NOT_FOUND));
+        }
 
         InquiryResDTO result = inquiryQueryService.getInquiry(inquiryId, loginUser);
         return CustomResponse.onSuccess(INQUIRY_OK, result);
