@@ -33,18 +33,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final MemberRepository memberRepository;
     private final AdminRepository adminRepository;
 
-    private final RequestMatcher nickAvailable =
-            new AntPathRequestMatcher("/members/nickname-available", "GET");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
-        if (nickAvailable.matches(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         String token = resolveToken(request);
 
