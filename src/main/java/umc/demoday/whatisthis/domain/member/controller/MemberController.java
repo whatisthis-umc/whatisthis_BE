@@ -105,7 +105,7 @@ public class MemberController {
     }
 
     @GetMapping("/members/nickname-available")
-    @Operation(summary = "닉네임 중복/형식 동시 확인 API")
+    @Operation(summary = "닉네임 중복/형식 동시 확인 API -by 이정준")
     public CustomResponse<Map<String, Object>> isNicknameAvailable(
             @RequestParam("nickname") String nicknameRaw
     ) {
