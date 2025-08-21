@@ -1,6 +1,7 @@
 package umc.demoday.whatisthis.domain.member.service.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.SocialLinkReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.SocialSignupReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.MyPageAccountDTO;
+import umc.demoday.whatisthis.domain.member.validation.validator.NicknameValidator;
 import umc.demoday.whatisthis.domain.post.repository.PostRepository;
 import umc.demoday.whatisthis.domain.post_like.repository.PostLikeRepository;
 import umc.demoday.whatisthis.domain.profile_image.ProfileImage;
@@ -99,30 +101,43 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
     @Override
     public MemberResDTO.JoinResponseDTO signUpSocialByCookieToken(String signupToken, SocialSignupReqDTO req) {
-        // 1) 토큰 파싱/검증 (JwtProvider에 방금 추가한 메서드 사용)
-        var sc = jwtProvider.verifySignupToken(signupToken); // email, provider, providerId
+        var sc = jwtProvider.verifySignupToken(signupToken);
 
-        // 2) 비즈니스 검증
         if (!Boolean.TRUE.equals(req.getServiceAgreed()) || !Boolean.TRUE.equals(req.getPrivacyAgreed())) {
             throw new GeneralException(GeneralErrorCode.TERMS_REQUIRED);
         }
-        if (memberRepository.existsByNickname(req.getNickname())) {
-            throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_NICKNAME);
+
+        String nickname = req.getNickname() == null ? "" : req.getNickname().trim();
+
+        // 형식 재검사
+        if (!NicknameValidator.isOnlyKorEngNum(nickname)) {
+            throw new GeneralException(GeneralErrorCode.INVALID_NICKNAME);
         }
 
-        // 3) 가입
+        // 중복 선검사
+        if (memberRepository.existsByNicknameIgnoreCase(nickname)) {
+            throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_NICKNAME); // 409 매핑 권장
+        }
+
         Member m = Member.builder()
                 .email(sc.email())
                 .provider(sc.provider())
                 .providerId(sc.providerId())
-                .nickname(req.getNickname())
+                .nickname(nickname)
                 .serviceAgreed(true)
                 .privacyAgreed(true)
                 .build();
-        memberRepository.save(m);
+
+        try {
+            memberRepository.save(m);
+        } catch (DataIntegrityViolationException e) {
+            // DB UNIQUE 제약 충돌 (동시 가입)
+            throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_NICKNAME);
+        }
 
         return new MemberResDTO.JoinResponseDTO(m.getNickname());
     }
+
 
     @Override
     public void evaluateIsBest(Member member) {
