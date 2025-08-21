@@ -41,8 +41,10 @@ public enum GeneralErrorCode implements BaseErrorCode {
     TERMS_REQUIRED(HttpStatus.BAD_REQUEST, "TERMS4000", "필수 항목에 체크해주세요."),
 
     // 이미지 업로드 에러
-    IMAGE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE5000", "이미지 업로드에 실패했습니다.")
-    ;
+    IMAGE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE5000", "이미지 업로드에 실패했습니다."),
+
+    // 닉네임 관련 에러
+    INVALID_NICKNAME(HttpStatus.BAD_REQUEST,"NICKNAME4000" , "이미 사용중인 닉네임입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
