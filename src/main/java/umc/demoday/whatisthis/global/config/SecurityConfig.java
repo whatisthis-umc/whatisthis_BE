@@ -113,6 +113,7 @@ public class SecurityConfig {
                                 "/members/reset-password",
                                 "/members/link-social",
                                 "/members/signup/social",
+                                "/members/members/nickname-available",
 
                                 "/support/notices",
                                 "/support/notices/*",
