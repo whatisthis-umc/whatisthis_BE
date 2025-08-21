@@ -99,7 +99,6 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(new AntPathRequestMatcher("/members/nickname-available/**")).permitAll()
                         .requestMatchers(
                                 "/members/signup",
                                 "/members/email-auth",
@@ -115,6 +114,7 @@ public class SecurityConfig {
                                 "/members/reset-password",
                                 "/members/link-social",
                                 "/members/signup/social",
+                                "/members/nickname-available",
 
                                 "/support/notices",
                                 "/support/notices/*",

@@ -104,7 +104,7 @@ public class MemberController {
         return CustomResponse.onSuccess(GeneralSuccessCode.SOCIAL_LINKED, null);
     }
 
-    @GetMapping("/members/nickname-available")
+    @GetMapping("/nickname-available")
     @Operation(summary = "닉네임 중복/형식 동시 확인 API -by 이정준")
     public CustomResponse<Map<String, Object>> isNicknameAvailable(
             @RequestParam("nickname") String nicknameRaw
