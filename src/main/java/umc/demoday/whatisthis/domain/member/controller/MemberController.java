@@ -16,6 +16,7 @@ import umc.demoday.whatisthis.domain.member.dto.member.MemberResDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.SocialLinkReqDTO;
 import umc.demoday.whatisthis.domain.member.dto.member.SocialSignupReqDTO;
 import umc.demoday.whatisthis.domain.member.repository.MemberRepository;
+import umc.demoday.whatisthis.domain.member.validation.validator.NicknameValidator;
 import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.CustomResponse;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
@@ -23,6 +24,8 @@ import umc.demoday.whatisthis.global.apiPayload.code.GeneralSuccessCode;
 import umc.demoday.whatisthis.domain.member.service.email.EmailAuthService;
 import umc.demoday.whatisthis.domain.member.service.member.MemberCommandService;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -99,6 +102,31 @@ public class MemberController {
         clearCookie(res, "linkToken");
 
         return CustomResponse.onSuccess(GeneralSuccessCode.SOCIAL_LINKED, null);
+    }
+
+    @GetMapping("/members/nickname-available")
+    @Operation(summary = "닉네임 중복/형식 동시 확인 API -by 이정준")
+    public CustomResponse<Map<String, Object>> isNicknameAvailable(
+            @RequestParam("nickname") String nicknameRaw
+    ) {
+        String nickname = nicknameRaw == null ? "" : nicknameRaw.trim();
+
+        // 1) 형식 검증 (특수문자 금지: 한글/영문/숫자만 허용)
+        if (!NicknameValidator.isOnlyKorEngNum(nickname)) {
+            throw new GeneralException(GeneralErrorCode.INVALID_NICKNAME);
+        }
+
+        // 2) 중복 확인 (대소문자 무시 정책이면 IgnoreCase 사용)
+        boolean exists = memberRepository.existsByNicknameIgnoreCase(nickname);
+        if (exists) {
+            return CustomResponse.ok(Map.of(
+                    "available", false,
+                    "message", "이미 사용중인 닉네임입니다."
+            ));
+        }
+
+        // 3) 가용
+        return CustomResponse.ok(Map.of("available", true));
     }
 
     // ====== 헬퍼: ResponseCookie 안 쓰고 문자열로 ======
