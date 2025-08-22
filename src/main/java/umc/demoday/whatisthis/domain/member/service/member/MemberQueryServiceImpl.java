@@ -10,6 +10,9 @@ import umc.demoday.whatisthis.global.CustomUserDetails;
 import umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode;
 import umc.demoday.whatisthis.global.apiPayload.exception.GeneralException;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MemberQueryServiceImpl implements MemberQueryService {
@@ -18,13 +21,29 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public FindIdResDTO findMemberIdByEmail(FindIdReqDTO request) {
-        String email = request.getFullEmail();
+        String raw = request.getFullEmail();
+        if (raw == null) {
+            throw new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND_BY_EMAIL);
+        }
+        String email = raw.trim().toLowerCase();
 
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND_BY_EMAIL));
+        // 중복 대응: 다건 조회
+        List<Member> list = memberRepository.findAllByEmail(email);
+        if (list.isEmpty()) {
+            throw new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND_BY_EMAIL);
+        }
 
-        String maskedId = maskMemberId(member.getMemberId());
-        return new FindIdResDTO(maskedId);
+        // 로컬 계정(= memberId != null && not blank) 우선 반환
+        for (Member m : list) {
+            String mid = m.getMemberId();
+            if (mid != null && !mid.isBlank()) {
+                String maskedId = maskMemberId(mid); // 기존 구현 그대로 사용
+                return new FindIdResDTO(maskedId);
+            }
+        }
+
+        // 로컬이 하나도 없다면 소셜 전용
+        throw new GeneralException(GeneralErrorCode.EMAIL_SOCIAL_ONLY);
     }
 
     private static String maskMemberId(String id) {

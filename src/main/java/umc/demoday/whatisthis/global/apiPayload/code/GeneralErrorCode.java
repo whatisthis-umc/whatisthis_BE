@@ -44,7 +44,8 @@ public enum GeneralErrorCode implements BaseErrorCode {
     IMAGE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE5000", "이미지 업로드에 실패했습니다."),
 
     // 닉네임 관련 에러
-    INVALID_NICKNAME(HttpStatus.BAD_REQUEST,"NICKNAME4000" , "이미 사용중인 닉네임입니다.");
+    INVALID_NICKNAME(HttpStatus.BAD_REQUEST,"NICKNAME4000" , "이미 사용중인 닉네임입니다."),
+    EMAIL_SOCIAL_ONLY(HttpStatus.BAD_REQUEST,"EMAIL4010" , "소셜로그인으로 가입된 이메일입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

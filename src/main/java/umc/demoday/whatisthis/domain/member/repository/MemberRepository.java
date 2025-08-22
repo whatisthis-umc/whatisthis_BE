@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 import umc.demoday.whatisthis.domain.member.Member;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Integer> {
@@ -23,6 +24,8 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
     Optional<Member> findByMemberId(String memberId);
 
     Optional<Member> findByEmail(String email);
+
+    List<Member> findAllByEmail(String email);
 
     Optional<Member> findByMemberIdAndEmail(String memberId, String email);
 
