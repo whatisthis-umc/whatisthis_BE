@@ -30,6 +30,7 @@ import umc.demoday.whatisthis.global.security.JwtProvider;
 
 import java.lang.module.FindException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static umc.demoday.whatisthis.global.apiPayload.code.GeneralErrorCode.BAD_REQUEST_400;
 
@@ -70,6 +71,26 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             throw new GeneralException(GeneralErrorCode.EMAIL_AUTH_CODE_MISMATCH);
         }
 
+        String normalizedEmail = dto.getEmail().trim().toLowerCase();
+
+        List<Member> sameEmailList = memberRepository.findAllByEmail(normalizedEmail);
+        if (!sameEmailList.isEmpty()) {
+            boolean hasLocal  = sameEmailList.stream()
+                    .anyMatch(m -> m.getMemberId() != null && !m.getMemberId().isBlank());
+            boolean hasSocial = sameEmailList.stream()
+                    .anyMatch(m -> m.getMemberId() == null);
+
+            if (hasLocal) {
+                // 기존 자사(LOCAL)로 이미 가입된 이메일 → 중복 가입 금지
+                // 프로젝트에 있는 코드명으로 교체 가능 (예: EMAIL_ALREADY_REGISTERED_LOCAL)
+                throw new GeneralException(GeneralErrorCode.ALREADY_EXIST_EMAIL);
+            }
+            if (!hasLocal && hasSocial) {
+                // 소셜만 존재하는 이메일 → 요구 문구로 차단
+                throw new GeneralException(GeneralErrorCode.EMAIL_SOCIAL_ONLY); // "소셜 로그인으로 가입된 이메일입니다."
+            }
+        }
+
 
         // 아이디 중복 검사
         if (memberRepository.existsByMemberId(dto.getMemberId())) {
@@ -83,6 +104,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         // DTO -> Entity
         Member newMember = MemberConverter.toMember(dto, passwordEncoder);
+
+        newMember.setEmail(normalizedEmail);
 
         // 기본 프로필 이미지 엔티티 생성
         ProfileImage defaultImage = ProfileImage.builder()

@@ -36,6 +36,8 @@ public enum GeneralErrorCode implements BaseErrorCode {
 
     // 이메일 관련 에러
     EMAIL_AUTH_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "EMAIL4000", "인증 코드 번호가 일치하지 않습니다."),
+    EMAIL_SOCIAL_ONLY(HttpStatus.BAD_REQUEST,"EMAIL4010" , "소셜로그인으로 가입된 이메일입니다."),
+    ALREADY_EXIST_EMAIL(HttpStatus.BAD_REQUEST, "EMAIL4020", "이미 존재하는 이메일입니다."),
 
     // 약관 관련 에러
     TERMS_REQUIRED(HttpStatus.BAD_REQUEST, "TERMS4000", "필수 항목에 체크해주세요."),
@@ -44,8 +46,7 @@ public enum GeneralErrorCode implements BaseErrorCode {
     IMAGE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE5000", "이미지 업로드에 실패했습니다."),
 
     // 닉네임 관련 에러
-    INVALID_NICKNAME(HttpStatus.BAD_REQUEST,"NICKNAME4000" , "이미 사용중인 닉네임입니다."),
-    EMAIL_SOCIAL_ONLY(HttpStatus.BAD_REQUEST,"EMAIL4010" , "소셜로그인으로 가입된 이메일입니다.");
+    INVALID_NICKNAME(HttpStatus.BAD_REQUEST,"NICKNAME4000" , "이미 사용중인 닉네임입니다."),;
 
     private final HttpStatus httpStatus;
     private final String code;
