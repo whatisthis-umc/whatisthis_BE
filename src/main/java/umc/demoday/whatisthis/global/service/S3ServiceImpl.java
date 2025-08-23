@@ -50,7 +50,7 @@ public class S3ServiceImpl implements S3Service {
     public String uploadFile(MultipartFile file, String folder) {
 
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+            return null;
         }
 
         try {
