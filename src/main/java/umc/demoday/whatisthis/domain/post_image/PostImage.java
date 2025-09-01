@@ -6,10 +6,9 @@ import umc.demoday.whatisthis.domain.post.Post;
 
 @Entity
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "post_image")
 public class PostImage {
 

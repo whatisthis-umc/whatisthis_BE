@@ -15,10 +15,9 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "comment")
 public class Comment {
 

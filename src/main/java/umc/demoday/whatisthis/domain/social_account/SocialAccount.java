@@ -6,10 +6,9 @@ import umc.demoday.whatisthis.domain.member.Member;
 
 @Entity
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "social_account")
 public class SocialAccount {
 

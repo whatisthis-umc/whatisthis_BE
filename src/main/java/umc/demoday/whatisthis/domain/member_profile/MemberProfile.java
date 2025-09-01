@@ -11,8 +11,8 @@ import umc.demoday.whatisthis.domain.member.Member;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberProfile {
 
     @Id
