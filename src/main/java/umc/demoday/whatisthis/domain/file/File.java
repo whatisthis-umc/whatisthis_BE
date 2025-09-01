@@ -7,8 +7,8 @@ import umc.demoday.whatisthis.domain.inquiry.Inquiry;
 @Getter
 @Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "file")
 public class File {
 

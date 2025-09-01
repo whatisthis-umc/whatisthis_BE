@@ -7,10 +7,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "email_token")
 public class EmailToken {
 
